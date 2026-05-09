@@ -1,0 +1,8 @@
+{
+  "name": "railway-csv-mvp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "logs:csv": "node scripts/railway-logs-to-csv.mjs"
+  }
+}
