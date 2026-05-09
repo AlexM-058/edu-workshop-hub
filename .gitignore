@@ -1,7 +1,22 @@
-node_modules/
-.env
-.env.*
-!.env.example
-out/
-*.log
 .DS_Store
+
+# Dependencies
+backend/vendor/
+frontend/node_modules/
+
+# Environment files
+backend/.env
+frontend/.env
+
+# Build output
+frontend/dist/
+
+# Laravel generated files
+backend/storage/*.key
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*.log
+
+# Docker/local data
+.docker-data/

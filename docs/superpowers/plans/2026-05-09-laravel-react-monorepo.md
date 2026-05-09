@@ -4,7 +4,7 @@
 
 **Goal:** Build the initial monorepo skeleton with a Laravel API backend, React Vite frontend, documentation, Docker development setup, and no unrelated MVP files.
 
-**Architecture:** The repository root coordinates two independent applications: `backend/` for the Laravel API and `frontend/` for the React Vite SPA. Docker provides a portable local runtime for PHP, Node, and PostgreSQL, while plain local Node development remains supported for the frontend.
+**Architecture:** The repository root coordinates two independent applications: `backend/` for the Laravel API and `frontend/` for the React Vite SPA. Docker provides the portable local runtime for PHP, Composer, Node, npm, Vite, and PostgreSQL so macOS, Linux, and Windows developers use the same commands.
 
 **Tech Stack:** Laravel, PHP 8.3, React, Vite, Node 24, PostgreSQL 16, Docker Compose.
 
@@ -60,16 +60,14 @@ Monorepo for the Edu Workshop Hub platform.
 
 ## Local Development
 
-The frontend can run with local Node:
+The frontend runs through Docker, so host Node/npm versions do not matter:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+docker compose up frontend
 ```
 
-The backend is designed to run through Docker because PHP and Composer do not
-need to be installed globally:
+The backend also runs through Docker, so PHP and Composer do not need to be
+installed globally:
 
 ```bash
 docker compose up backend db
@@ -260,23 +258,22 @@ Expected: commit succeeds.
 - Modify: `frontend/src/App.css`
 - Modify: `frontend/src/index.css`
 
-- [ ] **Step 1: Create React Vite project**
+- [ ] **Step 1: Create React Vite project through Docker**
 
 Run:
 
 ```bash
-npm create vite@latest frontend -- --template react
+docker run --rm -v "$PWD":/app -w /app node:24-alpine sh -lc "npm create vite@latest frontend -- --template react"
 ```
 
 Expected: `frontend/package.json`, `frontend/src/main.jsx`, and `frontend/src/App.jsx` exist.
 
-- [ ] **Step 2: Install frontend dependencies**
+- [ ] **Step 2: Install frontend dependencies through Docker**
 
 Run:
 
 ```bash
-cd frontend
-npm install
+docker run --rm -v "$PWD/frontend":/app -w /app node:24-alpine npm install
 ```
 
 Expected: `frontend/node_modules/` and `frontend/package-lock.json` exist.
@@ -478,13 +475,12 @@ body {
 }
 ```
 
-- [ ] **Step 7: Build frontend**
+- [ ] **Step 7: Build frontend through Docker**
 
 Run:
 
 ```bash
-cd frontend
-npm run build
+docker run --rm -v "$PWD/frontend":/app -w /app node:24-alpine npm run build
 ```
 
 Expected: Vite build succeeds and creates `frontend/dist/`.
@@ -682,13 +678,12 @@ docker compose run --rm backend php artisan test --filter=HealthTest
 
 Expected: PASS for `HealthTest`.
 
-- [ ] **Step 2: Run frontend build locally**
+- [ ] **Step 2: Run frontend build through Docker**
 
 Run:
 
 ```bash
-cd frontend
-npm run build
+docker run --rm -v "$PWD/frontend":/app -w /app node:24-alpine npm run build
 ```
 
 Expected: Vite build succeeds.
