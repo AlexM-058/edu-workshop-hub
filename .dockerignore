@@ -1,0 +1,12 @@
+.git
+.DS_Store
+
+backend/vendor
+backend/.env
+backend/storage/logs/*.log
+
+frontend/node_modules
+frontend/dist
+frontend/.env
+
+.docker-data

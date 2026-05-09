@@ -19,6 +19,13 @@ development workflow.
 
 ## Local Development
 
+Install dependencies through containers:
+
+```bash
+docker compose run --rm backend composer install
+docker compose run --rm frontend npm install
+```
+
 Run the full stack:
 
 ```bash
@@ -59,3 +66,23 @@ cp frontend/.env.example frontend/.env
 
 Docker entrypoints create missing local environment files automatically when
 possible, but copying them explicitly makes configuration clearer.
+
+## Common Commands
+
+Run backend tests:
+
+```bash
+docker compose run --rm backend php artisan test
+```
+
+Run frontend build:
+
+```bash
+docker compose run --rm frontend npm run build
+```
+
+Run database migrations:
+
+```bash
+docker compose run --rm backend php artisan migrate
+```
