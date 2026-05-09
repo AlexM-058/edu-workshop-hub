@@ -3,9 +3,37 @@
 Edu Workshop Hub is a Docker-first monorepo with a Laravel API backend and a
 React Vite frontend.
 
+The product is a bilingual workshop management platform for teachers. Teachers
+can discover educational workshops, enroll in them, join waiting lists, and
+download participation documents. Referents organize workshops, manage
+participants, mark attendance, and generate official documents. Admins manage
+users, categories, translations, and platform-level audit data.
+
 The project is designed to run the same way on macOS, Linux, and Windows. You
 do not need to install PHP, Composer, Node, npm, PostgreSQL, or Laravel directly
 on your machine.
+
+## Product Scope
+
+The platform supports three main layouts:
+
+- `Professor` - browses workshops, enrolls, withdraws, tracks enrollment status,
+  and downloads participation certificates after attendance is confirmed.
+- `Referent` - creates and manages workshops, sets capacity, date and location,
+  manages participant and waiting lists, marks attendance, and exports attendance
+  lists.
+- `Admin` - manages users, course categories, translations, and global platform
+  activity.
+
+Core features:
+
+- Workshop catalog with active workshops.
+- Enrollment and withdrawal flow.
+- Automatic waiting list promotion when a confirmed participant withdraws.
+- Bilingual interface: Romanian and German.
+- Attendance management.
+- Attendance list export as PDF or Excel.
+- Participation certificate download after attendance confirmation.
 
 ## Tech Stack
 
@@ -248,6 +276,7 @@ docker compose up --build
 
 ## Documentation
 
+- Business analysis: `docs/business-analysis.md`
 - Product brief draft: `docs/project-brief.md`
 - Design spec: `docs/superpowers/specs/2026-05-09-laravel-react-monorepo-design.md`
 - Implementation plan: `docs/superpowers/plans/2026-05-09-laravel-react-monorepo.md`
