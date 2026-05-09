@@ -6,7 +6,7 @@
 
 **Architecture:** The repository root coordinates two independent applications: `backend/` for the Laravel API and `frontend/` for the React Vite SPA. Docker provides the portable local runtime for PHP, Composer, Node, npm, Vite, and PostgreSQL so macOS, Linux, and Windows developers use the same commands.
 
-**Tech Stack:** Laravel, PHP 8.3, React, Vite, Node 24, PostgreSQL 16, Docker Compose.
+**Tech Stack:** Laravel, PHP 8.4, React, Vite, Node 24, PostgreSQL 16, Docker Compose.
 
 ---
 
@@ -189,7 +189,7 @@ class HealthTest extends TestCase
 Run:
 
 ```bash
-docker run --rm -v "$PWD/backend":/app -w /app php:8.3-cli php artisan test --filter=HealthTest
+docker run --rm -v "$PWD/backend":/app -w /app composer:2 php artisan test --filter=HealthTest
 ```
 
 Expected: FAIL because `/api/health` is not implemented yet.
@@ -232,7 +232,7 @@ DB_PASSWORD=secret
 Run:
 
 ```bash
-docker run --rm -v "$PWD/backend":/app -w /app php:8.3-cli php artisan test --filter=HealthTest
+docker run --rm -v "$PWD/backend":/app -w /app composer:2 php artisan test --filter=HealthTest
 ```
 
 Expected: PASS for `HealthTest`.
@@ -511,7 +511,7 @@ Expected: commit succeeds.
 Write `docker/backend/Dockerfile`:
 
 ```dockerfile
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -700,7 +700,7 @@ Expected:
 
 - Backend listens on `http://localhost:8000`.
 - Frontend listens on `http://localhost:5173`.
-- PostgreSQL listens on `localhost:5432`.
+- PostgreSQL listens on the internal Compose host `db:5432`.
 
 - [ ] **Step 4: Check backend health endpoint**
 
