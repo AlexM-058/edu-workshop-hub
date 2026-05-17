@@ -90,6 +90,14 @@ cd edu-workshop-hub
 
 Start Docker Desktop or make sure Docker Engine is running.
 
+Pull the base Docker images. This makes first setup failures easier to spot
+before dependency installation starts:
+
+```bash
+docker compose pull
+docker pull php:8.4-cli
+```
+
 Create local environment files:
 
 ```bash
@@ -248,6 +256,17 @@ Cannot connect to the Docker daemon
 
 Start Docker Desktop or Docker Engine, then run the command again.
 
+If `docker compose up --build` appears stuck while loading metadata for
+`php:8.4-cli`, pull the backend base image explicitly and restart:
+
+```bash
+docker pull php:8.4-cli
+docker compose up --build
+```
+
+This usually means Docker is still downloading the PHP image from Docker Hub, or
+Docker Desktop has a temporary network/authentication issue.
+
 If ports are already in use:
 
 - Frontend uses host port `5173`.
@@ -278,5 +297,6 @@ docker compose up --build
 
 - Business analysis: `docs/business-analysis.md`
 - Product brief draft: `docs/project-brief.md`
+- Common issues: `docs/common-issues.md`
 - Design spec: `docs/superpowers/specs/2026-05-09-laravel-react-monorepo-design.md`
 - Implementation plan: `docs/superpowers/plans/2026-05-09-laravel-react-monorepo.md`
