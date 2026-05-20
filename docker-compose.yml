@@ -18,8 +18,13 @@ services:
       DB_DATABASE: edu_workshop_hub
       DB_USERNAME: edu_workshop_hub
       DB_PASSWORD: secret
+    networks:
+      - appnet
     depends_on:
-      - db
+      db:
+        # Wait until Postgres is actually ready to accept connections,
+        # not just until the container has started.
+        condition: service_healthy
 
   frontend:
     build:
@@ -32,6 +37,8 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000/api
+    networks:
+      - appnet
     depends_on:
       - backend
 
@@ -44,6 +51,42 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - appnet
+    # Probe the database with pg_isready so dependent services only start
+    # after Postgres is genuinely accepting connections on the right database.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edu_workshop_hub -d edu_workshop_hub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      # Disable the login splash screen in dev for faster access
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - appnet
+    depends_on:
+      db:
+        condition: service_healthy
+    # pgAdmin is a dev-only tool; prevent accidental production use
+    profiles:
+      - dev
 
 volumes:
   postgres-data:
+  pgadmin-data:
+
+networks:
+  appnet:
+    driver: bridge

@@ -68,16 +68,21 @@ edu-workshop-hub/
 
 ## Services
 
-Docker Compose starts three services:
+Docker Compose runs four services:
 
-| Service | Purpose | URL |
-| --- | --- | --- |
-| `frontend` | React Vite app | http://localhost:5173 |
-| `backend` | Laravel API and default Laravel page | http://localhost:8000 |
-| `db` | PostgreSQL database | Internal host: `db:5432` |
+| Service | Purpose | URL | Profile |
+| --- | --- | --- | --- |
+| `frontend` | React Vite app | http://localhost:5173 | default |
+| `backend` | Laravel API | http://localhost:8000 | default |
+| `db` | PostgreSQL 16 database | Internal: `db:5432` | default |
+| `pgadmin` | pgAdmin 4 database GUI | http://localhost:5050 | `dev` |
 
-The database is intentionally not exposed on the host machine by default. This
-avoids conflicts when another PostgreSQL server already uses port `5432`.
+The database port `5432` is intentionally not exposed on the host. This avoids
+conflicts with any local PostgreSQL installation. pgAdmin connects to `db:5432`
+internally over the `appnet` bridge network.
+
+`pgadmin` uses the `dev` profile and does not start with a plain
+`docker compose up`. Use `--profile dev` to include it (see below).
 
 ## First Setup
 
@@ -126,23 +131,30 @@ docker compose run --rm backend php artisan migrate
 
 ## Run The Project
 
-Start the full stack:
+Start the default stack (frontend, backend, db):
 
 ```bash
 docker compose up --build
 ```
 
-Or run it in the background:
+Start the full dev stack including pgAdmin:
 
 ```bash
-docker compose up --build -d
+docker compose --profile dev up --build
+```
+
+Or run either variant in the background with `-d`:
+
+```bash
+docker compose --profile dev up --build -d
 ```
 
 Open:
 
 - React frontend: http://localhost:5173
-- Laravel default page: http://localhost:8000
+- Laravel API: http://localhost:8000
 - Laravel API health endpoint: http://localhost:8000/api/health
+- pgAdmin 4 (dev profile only): http://localhost:5050
 
 The health endpoint should return:
 
@@ -150,10 +162,16 @@ The health endpoint should return:
 {"status":"ok","service":"backend"}
 ```
 
-Stop the project:
+Stop the project (keeps volumes):
 
 ```bash
 docker compose down
+```
+
+Stop and wipe all data volumes:
+
+```bash
+docker compose down -v
 ```
 
 ## Development Commands
@@ -239,11 +257,18 @@ VITE_API_URL=http://localhost:8000/api
 - Docker-first monorepo structure.
 - Laravel backend in `backend/`.
 - React Vite frontend in `frontend/`.
-- PostgreSQL service in Docker Compose.
+- PostgreSQL 16 service with `healthcheck` in Docker Compose.
+- Explicit `appnet` bridge network shared by all services.
+- pgAdmin 4 service available under the `dev` profile at http://localhost:5050.
 - Backend health endpoint at `GET /api/health`.
 - React starter screen that checks the backend health endpoint.
 - CORS configured for the Vite frontend origin.
 - Docker images for backend and frontend development.
+- Database schema implemented via Laravel migrations:
+  - `users` (Google OAuth, first/last name, role)
+  - `workshops` (bilingual title/description, capacity, denormalized `occupied_slots`)
+  - `registrations` (enrollment status, attendance flag, unique per professor/workshop)
+  - `certificates` (PDF path, linked to registration)
 - Project documentation under `docs/`.
 
 ## Troubleshooting
@@ -271,7 +296,17 @@ If ports are already in use:
 
 - Frontend uses host port `5173`.
 - Backend uses host port `8000`.
+- pgAdmin uses host port `5050` (dev profile only).
 - PostgreSQL does not use a host port by default.
+
+If pgAdmin fails to start with a `network not found` error on Windows, the
+Docker networking layer may have a stale state. Run:
+
+```bash
+docker compose down -v
+docker network prune
+docker compose --profile dev up --build
+```
 
 If the frontend says the backend is offline, check the backend health endpoint:
 

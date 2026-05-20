@@ -27,6 +27,62 @@ docker compose up --build
 If the pull fails, check that Docker Desktop or Docker Engine is running and
 that the machine can reach Docker Hub.
 
+## pgAdmin Fails With `network not found` On Windows
+
+Symptom:
+
+```text
+Error response from daemon: failed to set up container networking: network ... not found
+```
+
+Cause:
+
+A Docker Desktop race condition on Windows where the auto-generated default
+network ID becomes stale between creation and the moment the pgAdmin container
+tries to attach to it.
+
+Fix:
+
+```bash
+docker compose down -v
+docker network prune
+docker compose --profile dev up --build
+```
+
+The project uses an explicit `appnet` bridge network to avoid this issue, but
+if it recurs after an abrupt Docker Desktop restart, the prune above clears any
+orphaned network state.
+
+## pgAdmin: First Login And Server Connection
+
+Open http://localhost:5050 and log in with:
+
+- **Email:** `admin@admin.com`
+- **Password:** `secret`
+
+To connect to the project database, right-click *Servers* → **Register →
+Server** and fill in:
+
+| Field | Value |
+| --- | --- |
+| Name | `edu-workshop-hub` |
+| Host | `db` |
+| Port | `5432` |
+| Database | `edu_workshop_hub` |
+| Username | `edu_workshop_hub` |
+| Password | `secret` |
+
+## Tables Not Visible In pgAdmin
+
+Migrations must be run explicitly after the database container is healthy.
+If the tables are missing, run:
+
+```bash
+docker compose run --rm backend php artisan migrate
+```
+
+Then refresh the *Tables* node in pgAdmin (right-click → Refresh).
+
 ## First Setup Checklist
 
 Run these commands from the repository root:
@@ -40,7 +96,7 @@ docker compose run --rm backend composer install
 docker compose run --rm frontend npm install
 docker compose run --rm backend php artisan key:generate
 docker compose run --rm backend php artisan migrate
-docker compose up --build
+docker compose --profile dev up --build
 ```
 
 Then verify the backend:
