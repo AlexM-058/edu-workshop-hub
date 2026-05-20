@@ -75,7 +75,7 @@ Docker Compose runs four services:
 | `frontend` | React Vite app | http://localhost:5173 | default |
 | `backend` | Laravel API | http://localhost:8000 | default |
 | `db` | PostgreSQL 16 database | Internal: `db:5432` | default |
-| `pgadmin` | pgAdmin 4 database GUI | http://localhost:5050 | `dev` |
+| `pgadmin` | pgAdmin 4 v9.15 database GUI | http://localhost:5050 | `dev` |
 
 The database port `5432` is intentionally not exposed on the host. This avoids
 conflicts with any local PostgreSQL installation. pgAdmin connects to `db:5432`
@@ -269,6 +269,7 @@ VITE_API_URL=http://localhost:8000/api
   - `workshops` (bilingual title/description, capacity, denormalized `occupied_slots`)
   - `registrations` (enrollment status, attendance flag, unique per professor/workshop)
   - `certificates` (PDF path, linked to registration)
+  - `sessions` (required by `SESSION_DRIVER=database`, supports OAuth redirect flow)
 - Project documentation under `docs/`.
 
 ## Troubleshooting
