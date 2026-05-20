@@ -12,14 +12,32 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     *
+     * Creates one representative user per role so every application layout
+     * can be tested in the local dev environment without a real Google login.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Admin
+        User::factory()->withRole('admin')->create([
+            'first_name' => 'Admin',
+            'last_name'  => 'User',
+            'email'      => 'admin@edu-workshop.local',
+        ]);
 
+        // Referent
+        User::factory()->withRole('referent')->create([
+            'first_name' => 'Referent',
+            'last_name'  => 'User',
+            'email'      => 'referent@edu-workshop.local',
+        ]);
+
+        // Professor (default role — also produced by a plain User::factory())
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'first_name' => 'Professor',
+            'last_name'  => 'User',
+            'email'      => 'professor@edu-workshop.local',
         ]);
     }
 }
+

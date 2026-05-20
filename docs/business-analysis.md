@@ -172,6 +172,10 @@ The current repository contains:
     (default false), timestamps. Unique constraint on `(workshop_id, user_id)`.
   - `certificates` — `id`, `registration_id` (FK → registrations),
     `file_path` (max 500 chars), timestamps.
+  - `sessions` — `id` (PK, string), `user_id` (nullable, indexed), `ip_address`,
+    `user_agent`, `payload`, `last_activity`. Required by `SESSION_DRIVER=database`.
+    Supports the Google OAuth redirect state and CSRF tokens for unauthenticated
+    visitors.
 
 ## 10. Next Product Decisions
 

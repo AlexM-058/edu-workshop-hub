@@ -15,6 +15,10 @@ return new class extends Migration
      * confirms attendance. The `file_path` stores the relative path within
      * the application's storage disk (e.g. "certificates/2026/cert-42.pdf").
      *
+     * The 1-to-1 relationship with `registrations` is enforced at the database
+     * level by a UNIQUE constraint on `registration_id`, added in migration
+     * `2026_05_20_000005_add_unique_registration_id_to_certificates_table`.
+     *
      * Cascading on the registration ensures that if a registration record is
      * removed, the associated certificate row is also cleaned up automatically.
      */

@@ -63,7 +63,11 @@ services:
       start_period: 10s
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    # Pinned to 9.15 (released 2026-05-11).
+    # Includes fixes for CVE-2026-7813 through CVE-2026-7820.
+    # To upgrade: update the tag, run `docker compose --profile dev pull pgadmin`,
+    # then restart with `docker compose --profile dev up -d pgadmin`.
+    image: dpage/pgadmin4:9.15
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: secret

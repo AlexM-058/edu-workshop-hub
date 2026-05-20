@@ -4,8 +4,6 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
@@ -13,33 +11,37 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
-    /**
      * Define the model's default state.
+     *
+     * Produces a professor-role user without a google_id (simulating a user
+     * created directly by an admin). Set google_id explicitly in tests that
+     * exercise the OAuth login path.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'google_id'  => null,
+            'first_name' => fake()->firstName(),
+            'last_name'  => fake()->lastName(),
+            'email'      => fake()->unique()->safeEmail(),
+            'role'       => 'professor',
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Return a factory state that overrides the role.
+     *
+     * Usage:
+     *   User::factory()->withRole('admin')->create();
+     *   User::factory()->withRole('referent')->create();
      */
-    public function unverified(): static
+    public function withRole(string $role): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'role' => $role,
         ]);
     }
 }
+
