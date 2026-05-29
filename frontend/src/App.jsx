@@ -9,6 +9,8 @@ import InstructorWorkshopsPage from './pages/InstructorWorkshopsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import WorkshopPreviewPage from './pages/WorkshopPreviewPage';
+import SignInPage from './pages/SignInPage';
+import ProtectedRoute from './auth/ProtectedRoute';
 import './App.css';
 
 function App() {
@@ -16,14 +18,15 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/register/professor" element={<RegisterProfessor />} />
+      <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/workshops/:id" element={<WorkshopDetailPage />} />
-      <Route path="/demo/dashboard/professor" element={<ProfessorDashboard />} />
-      <Route path="/demo/dashboard/referent" element={<ReferentDashboard />} />
-      <Route path="/demo/dashboard/referent/workshops" element={<InstructorWorkshopsPage />} />
-      <Route path="/demo/dashboard/referent/workshops/new" element={<CreateWorkshopPage />} />
-      <Route path="/demo/dashboard/referent/workshops/preview" element={<WorkshopPreviewPage />} />
-      <Route path="/demo/dashboard/referent/analytics" element={<AnalyticsPage />} />
+      <Route path="/demo/dashboard/professor" element={<ProtectedRoute><ProfessorDashboard /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent" element={<ProtectedRoute roles={['teacher', 'admin']}><ReferentDashboard /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops" element={<ProtectedRoute roles={['teacher', 'admin']}><InstructorWorkshopsPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops/new" element={<ProtectedRoute roles={['teacher', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops/preview" element={<ProtectedRoute roles={['teacher', 'admin']}><WorkshopPreviewPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/analytics" element={<ProtectedRoute roles={['teacher', 'admin']}><AnalyticsPage /></ProtectedRoute>} />
       <Route path="/dashboard/professor" element={<Navigate replace to="/demo/dashboard/professor" />} />
       <Route path="/dashboard/referent" element={<Navigate replace to="/demo/dashboard/referent" />} />
       <Route path="/dashboard/referent/workshops" element={<Navigate replace to="/demo/dashboard/referent/workshops" />} />

@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 import Icon from './Icon'
+import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
@@ -18,6 +19,7 @@ const instructorLinks = [
 
 export default function TopNav({ searchKey = 'nav.searchCourses', instructor = false }) {
   const { locale, setLocale, t } = useI18n()
+  const { appUser, isSignedIn, signOut } = useAppAuth()
   const links = instructor ? instructorLinks : professorLinks
 
   return (
@@ -60,10 +62,18 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
           <button className="rounded-lg p-2 text-slate-600 transition-colors duration-200 hover:bg-slate-50" aria-label="Help">
             <Icon>help_outline</Icon>
           </button>
-          {instructor ? (
-            <img className="h-8 w-8 rounded-full border border-slate-200 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfKhZiBtIq8gOk7EVZ35PRiKcPYptlFuI52a6yaD_AaZvx-OFu0lTEDLjYzwZvi4NWEG2_2mar5KMghaREjKwXUxBzReGXxLGy4Ii3XA3T_7AmzMK_gfPWi5sAwQfiSaLYLa14t-ZEAIdhTIoNWRlCI7PnA9RHlpgDkCAjfFgJUxbSN9rjeFtUJ0FGYesIdCMSbJ9I-WhdVA5T0X-muUjWeBIALMKzj1zN_bMGbSKqdErzKqK3osnMQmTp8xSJKkPQglLvOUsghKg" alt="Instructor Profile" />
+          {isSignedIn ? (
+            <div className="hidden items-center gap-3 md:flex">
+              <div className="text-right">
+                <p className="text-xs font-label-md text-primary">{appUser?.name ?? 'EduCraft'}</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500">{appUser?.role ?? 'sync'}</p>
+              </div>
+              <button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-slate-50" onClick={() => signOut()} type="button">
+                {t('auth.signOut')}
+              </button>
+            </div>
           ) : (
-            <Link to="/register/professor" className="rounded-lg bg-primary px-6 py-2 text-label-md font-label-md text-white transition-all hover:bg-primary-container">
+            <Link to="/sign-in" className="rounded-lg bg-primary px-6 py-2 text-label-md font-label-md text-white transition-all hover:bg-primary-container">
               {t('auth.signIn')}
             </Link>
           )}

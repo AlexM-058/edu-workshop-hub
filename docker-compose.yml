@@ -32,6 +32,7 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000/api
+      VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:-}
     depends_on:
       - backend
 
