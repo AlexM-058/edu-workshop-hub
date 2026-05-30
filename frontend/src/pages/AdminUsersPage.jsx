@@ -99,7 +99,7 @@ function SmallCount({ value, label, last = false }) {
 }
 
 function ActionRow({ label }) {
-  return <a className="group flex items-center justify-between" href="#"><span className="font-body-md">{label}</span><Icon className="transition-transform group-hover:translate-x-1">chevron_right</Icon></a>
+  return <button className="group flex w-full cursor-not-allowed items-center justify-between text-left opacity-80" disabled title="Demo action unavailable" type="button"><span className="font-body-md">{label}</span><Icon>chevron_right</Icon></button>
 }
 
 function FilterSelect({ icon, options }) {

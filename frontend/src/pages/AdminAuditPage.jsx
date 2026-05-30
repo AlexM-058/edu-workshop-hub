@@ -53,7 +53,7 @@ export default function AdminAuditPage() {
               <div className="relative flex h-48 w-full items-end justify-between bg-slate-50 px-4 pb-2">
                 {[12, 24, 20, 32, 28, 40, 36].map((height, index) => <div key={index} className="w-4 bg-primary" style={{ height }} />)}
               </div>
-              <div className="mt-2 flex justify-between font-caption text-slate-400">{['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day) => <span key={day}>{day}</span>)}</div>
+              <div className="mt-2 flex justify-between font-caption text-slate-400">{['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}</div>
             </div>
             <div className="bg-primary p-6 text-white shadow-xl">
               <div className="mb-8 flex items-center justify-between">
