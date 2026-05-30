@@ -9,6 +9,9 @@ import InstructorWorkshopsPage from './pages/InstructorWorkshopsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import WorkshopPreviewPage from './pages/WorkshopPreviewPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminAuditPage from './pages/AdminAuditPage';
 import './App.css';
 
 function App() {
@@ -24,12 +27,20 @@ function App() {
       <Route path="/demo/dashboard/referent/workshops/new" element={<CreateWorkshopPage />} />
       <Route path="/demo/dashboard/referent/workshops/preview" element={<WorkshopPreviewPage />} />
       <Route path="/demo/dashboard/referent/analytics" element={<AnalyticsPage />} />
+      <Route path="/demo/admin" element={<Navigate replace to="/demo/admin/users" />} />
+      <Route path="/demo/admin/users" element={<AdminUsersPage />} />
+      <Route path="/demo/admin/settings" element={<AdminSettingsPage />} />
+      <Route path="/demo/admin/audit" element={<AdminAuditPage />} />
       <Route path="/dashboard/professor" element={<Navigate replace to="/demo/dashboard/professor" />} />
       <Route path="/dashboard/referent" element={<Navigate replace to="/demo/dashboard/referent" />} />
       <Route path="/dashboard/referent/workshops" element={<Navigate replace to="/demo/dashboard/referent/workshops" />} />
       <Route path="/dashboard/referent/workshops/new" element={<Navigate replace to="/demo/dashboard/referent/workshops/new" />} />
       <Route path="/dashboard/referent/workshops/preview" element={<Navigate replace to="/demo/dashboard/referent/workshops/preview" />} />
       <Route path="/dashboard/referent/analytics" element={<Navigate replace to="/demo/dashboard/referent/analytics" />} />
+      <Route path="/admin" element={<Navigate replace to="/demo/admin/users" />} />
+      <Route path="/admin/users" element={<Navigate replace to="/demo/admin/users" />} />
+      <Route path="/admin/settings" element={<Navigate replace to="/demo/admin/settings" />} />
+      <Route path="/admin/audit" element={<Navigate replace to="/demo/admin/audit" />} />
     </Routes>
   );
 }
