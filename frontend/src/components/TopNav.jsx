@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 import Icon from './Icon'
+import LanguageToggle from './LanguageToggle'
 import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
@@ -17,7 +18,7 @@ const instructorLinks = [
 ]
 
 export default function TopNav({ searchKey = 'nav.searchCourses', instructor = false }) {
-  const { locale, setLocale, t } = useI18n()
+  const { t } = useI18n()
   const links = instructor ? instructorLinks : professorLinks
 
   return (
@@ -67,14 +68,7 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
               {t('auth.signIn')}
             </Link>
           )}
-          <button
-            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-primary transition-colors hover:bg-slate-50"
-            onClick={() => setLocale(locale === 'ro' ? 'en' : 'ro')}
-            type="button"
-            aria-label="Switch language"
-          >
-            {locale === 'ro' ? 'EN' : 'RO'}
-          </button>
+          <LanguageToggle />
         </div>
       </div>
     </header>

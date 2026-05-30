@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
+import LanguageToggle from '../components/LanguageToggle'
 import { images } from '../data/stitchData'
 import { useI18n } from '../i18n/I18nContext'
 
@@ -16,6 +17,7 @@ export default function RegisterProfessor() {
           <div className="flex items-center gap-4">
             <span className="text-label-md font-label-md text-slate-500">{t('common.needHelp')}</span>
             <button className="text-slate-600" aria-label={t('common.needHelp')}><Icon>help_outline</Icon></button>
+            <LanguageToggle />
           </div>
         </div>
       </header>
