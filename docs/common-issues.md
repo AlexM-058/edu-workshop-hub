@@ -3,6 +3,23 @@
 This project is Docker-first. Do not install PHP, Composer, Node, npm,
 PostgreSQL, or Laravel on the host machine for normal development.
 
+## Dashboard Routes Redirect To Landing Page
+
+Symptom: visiting `/dashboard/professor` or `/dashboard/referent` directly
+redirects to `/`.
+
+Cause: The dashboard routes are protected by a client-side session guard
+(`src/components/RequireAuth.jsx`). A session is written to `sessionStorage`
+only when a role is selected through the login modal on the landing page.
+Direct URL access or a new tab will always redirect because `sessionStorage`
+is tab-scoped.
+
+This is intentional. The session guard is a **prototype mock** — it uses
+`src/lib/auth.js` backed by `sessionStorage`. When backend Google OAuth is
+implemented, replace `login`, `logout`, and `getSession` in `src/lib/auth.js`
+with real session/token logic. The guard itself (`RequireAuth.jsx`) does not
+need to change.
+
 ## Docker Compose Hangs On `php:8.4-cli`
 
 Symptom:

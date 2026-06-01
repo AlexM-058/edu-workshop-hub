@@ -1,6 +1,8 @@
 import DashboardLayout from '../components/DashboardLayout';
+import { getSession } from '../lib/auth';
 
 export default function ReferentDashboard() {
+  const session = getSession();
   const mockCreatedWorkshops = [
     {
       id: 101,
@@ -21,7 +23,7 @@ export default function ReferentDashboard() {
   ];
 
   return (
-    <DashboardLayout role="Referent" userName="Sarah">
+    <DashboardLayout role="Referent" userName={session?.userName ?? 'Referent'}>
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Active Workshops</div>
@@ -40,7 +42,14 @@ export default function ReferentDashboard() {
       <div className="dashboard-section">
         <div className="section-header">
           <h2>Workshops You Manage</h2>
-          <button className="btn-primary btn-small">+ Create Workshop</button>
+          {/* Not yet implemented — requires workshop creation form */}
+          <button
+            className="btn-primary btn-small"
+            disabled
+            title="Coming soon — not yet available"
+          >
+            + Create Workshop
+          </button>
         </div>
         <div className="workshop-grid">
           {mockCreatedWorkshops.map(ws => (
@@ -63,8 +72,22 @@ export default function ReferentDashboard() {
                 </div>
               </div>
               <div className="workshop-actions">
-                <button className="btn-secondary">Manage</button>
-                <button className="btn-outline">Attendance</button>
+                {/* Not yet implemented — requires workshop management page */}
+                <button
+                  className="btn-secondary"
+                  disabled
+                  title="Coming soon — not yet available"
+                >
+                  Manage
+                </button>
+                {/* Not yet implemented — requires attendance feature */}
+                <button
+                  className="btn-outline"
+                  disabled
+                  title="Coming soon — not yet available"
+                >
+                  Attendance
+                </button>
               </div>
             </div>
           ))}

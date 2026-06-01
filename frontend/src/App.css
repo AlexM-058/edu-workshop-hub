@@ -200,6 +200,17 @@ h1 {
   font-size: 0.85rem;
 }
 
+/* Disabled / coming-soon state — applies to all btn-* classes */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-outline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  pointer-events: auto; /* keep :disabled visible; allow title tooltip on hover */
+}
+
 /* Modal */
 .modal-backdrop {
   position: fixed;

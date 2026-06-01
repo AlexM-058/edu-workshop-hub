@@ -1,7 +1,13 @@
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../lib/auth';
 
 export default function DashboardLayout({ children, role, userName }) {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="dashboard-layout">
@@ -27,7 +33,7 @@ export default function DashboardLayout({ children, role, userName }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="btn-logout" onClick={() => navigate('/')}>
+          <button className="btn-logout" onClick={handleLogout}>
             <span className="nav-icon">🚪</span>
             Log out
           </button>

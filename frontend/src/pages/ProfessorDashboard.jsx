@@ -1,6 +1,8 @@
 import DashboardLayout from '../components/DashboardLayout';
+import { getSession } from '../lib/auth';
 
 export default function ProfessorDashboard() {
+  const session = getSession();
   const mockWorkshops = [
     {
       id: 1,
@@ -26,7 +28,7 @@ export default function ProfessorDashboard() {
   ];
 
   return (
-    <DashboardLayout role="Professor" userName="Alex">
+    <DashboardLayout role="Professor" userName={session?.userName ?? 'Professor'}>
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Enrolled Workshops</div>
@@ -56,7 +58,14 @@ export default function ProfessorDashboard() {
               <h3 className="workshop-title">{ws.title}</h3>
               <p className="workshop-location">📍 {ws.location}</p>
               <div className="workshop-actions">
-                <button className="btn-secondary">View Details</button>
+                {/* Not yet implemented — requires workshop detail page */}
+                <button
+                  className="btn-secondary"
+                  disabled
+                  title="Coming soon — not yet available"
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ))}

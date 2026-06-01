@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getHealth } from '../lib/api';
+import { login } from '../lib/auth';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ export default function LandingPage() {
 
   const handleRoleSelect = (role) => {
     setIsModalOpen(false);
+    // TODO: replace the mock userName below with the real name returned by
+    // Google OAuth once backend authentication is implemented.
+    const mockUserName = role === 'professor' ? 'Demo Professor' : 'Demo Referent';
+    login(role, mockUserName);
     navigate(`/dashboard/${role}`);
   };
 
