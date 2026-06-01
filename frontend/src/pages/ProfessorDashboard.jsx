@@ -6,6 +6,21 @@ import { useI18n } from '../i18n/I18nContext';
 
 export default function ProfessorDashboard() {
   const { t } = useI18n();
+  const activeWorkshops = [
+    {
+      titleKey: 'dashboard.workshop1Title',
+      image: images.tablet,
+      progress: '65%',
+      unitsKey: 'dashboard.workshop1Units',
+    },
+    {
+      titleKey: 'dashboard.workshop2Title',
+      image: images.conference,
+      progress: '20%',
+      unitsKey: 'dashboard.workshop2Units',
+    },
+  ];
+  const recommended = ['dashboard.recommended1', 'dashboard.recommended2'];
 
   return (
     <DashboardShell>
@@ -23,17 +38,17 @@ export default function ProfessorDashboard() {
                 {t('common.viewAll')} <Icon className="h-4 w-4">arrow_forward</Icon>
               </Link>
             </div>
-            {[['Advanced Pedagogical Strategies in STEM', images.tablet, '65%', '4 of 6 units completed'], ['Inclusive Classroom Design: Equity & Access', images.conference, '20%', '2 of 8 units completed']].map(([title, image, progress, units]) => (
-              <article key={title} className="flex flex-col gap-6 rounded-lg border border-outline-variant bg-white p-md transition-shadow hover:shadow-sm md:flex-row">
-                <img className="h-32 w-full flex-shrink-0 rounded-lg object-cover md:w-48" src={image} alt="" />
+            {activeWorkshops.map((workshop) => (
+              <article key={workshop.titleKey} className="flex flex-col gap-6 rounded-lg border border-outline-variant bg-white p-md transition-shadow hover:shadow-sm md:flex-row">
+                <img className="h-32 w-full flex-shrink-0 rounded-lg object-cover md:w-48" src={workshop.image} alt="" />
                 <div className="flex min-w-0 flex-1 flex-col justify-between">
                   <div>
-                    <h3 className="mb-1 font-h3 text-xl text-primary">{title}</h3>
-                    <p className="text-sm font-body-md text-on-surface-variant">Dr. Julian Vance • 6 Modules</p>
+                    <h3 className="mb-1 font-h3 text-xl text-primary">{t(workshop.titleKey)}</h3>
+                    <p className="text-sm font-body-md text-on-surface-variant">{t('dashboard.workshopInstructor')} &bull; {t('dashboard.modulesCount')}</p>
                   </div>
                   <div className="mt-4">
-                    <div className="mb-2 flex justify-between gap-4 text-xs font-label-md"><span>Progress: {progress}</span><span className="text-right">{units}</span></div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-secondary" style={{ width: progress }} /></div>
+                    <div className="mb-2 flex justify-between gap-4 text-xs font-label-md"><span>{t('dashboard.progressLabel')} {workshop.progress}</span><span className="text-right">{t(workshop.unitsKey)}</span></div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-secondary" style={{ width: workshop.progress }} /></div>
                   </div>
                 </div>
               </article>
@@ -50,7 +65,7 @@ export default function ProfessorDashboard() {
             </div>
             <div className="border border-outline-variant bg-white p-md">
               <h3 className="mb-4 font-h3 text-lg text-primary">{t('dashboard.recommended')}</h3>
-              {['Curating Digital Libraries for Higher Ed', 'The Future of AI in Academic Research'].map((item) => <p key={item} className="border-t border-slate-100 py-4 text-sm font-label-md text-primary first:border-t-0">{item}<span className="block text-xs font-normal text-on-surface-variant">Based on your History</span></p>)}
+              {recommended.map((itemKey) => <p key={itemKey} className="border-t border-slate-100 py-4 text-sm font-label-md text-primary first:border-t-0">{t(itemKey)}<span className="block text-xs font-normal text-on-surface-variant">{t('dashboard.basedOnHistory')}</span></p>)}
             </div>
           </aside>
         </div>

@@ -90,6 +90,8 @@ Expected conventions:
 - Keep API calls centralized under `src/lib/`.
 - Keep reusable UI under `src/components/`.
 - Keep route-level or page-level UI under `src/pages/` when routes are added.
+- Tailwind and the Vite Tailwind plugin are build-time tooling and belong in
+  `frontend/package.json` `devDependencies`, not runtime `dependencies`.
 - Use clear loading, error, and normal states for data-fetching UI.
 - Inline error states should be visible in the page, not only as toasts.
 - Avoid duplicated CTAs in headers and empty states.
@@ -100,6 +102,19 @@ Current frontend API entrypoint:
 ```text
 frontend/src/lib/api.js
 ```
+
+Current frontend i18n conventions:
+
+- Supported UI locales are Romanian (`ro`) and German (`de`), not English.
+- The language selector must switch between `ro` and `de`.
+- The selected language is persisted in `localStorage` under
+  `eduCraftLocale`; unsupported browser or stored locales must fall back to
+  Romanian.
+- Keep Romanian and German translation dictionaries synchronized when adding
+  user-facing labels.
+- Demo routes currently live under `/demo/*`; keep the TODO in
+  `frontend/src/App.jsx` until authenticated role-based routes replace those
+  public prototype paths.
 
 ## Testing Guidelines
 
@@ -165,6 +180,8 @@ For medium or high risk changes, explicitly check:
   confirmed by a referent.
 - Romanian and German language support should be considered when naming UI
   labels and statuses.
+- Revenue figures in the referent prototype are placeholders only. Revenue is
+  outside the current Referent product scope unless the product brief is updated.
 - PostgreSQL is internal to Docker Compose as `db:5432`; do not expose host
   port `5432` unless there is a concrete reason.
 - Backend Docker uses PHP 8.4 because the installed Laravel dependencies require
