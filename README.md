@@ -31,9 +31,18 @@ Core features:
 - Enrollment and withdrawal flow.
 - Automatic waiting list promotion when a confirmed participant withdraws.
 - Bilingual interface: Romanian and German.
+- Frontend language preference persists in browser `localStorage` and falls
+  back to Romanian for unsupported locales.
 - Attendance management.
 - Attendance list export as PDF or Excel.
 - Participation certificate download after attendance confirmation.
+
+Current prototype notes:
+
+- Public demo dashboards are mounted under `/demo/*` until authenticated
+  role-based routes are implemented.
+- Revenue values shown in referent-facing prototype screens are placeholders;
+  revenue management is not part of the current Referent scope.
 
 ## Tech Stack
 
