@@ -21,6 +21,7 @@ function App() {
       <Route path="/register/professor" element={<RegisterProfessor />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/workshops/:id" element={<WorkshopDetailPage />} />
+      {/* TODO: Remove the /demo prefix once authenticated role-based routes replace the public prototype paths. */}
       <Route path="/demo/dashboard/professor" element={<ProfessorDashboard />} />
       <Route path="/demo/dashboard/referent" element={<ReferentDashboard />} />
       <Route path="/demo/dashboard/referent/workshops" element={<InstructorWorkshopsPage />} />
