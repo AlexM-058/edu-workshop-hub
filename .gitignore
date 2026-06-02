@@ -20,3 +20,7 @@ backend/storage/logs/*.log
 
 # Docker/local data
 .docker-data/
+
+# Local agent artifacts
+.agents/
+skills-lock.json
