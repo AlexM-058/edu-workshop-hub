@@ -80,3 +80,24 @@ export async function createTeacherWorkshop(token, payload) {
 
   return responsePayload;
 }
+
+export async function enrollInWorkshop(token, workshopId) {
+  const response = await fetch(`${apiBaseUrl}/workshops/${encodeURIComponent(workshopId)}/enroll`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const responsePayload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(responsePayload.message ?? `Workshop enrollment failed with ${response.status}`);
+    error.status = response.status;
+    error.payload = responsePayload;
+    throw error;
+  }
+
+  return responsePayload;
+}

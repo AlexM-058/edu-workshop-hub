@@ -55,7 +55,7 @@ export function CatalogWorkshopCard({ workshop }) {
             <span className="font-h3 text-xl text-primary">{workshop.price}</span>
             {workshop.note && <span className="text-[10px] font-bold uppercase text-secondary">{workshop.note}</span>}
           </div>
-          <Link to="/workshops/advanced-pedagogical-strategies" className="rounded-lg bg-primary px-6 py-2 font-label-md text-white transition-colors hover:bg-primary-container">
+          <Link to="/workshops/1" className="rounded-lg bg-primary px-6 py-2 font-label-md text-white transition-colors hover:bg-primary-container">
             Înscrie-te
           </Link>
         </div>

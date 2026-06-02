@@ -163,6 +163,7 @@ The health endpoint should return:
 Current authenticated API endpoints include:
 
 - `GET /api/auth/me` - syncs the signed-in Clerk user to the local user table.
+- `POST /api/workshops/{workshop}/enroll` - allows attenders to enroll in a published workshop or join its waiting list.
 - `POST /api/teacher/workshops` - allows `teacher` and `admin` users to create draft or published workshops.
 - `POST /api/admin/teacher-invitations` - allows admins to prepare teacher role invitations.
 

@@ -1,12 +1,50 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useAppAuth } from '../auth/AuthContext'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'
 import TopNav from '../components/TopNav'
 import { images } from '../data/stitchData'
 import { useI18n } from '../i18n/I18nContext'
+import { enrollInWorkshop } from '../lib/api'
+import { submitWorkshopEnrollment } from './workshopEnrollment'
 
 export default function WorkshopDetailPage() {
   const { t } = useI18n()
+  const { id } = useParams()
+  const { getToken, isSignedIn, isSyncing, role } = useAppAuth()
+  const [isEnrolling, setIsEnrolling] = useState(false)
+  const [enrollmentError, setEnrollmentError] = useState('')
+  const [enrollmentSuccess, setEnrollmentSuccess] = useState('')
+
+  const handleEnrollment = async () => {
+    if (!isSignedIn) {
+      setEnrollmentSuccess('')
+      setEnrollmentError(t('detail.enrollErrorSignIn'))
+      return
+    }
+
+    if (role && role !== 'attender') {
+      setEnrollmentSuccess('')
+      setEnrollmentError(t('detail.enrollErrorForbidden'))
+      return
+    }
+
+    setIsEnrolling(true)
+    setEnrollmentError('')
+    setEnrollmentSuccess('')
+
+    const result = await submitWorkshopEnrollment({
+      workshopId: id,
+      getToken,
+      enrollInWorkshop,
+      t,
+    })
+
+    setEnrollmentError(result.errorMessage)
+    setEnrollmentSuccess(result.successMessage)
+    setIsEnrolling(false)
+  }
 
   return (
     <div className="bg-surface text-on-surface">
@@ -27,9 +65,26 @@ export default function WorkshopDetailPage() {
               <Info icon="group">Limited to 25 Participants</Info>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Link to="/demo/dashboard/attender" className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95">{t('detail.enrollNow')}</Link>
+              <button
+                className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95 disabled:cursor-wait disabled:opacity-70"
+                disabled={isEnrolling || isSyncing}
+                onClick={handleEnrollment}
+                type="button"
+              >
+                {isEnrolling ? t('detail.enrolling') : t('detail.enrollNow')}
+              </button>
               <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">{t('detail.download')}</button>
             </div>
+            {enrollmentSuccess && (
+              <p className="mt-4 rounded-lg border border-secondary/30 bg-secondary-container px-4 py-3 font-body-md text-on-secondary-container" role="status">
+                {enrollmentSuccess}
+              </p>
+            )}
+            {enrollmentError && (
+              <p className="mt-4 rounded-lg border border-error/30 bg-error-container px-4 py-3 font-body-md text-on-error-container" role="alert">
+                {enrollmentError}
+              </p>
+            )}
           </div>
           <div className="relative lg:col-span-5">
             <div className="aspect-[4/5] overflow-hidden rounded-xl border border-outline-variant/30 shadow-2xl">

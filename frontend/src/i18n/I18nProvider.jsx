@@ -16,7 +16,7 @@ export function I18nProvider({ children }) {
   const value = useMemo(() => ({
     locale,
     setLocale: setLocaleState,
-    t: (key) => translate(locale, key),
+    t: (key, params) => translate(locale, key, params),
   }), [locale]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

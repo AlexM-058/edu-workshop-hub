@@ -103,7 +103,15 @@ export const translations = {
     'catalog.allFormats': 'Toate formatele',
     'detail.title': 'Strategii pedagogice avansate pentru clase digitale',
     'detail.subtitle': 'Stăpânește intersecția dintre știința cognitivă și tehnologia educațională pentru a susține învățarea profundă în medii hibride.',
-    'detail.enrollNow': 'Înscrie-te acum - $450',
+    'detail.enrollNow': 'Înscrie-te acum',
+    'detail.enrolling': 'Se trimite înscrierea...',
+    'detail.enrollSuccess': 'Înscriere confirmată.',
+    'detail.waitlistSuccess': 'Ai fost adăugat pe lista de așteptare. Poziția ta: {position}.',
+    'detail.enrollErrorDuplicate': 'Ești deja înscris sau pe lista de așteptare pentru acest workshop.',
+    'detail.enrollErrorForbidden': 'Doar utilizatorii cu rol attender se pot înscrie.',
+    'detail.enrollErrorGeneric': 'Înscrierea nu a putut fi finalizată. Încearcă din nou.',
+    'detail.enrollErrorSignIn': 'Autentifică-te cu un cont attender pentru a te înscrie.',
+    'detail.enrollErrorUnpublished': 'Înscrierea este disponibilă doar pentru workshop-uri publicate.',
     'detail.download': 'Descarcă programa',
     'detail.overview': 'Prezentare curs',
     'detail.learn': 'Ce vei învăța',
@@ -460,7 +468,15 @@ export const translations = {
     'catalog.allFormats': 'Alle Formate',
     'detail.title': 'Fortgeschrittene pädagogische Strategien für digitale Klassenräume',
     'detail.subtitle': 'Beherrsche die Schnittstelle von Kognitionswissenschaft und Bildungstechnologie, um tiefes Lernen in hybriden Umgebungen zu fördern.',
-    'detail.enrollNow': 'Jetzt einschreiben - $450',
+    'detail.enrollNow': 'Jetzt einschreiben',
+    'detail.enrolling': 'Einschreibung wird gesendet...',
+    'detail.enrollSuccess': 'Einschreibung bestätigt.',
+    'detail.waitlistSuccess': 'Du wurdest zur Warteliste hinzugefügt. Deine Position: {position}.',
+    'detail.enrollErrorDuplicate': 'Du bist für diesen Workshop bereits eingeschrieben oder auf der Warteliste.',
+    'detail.enrollErrorForbidden': 'Nur Nutzer mit der Rolle Attender können sich einschreiben.',
+    'detail.enrollErrorGeneric': 'Die Einschreibung konnte nicht abgeschlossen werden. Versuche es erneut.',
+    'detail.enrollErrorSignIn': 'Melde dich mit einem Attender-Konto an, um dich einzuschreiben.',
+    'detail.enrollErrorUnpublished': 'Einschreibung ist nur für veröffentlichte Workshops verfügbar.',
     'detail.download': 'Lehrplan herunterladen',
     'detail.overview': 'Kursübersicht',
     'detail.learn': 'Was du lernen wirst',
@@ -722,7 +738,12 @@ export function getInitialLocale(browserLanguage = '') {
   return supportedLocales.includes(normalized) ? normalized : 'ro';
 }
 
-export function translate(locale, key) {
+export function translate(locale, key, params = {}) {
   const dictionary = translations[supportedLocales.includes(locale) ? locale : 'ro'] ?? translations.ro;
-  return dictionary[key] ?? translations.ro[key] ?? key;
+  const value = dictionary[key] ?? translations.ro[key] ?? key;
+
+  return Object.entries(params).reduce(
+    (translated, [name, replacement]) => translated.replaceAll(`{${name}}`, String(replacement)),
+    value,
+  );
 }

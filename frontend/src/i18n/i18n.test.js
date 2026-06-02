@@ -22,6 +22,11 @@ describe('i18n translations', () => {
     assert.equal(getInitialLocale('fr-FR'), 'ro');
   });
 
+  it('interpolates translation parameters', () => {
+    assert.equal(translate('ro', 'detail.waitlistSuccess', { position: 3 }), 'Ai fost adăugat pe lista de așteptare. Poziția ta: 3.');
+    assert.equal(translate('de', 'detail.waitlistSuccess', { position: 3 }), 'Du wurdest zur Warteliste hinzugefügt. Deine Position: 3.');
+  });
+
   it('keeps Romanian and German dictionaries in sync', () => {
     assert.deepEqual(Object.keys(translations.de).sort(), Object.keys(translations.ro).sort());
   });
