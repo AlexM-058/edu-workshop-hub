@@ -1,3 +1,4 @@
+import { UserButton } from '@clerk/clerk-react'
 import { Link, NavLink } from 'react-router-dom'
 import Icon from './Icon'
 import { useAppAuth } from '../auth/AuthContext'
@@ -6,21 +7,21 @@ import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
-  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/professor' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/professor?panel=certificates' },
+  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/attender' },
+  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
   { labelKey: 'nav.resources', to: '/' },
 ]
 
 const instructorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
-  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/referent/workshops' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/professor?panel=certificates' },
+  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/teacher/workshops' },
+  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
   { labelKey: 'nav.resources', to: '/' },
 ]
 
 export default function TopNav({ searchKey = 'nav.searchCourses', instructor = false }) {
   const { t } = useI18n()
-  const { appUser, isSignedIn, signOut } = useAppAuth()
+  const { appUser, clerkConfigured, isSignedIn, signOut } = useAppAuth()
   const links = instructor ? instructorLinks : professorLinks
 
   return (
@@ -64,14 +65,18 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
             <Icon>help_outline</Icon>
           </button>
           {isSignedIn ? (
-            <div className="hidden items-center gap-3 md:flex">
-              <div className="text-right">
+            <div className="flex items-center gap-3">
+              <div className="hidden text-right md:block">
                 <p className="text-xs font-label-md text-primary">{appUser?.name ?? 'EduCraft'}</p>
                 <p className="text-[10px] uppercase tracking-wider text-slate-500">{appUser?.role ?? 'sync'}</p>
               </div>
-              <button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-slate-50" onClick={() => signOut()} type="button">
-                {t('auth.signOut')}
-              </button>
+              {clerkConfigured ? (
+                <UserButton afterSignOutUrl="/sign-in" />
+              ) : (
+                <button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-slate-50" onClick={() => signOut()} type="button">
+                  {t('auth.signOut')}
+                </button>
+              )}
             </div>
           ) : (
             <Link to="/sign-in" className="rounded-lg bg-primary px-6 py-2 text-label-md font-label-md text-white transition-all hover:bg-primary-container">

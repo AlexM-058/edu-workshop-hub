@@ -3,9 +3,9 @@
 Edu Workshop Hub is a Docker-first monorepo with a Laravel API backend and a
 React Vite frontend.
 
-The product is a bilingual workshop management platform for teachers. Teachers
+The product is a bilingual workshop management platform for teachers. Attenders
 can discover educational workshops, enroll in them, join waiting lists, and
-download participation documents. Referents organize workshops, manage
+download participation documents. Teachers organize workshops, manage
 participants, mark attendance, and generate official documents. Admins manage
 users, categories, translations, and platform-level audit data.
 
@@ -17,9 +17,9 @@ on your machine.
 
 The platform supports three main layouts:
 
-- `Professor` - browses workshops, enrolls, withdraws, tracks enrollment status,
+- `Attender` - browses workshops, enrolls, withdraws, tracks enrollment status,
   and downloads participation certificates after attendance is confirmed.
-- `Referent` - creates and manages workshops, sets capacity, date and location,
+- `Teacher` - creates and manages workshops, sets capacity, date and location,
   manages participant and waiting lists, marks attendance, and exports attendance
   lists.
 - `Admin` - manages users, course categories, translations, and global platform
@@ -39,10 +39,11 @@ Core features:
 
 Current prototype notes:
 
-- Public demo dashboards are mounted under `/demo/*` until authenticated
-  role-based routes are implemented.
-- Revenue values shown in referent-facing prototype screens are placeholders;
-  revenue management is not part of the current Referent scope.
+- Canonical demo dashboards use `/demo/dashboard/attender` and
+  `/demo/dashboard/teacher`; legacy professor/referent dashboard URLs redirect
+  to those paths.
+- Revenue values shown in teacher-facing prototype screens are placeholders;
+  revenue management is not part of the current Teacher scope.
 
 ## Tech Stack
 

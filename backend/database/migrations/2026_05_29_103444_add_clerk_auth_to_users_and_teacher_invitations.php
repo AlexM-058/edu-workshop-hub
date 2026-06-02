@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table): void {
             $table->string('clerk_id')->nullable()->unique()->after('id');
-            $table->string('role')->default('professor')->after('email');
+            $table->string('role')->default('attender')->after('email');
             if (Schema::getConnection()->getDriverName() !== 'sqlite') {
                 $table->string('password')->nullable()->change();
             }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -8,6 +8,14 @@ const frontendRoot = fileURLToPath(new URL('../../', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../../', import.meta.url))
 
 function readRepoFile(path) {
+  if (path.startsWith('frontend/')) {
+    return readFileSync(join(frontendRoot, path.replace(/^frontend\//, '')), 'utf8')
+  }
+
+  if (path.startsWith('docker/') && existsSync('/docker')) {
+    return readFileSync(join('/', path), 'utf8')
+  }
+
   return readFileSync(join(repoRoot, path), 'utf8')
 }
 
@@ -37,4 +45,16 @@ test('frontend source does not expose placeholder hash links as navigation', () 
     .filter((path) => /href=\{?["']#["']\}?/.test(readFileSync(path, 'utf8')))
 
   assert.deepEqual(filesWithHashLinks, [])
+})
+
+test('app exposes canonical attender and teacher dashboard routes with legacy redirects', () => {
+  const appSource = readRepoFile('frontend/src/App.jsx')
+
+  assert.match(appSource, /path="\/demo\/dashboard\/attender"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/teacher"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops"/)
+  assert.match(appSource, /path="\/dashboard\/attender"/)
+  assert.match(appSource, /path="\/dashboard\/teacher"/)
+  assert.match(appSource, /path="\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
+  assert.match(appSource, /path="\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
 })

@@ -16,7 +16,7 @@ const workshops = [
     image: workshopImages[0],
     details: [['group', 'workshops.enrolledStudents', '452/500'], ['calendar_today', 'workshops.date', '15 Oct 2026'], ['location_on', 'workshops.location', 'Amfiteatrul A1'], ['hourglass_empty', 'workshops.waitlist', '12']],
     action: 'common.edit',
-    to: '/demo/dashboard/referent/workshops/new',
+    to: '/demo/dashboard/teacher/workshops/new',
   },
   {
     title: 'Etica în Inteligența Artificială',
@@ -26,7 +26,7 @@ const workshops = [
     muted: true,
     details: [['group', 'workshops.enrolledStudents', '832/850'], ['calendar_today', 'workshops.date', '22 Iul 2026'], ['location_on', 'workshops.location', 'Online (Zoom)']],
     action: 'workshops.analyzeData',
-    to: '/demo/dashboard/referent/analytics',
+    to: '/demo/dashboard/teacher/analytics',
   },
   {
     title: 'Workshop fără titlu',
@@ -35,7 +35,7 @@ const workshops = [
     draft: true,
     details: [['calendar_today', 'workshops.date', 'common.unspecified'], ['location_on', 'workshops.location', 'common.unspecified'], ['edit', 'workshops.lastChanges', 'instructorDashboard.now3h']],
     action: 'common.continueEditing',
-    to: '/demo/dashboard/referent/workshops/new',
+    to: '/demo/dashboard/teacher/workshops/new',
   },
 ]
 
@@ -43,8 +43,8 @@ export default function InstructorWorkshopsPage() {
   const { t } = useI18n()
 
   return (
-    <DashboardShell mode="instructor">
-      <main className="mx-auto max-w-[1200px] p-margin">
+    <DashboardShell mode="teacher">
+      <main className="mx-auto max-w-[1200px] p-8">
         <header className="mb-lg">
           <h1 className="mb-2 font-h1 text-h1 text-primary">{t('workshops.title')}</h1>
           <p className="max-w-2xl font-body-lg text-body-lg text-slate-600">{t('workshops.subtitle')}</p>

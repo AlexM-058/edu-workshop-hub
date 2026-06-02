@@ -85,7 +85,7 @@ export default function RegisterProfessor() {
                 <Link to="/" className="flex items-center gap-xs text-label-md font-label-md text-primary hover:underline"><Icon>arrow_back</Icon>{t('register.back')}</Link>
                 <div className="flex items-center gap-md">
                   <div className="hidden h-2 w-32 overflow-hidden rounded-full bg-surface-container sm:block"><div className="h-full w-[66%] bg-secondary" /></div>
-                  <Link to="/demo/dashboard/professor" className="bg-primary px-lg py-sm text-label-md font-label-md text-white shadow-sm transition-colors hover:bg-primary-container">{t('register.next')}</Link>
+                  <Link to="/demo/dashboard/attender" className="bg-primary px-lg py-sm text-label-md font-label-md text-white shadow-sm transition-colors hover:bg-primary-container">{t('register.next')}</Link>
                 </div>
               </div>
             </form>

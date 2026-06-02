@@ -3,10 +3,10 @@ import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
 
 const users = [
-  ['ED', 'Elena Dumitrescu', 'elena.d@educraft.ro', 'admin.roleProfessor', 'admin.active', '14 Oct 2023', true],
-  ['AM', 'Andrei Marinescu', 'a.marinescu@educraft.ro', 'admin.roleReferent', 'admin.active', '22 Nov 2023', true],
-  ['IC', 'Ioana Constantinescu', 'ioana.c@educraft.ro', 'admin.roleProfessor', 'admin.inactive', '05 Ian 2024', false],
-  ['VP', 'Vlad Popescu', 'vlad.popescu@educraft.ro', 'admin.roleReferent', 'admin.active', '12 Feb 2024', true],
+  ['ED', 'Elena Dumitrescu', 'elena.d@educraft.ro', 'admin.roleAttender', 'admin.active', '14 Oct 2023', true],
+  ['AM', 'Andrei Marinescu', 'a.marinescu@educraft.ro', 'admin.roleTeacher', 'admin.active', '22 Nov 2023', true],
+  ['IC', 'Ioana Constantinescu', 'ioana.c@educraft.ro', 'admin.roleAttender', 'admin.inactive', '05 Ian 2024', false],
+  ['VP', 'Vlad Popescu', 'vlad.popescu@educraft.ro', 'admin.roleTeacher', 'admin.active', '12 Feb 2024', true],
 ]
 
 export default function AdminUsersPage() {
@@ -14,7 +14,7 @@ export default function AdminUsersPage() {
 
   return (
     <AdminShell searchKey="admin.searchUsers">
-      <div className="mx-auto max-w-[1200px] space-y-lg p-margin">
+      <div className="mx-auto max-w-[1200px] space-y-lg p-8">
         <header className="flex items-end justify-between border-b border-outline-variant pb-md">
           <div>
             <h1 className="font-h1 text-h1 text-primary">{t('admin.users.title')}</h1>
@@ -32,8 +32,8 @@ export default function AdminUsersPage() {
               <p className="mt-2 flex items-center gap-1 font-label-md text-secondary"><Icon className="text-[18px]">trending_up</Icon>{t('admin.users.monthGrowth')}</p>
             </div>
             <div className="hidden gap-4 sm:flex">
-              <SmallCount value="452" label={t('admin.roleProfessorPlural')} />
-              <SmallCount value="832" label={t('admin.roleReferentPlural')} last />
+              <SmallCount value="452" label={t('admin.roleAttenderPlural')} />
+              <SmallCount value="832" label={t('admin.roleTeacherPlural')} last />
             </div>
           </div>
           <div className="flex flex-col justify-between rounded-xl bg-primary p-md text-white md:col-span-4">
@@ -48,7 +48,7 @@ export default function AdminUsersPage() {
         <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0_4px_12px_rgba(26,54,93,0.05)]">
           <div className="flex flex-wrap items-center justify-between gap-md bg-surface-container-low/50 p-md">
             <div className="flex min-w-[300px] flex-1 gap-md">
-              <FilterSelect icon="filter_list" options={['admin.users.allRoles', 'admin.roleProfessor', 'admin.roleReferent', 'admin.roleAdmin']} />
+              <FilterSelect icon="filter_list" options={['admin.users.allRoles', 'admin.roleAttender', 'admin.roleTeacher', 'admin.roleAdmin']} />
               <FilterSelect icon="bolt" options={['admin.users.allStatuses', 'admin.active', 'admin.inactive', 'admin.suspended']} />
             </div>
             <p className="font-caption text-on-surface-variant">{t('admin.users.showing')}</p>

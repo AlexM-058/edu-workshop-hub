@@ -10,6 +10,13 @@ class ClerkAuthTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['services.clerk.allow_test_tokens' => true]);
+    }
+
     public function test_auth_me_rejects_requests_without_a_token(): void
     {
         $this->getJson('/api/auth/me')->assertUnauthorized();
@@ -29,22 +36,22 @@ class ClerkAuthTest extends TestCase
             ->assertUnauthorized();
     }
 
-    public function test_auth_me_syncs_a_new_clerk_user_as_professor_by_default(): void
+    public function test_auth_me_syncs_a_new_clerk_user_as_attender_by_default(): void
     {
         $this->withToken($this->clerkToken([
-            'sub' => 'user_professor',
-            'email' => 'professor@example.com',
-            'name' => 'Pat Professor',
+            'sub' => 'user_attender',
+            'email' => 'attender@example.com',
+            'name' => 'Ada Attender',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.email', 'professor@example.com')
-            ->assertJsonPath('user.role', 'professor');
+            ->assertJsonPath('user.email', 'attender@example.com')
+            ->assertJsonPath('user.role', 'attender');
 
         $this->assertDatabaseHas('users', [
-            'clerk_id' => 'user_professor',
-            'email' => 'professor@example.com',
-            'role' => 'professor',
+            'clerk_id' => 'user_attender',
+            'email' => 'attender@example.com',
+            'role' => 'attender',
         ]);
     }
 
@@ -76,11 +83,11 @@ class ClerkAuthTest extends TestCase
             ->assertJsonPath('user.role', 'teacher');
     }
 
-    public function test_professor_is_forbidden_from_teacher_and_admin_endpoints(): void
+    public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void
     {
         $token = $this->clerkToken([
-            'sub' => 'user_professor',
-            'email' => 'professor@example.com',
+            'sub' => 'user_attender',
+            'email' => 'attender@example.com',
         ]);
 
         $this->withToken($token)->getJson('/api/teacher/status')->assertForbidden();
@@ -115,6 +122,7 @@ class ClerkAuthTest extends TestCase
             'sub' => 'user_123',
             'email' => 'alex@example.com',
             'name' => 'Alex Teacher',
+            'iss' => config('services.clerk.issuer'),
             'exp' => time() + 3600,
             'nbf' => time() - 60,
         ], $claims), JSON_THROW_ON_ERROR));

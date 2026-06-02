@@ -10,7 +10,7 @@ class ClerkTokenVerifier
 {
     public function verify(string $token): array
     {
-        if (app()->environment('testing') && str_starts_with($token, 'test:')) {
+        if (config('services.clerk.allow_test_tokens') && str_starts_with($token, 'test:')) {
             return $this->decodeTestToken($token);
         }
 

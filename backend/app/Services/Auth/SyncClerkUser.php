@@ -56,7 +56,7 @@ class SyncClerkUser
             })
             ->first();
 
-        return $invitation ? $invitation->role : 'professor';
+        return $invitation ? $invitation->role : 'attender';
     }
 
     private function acceptTeacherInvitation(User $user): void

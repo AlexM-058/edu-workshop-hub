@@ -11,9 +11,9 @@ const metrics = [
 ]
 
 const shortcuts = [
-  ['school', 'nav.myWorkshops', 'instructorDashboard.myWorkshopsText', 'instructorDashboard.viewWorkshops', '/demo/dashboard/referent/workshops', 'bg-blue-50 text-blue-700'],
-  ['add_circle', 'instructorDashboard.createWorkshop', 'instructorDashboard.createText', 'instructorDashboard.createNow', '/demo/dashboard/referent/workshops/new', 'bg-green-50 text-green-700'],
-  ['analytics', 'nav.analytics', 'instructorDashboard.analyticsText', 'instructorDashboard.viewReports', '/demo/dashboard/referent/analytics', 'bg-amber-50 text-amber-700'],
+  ['school', 'nav.myWorkshops', 'instructorDashboard.myWorkshopsText', 'instructorDashboard.viewWorkshops', '/demo/dashboard/teacher/workshops', 'bg-blue-50 text-blue-700'],
+  ['add_circle', 'instructorDashboard.createWorkshop', 'instructorDashboard.createText', 'instructorDashboard.createNow', '/demo/dashboard/teacher/workshops/new', 'bg-green-50 text-green-700'],
+  ['analytics', 'nav.analytics', 'instructorDashboard.analyticsText', 'instructorDashboard.viewReports', '/demo/dashboard/teacher/analytics', 'bg-amber-50 text-amber-700'],
 ]
 
 const activeWorkshops = [
@@ -31,8 +31,8 @@ export default function InstructorDashboardPage() {
   const { t } = useI18n()
 
   return (
-    <DashboardShell mode="instructor">
-      <main className="mx-auto max-w-[1400px] p-margin">
+    <DashboardShell mode="teacher">
+      <main className="mx-auto max-w-[1400px] p-8">
         <header className="mb-xl flex flex-col justify-between gap-4 md:flex-row md:items-start">
           <div>
             <h1 className="mb-xs font-h1 text-h2 text-primary">{t('instructorDashboard.greeting')}</h1>
@@ -78,7 +78,7 @@ export default function InstructorDashboardPage() {
             <div>
               <div className="mb-md flex items-center justify-between">
                 <h2 className="font-h3 text-h3 text-primary">{t('instructorDashboard.activeWorkshops')}</h2>
-                <Link className="font-label-md text-primary hover:underline" to="/demo/dashboard/referent/workshops">{t('common.viewAll')}</Link>
+                <Link className="font-label-md text-primary hover:underline" to="/demo/dashboard/teacher/workshops">{t('common.viewAll')}</Link>
               </div>
               <div className="space-y-4">
                 {activeWorkshops.map(([icon, title, students, date, progress, tone]) => (
@@ -96,8 +96,8 @@ export default function InstructorDashboardPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Link className="rounded border border-slate-200 px-4 py-2 text-sm font-label-md hover:bg-slate-50" to="/demo/dashboard/referent/workshops/new">{t('common.edit')}</Link>
-                      <Link className="rounded bg-primary px-4 py-2 text-sm font-label-md text-white hover:bg-primary-container" to="/demo/dashboard/referent/analytics">{t('nav.analytics')}</Link>
+                      <Link className="rounded border border-slate-200 px-4 py-2 text-sm font-label-md hover:bg-slate-50" to="/demo/dashboard/teacher/workshops/new">{t('common.edit')}</Link>
+                      <Link className="rounded bg-primary px-4 py-2 text-sm font-label-md text-white hover:bg-primary-container" to="/demo/dashboard/teacher/analytics">{t('nav.analytics')}</Link>
                     </div>
                   </article>
                 ))}
@@ -124,8 +124,8 @@ export default function InstructorDashboardPage() {
             <section className="rounded-lg bg-primary p-lg text-white shadow-md">
               <h3 className="mb-md font-h3 text-h3">{t('instructorDashboard.quickActions')}</h3>
               {[
-                ['add_box', 'instructorDashboard.createWorkshop', '/demo/dashboard/referent/workshops/new'],
-                ['card_membership', 'instructorDashboard.viewCertificates', '/demo/dashboard/professor?panel=certificates'],
+                ['add_box', 'instructorDashboard.createWorkshop', '/demo/dashboard/teacher/workshops/new'],
+                ['card_membership', 'instructorDashboard.viewCertificates', '/demo/dashboard/attender?panel=certificates'],
                 ['support_agent', 'instructorDashboard.contactSupport', '/'],
               ].map(([icon, label, to]) => <Link key={label} className="mb-3 flex w-full items-center gap-3 rounded-lg bg-white/10 p-3 text-left font-label-md transition-colors hover:bg-white/20" to={to}><Icon>{icon}</Icon>{t(label)}</Link>)}
             </section>

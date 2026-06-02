@@ -1,4 +1,19 @@
-# React + Vite
+# Edu Workshop Hub Frontend
+
+The React Vite frontend uses Clerk for Google sign-in when
+`VITE_CLERK_PUBLISHABLE_KEY` is configured. Without that key, the app renders a
+static auth provider and the sign-in page shows a visible configuration message.
+
+Canonical role dashboard paths:
+
+- `/demo/dashboard/attender`
+- `/demo/dashboard/teacher`
+- `/demo/admin`
+
+Legacy professor/referent dashboard paths redirect to the canonical attender and
+teacher paths.
+
+## React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
