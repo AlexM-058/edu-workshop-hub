@@ -160,6 +160,12 @@ The health endpoint should return:
 {"status":"ok","service":"backend"}
 ```
 
+Current authenticated API endpoints include:
+
+- `GET /api/auth/me` - syncs the signed-in Clerk user to the local user table.
+- `POST /api/teacher/workshops` - allows `teacher` and `admin` users to create draft or published workshops.
+- `POST /api/admin/teacher-invitations` - allows admins to prepare teacher role invitations.
+
 Stop the project:
 
 ```bash

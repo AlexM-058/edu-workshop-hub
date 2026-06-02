@@ -1,10 +1,58 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useAppAuth } from '../auth/AuthContext'
 import DashboardShell from '../components/DashboardShell'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
+import { createTeacherWorkshop } from '../lib/api'
+import { submitWorkshopForm } from './createWorkshopForm'
+
+const initialForm = {
+  title: '',
+  category: 'Științe Sociale',
+  description: '',
+  coordinatorName: '',
+  coordinatorBio: '',
+  startsAt: '',
+  endsAt: '',
+  duration: '',
+  capacity: '',
+  location: '',
+}
 
 export default function CreateWorkshopPage() {
   const { t } = useI18n()
+  const { getToken } = useAppAuth()
+  const [form, setForm] = useState(initialForm)
+  const [submittingStatus, setSubmittingStatus] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [createdWorkshop, setCreatedWorkshop] = useState(null)
+
+  function updateField(field, value) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  async function handleSubmit(status) {
+    setSubmittingStatus(status)
+    setErrorMessage('')
+    setCreatedWorkshop(null)
+
+    const result = await submitWorkshopForm({
+      form,
+      status,
+      getToken,
+      createWorkshop: createTeacherWorkshop,
+      t,
+    })
+
+    setErrorMessage(result.errorMessage)
+    setCreatedWorkshop(result.workshop)
+    setSubmittingStatus('')
+  }
+
+  const isSubmitting = submittingStatus !== ''
 
   return (
     <DashboardShell mode="teacher">
@@ -19,16 +67,16 @@ export default function CreateWorkshopPage() {
             <section className="col-span-12 space-y-md lg:col-span-8">
               <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg">
                 <div className="space-y-lg">
-                  <Field label={t('create.titleLabel')} placeholder={t('create.titlePlaceholder')} />
+                  <Field label={t('create.titleLabel')} onChange={(value) => updateField('title', value)} placeholder={t('create.titlePlaceholder')} value={form.title} />
                   <label className="space-y-xs block">
                     <span className="block font-label-md text-label-md uppercase text-primary">{t('create.category')}</span>
-                    <select className="w-full rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    <select className="w-full rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('category', event.target.value)} value={form.category}>
                       <option>Științe Sociale</option><option>Data Science</option><option>Umanioare Digitale</option><option>Fizică Teoretică</option>
                     </select>
                   </label>
                   <label className="space-y-xs block">
                     <span className="block font-label-md text-label-md uppercase text-primary">{t('create.description')}</span>
-                    <textarea className="w-full resize-none rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder={t('create.descriptionPlaceholder')} rows="6" />
+                    <textarea className="w-full resize-none rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('description', event.target.value)} placeholder={t('create.descriptionPlaceholder')} rows="6" value={form.description} />
                   </label>
 
                   <section className="border-t border-slate-100 pt-lg">
@@ -41,10 +89,10 @@ export default function CreateWorkshopPage() {
                         <p className="mt-xs text-center font-caption text-[10px] uppercase text-on-surface-variant">{t('create.profileImage')}</p>
                       </div>
                       <div className="space-y-md">
-                        <Field label={t('create.fullName')} placeholder={t('create.fullNamePlaceholder')} compact />
+                        <Field label={t('create.fullName')} onChange={(value) => updateField('coordinatorName', value)} placeholder={t('create.fullNamePlaceholder')} value={form.coordinatorName} compact />
                         <label className="space-y-xs block">
                           <span className="block font-label-md text-label-md uppercase text-primary">{t('create.bio')}</span>
-                          <textarea className="w-full resize-none rounded-lg border border-outline-variant p-3 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder={t('create.bioPlaceholder')} rows="3" />
+                          <textarea className="w-full resize-none rounded-lg border border-outline-variant p-3 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('coordinatorBio', event.target.value)} placeholder={t('create.bioPlaceholder')} rows="3" value={form.coordinatorBio} />
                         </label>
                         <Field label={t('create.links')} placeholder="https://linkedin.com/in/..." compact icon="link" />
                       </div>
@@ -55,20 +103,20 @@ export default function CreateWorkshopPage() {
                     <label className="space-y-xs block">
                       <span className="block font-label-md text-label-md uppercase text-primary">{t('create.period')}</span>
                       <div className="flex items-center gap-2">
-                        <input className="w-full rounded-lg border border-outline-variant p-3 font-body-md outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" type="date" />
+                        <input className="w-full rounded-lg border border-outline-variant p-3 font-body-md outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('startsAt', event.target.value)} type="date" value={form.startsAt} />
                         <span className="text-outline">-</span>
-                        <input className="w-full rounded-lg border border-outline-variant p-3 font-body-md outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" type="date" />
+                        <input className="w-full rounded-lg border border-outline-variant p-3 font-body-md outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('endsAt', event.target.value)} type="date" value={form.endsAt} />
                       </div>
                     </label>
-                    <Field label={t('create.duration')} placeholder={t('create.durationPlaceholder')} compact />
+                    <Field label={t('create.duration')} onChange={(value) => updateField('duration', value)} placeholder={t('create.durationPlaceholder')} value={form.duration} compact />
                   </section>
 
                   <section className="border-t border-slate-100 pt-lg">
                     <div className="mb-md grid grid-cols-1 gap-md md:grid-cols-2">
                       <Field label={t('create.cost')} placeholder="0.00" compact prefix="RON" />
-                      <Field label={t('create.participants')} placeholder={t('create.participantsPlaceholder')} compact />
+                      <Field label={t('create.participants')} onChange={(value) => updateField('capacity', value)} placeholder={t('create.participantsPlaceholder')} type="number" value={form.capacity} compact />
                     </div>
-                    <Field label={t('create.location')} placeholder={t('create.locationPlaceholder')} compact icon="location_on" />
+                    <Field label={t('create.location')} onChange={(value) => updateField('location', value)} placeholder={t('create.locationPlaceholder')} value={form.location} compact icon="location_on" />
                   </section>
                 </div>
               </div>
@@ -89,9 +137,25 @@ export default function CreateWorkshopPage() {
             </aside>
           </div>
 
+          <div className="mt-lg space-y-sm" aria-live="polite">
+            {errorMessage ? (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-md py-sm font-body-md text-sm text-red-700">{errorMessage}</p>
+            ) : null}
+            {createdWorkshop ? (
+              <p className="rounded-lg border border-green-200 bg-green-50 px-md py-sm font-body-md text-sm text-green-700">
+                {t(createdWorkshop.status === 'published' ? 'create.successPublished' : 'create.successDraft')} {createdWorkshop.title}
+              </p>
+            ) : null}
+          </div>
+
           <footer className="sticky bottom-0 z-40 mt-xl flex items-center justify-between border-t border-slate-200 bg-white/80 py-md backdrop-blur-sm">
-            <button className="inline-flex cursor-not-allowed items-center gap-base rounded-lg border border-primary px-lg py-3 font-bold text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button"><Icon>close</Icon>{t('common.saveDraft')}</button>
-            <Link className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110" to="/demo/dashboard/teacher/workshops/preview">{t('create.continuePreview')} <Icon>arrow_forward</Icon></Link>
+            <button className="inline-flex items-center gap-base rounded-lg border border-primary px-lg py-3 font-bold text-primary transition-all disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting} onClick={() => handleSubmit('draft')} type="button">
+              <Icon>{submittingStatus === 'draft' ? 'hourglass_top' : 'save'}</Icon>
+              {submittingStatus === 'draft' ? t('create.saving') : t('common.saveDraft')}
+            </button>
+            <button className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting} onClick={() => handleSubmit('published')} type="button">
+              {submittingStatus === 'published' ? t('create.publishing') : t('common.publish')} <Icon>{submittingStatus === 'published' ? 'hourglass_top' : 'arrow_forward'}</Icon>
+            </button>
           </footer>
         </div>
       </main>
@@ -99,14 +163,14 @@ export default function CreateWorkshopPage() {
   )
 }
 
-function Field({ label, placeholder, compact = false, icon, prefix }) {
+function Field({ label, placeholder, compact = false, icon, prefix, onChange, type = 'text', value }) {
   return (
     <label className="space-y-xs block">
       <span className="block font-label-md text-label-md uppercase text-primary">{label}</span>
       <div className="relative">
         {icon ? <Icon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-outline">{icon}</Icon> : null}
         {prefix ? <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">{prefix}</span> : null}
-        <input className={`w-full rounded-lg border border-outline-variant font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 ${compact ? 'p-3' : 'p-4'} ${icon ? 'pl-10' : ''} ${prefix ? 'pl-16' : ''}`} placeholder={placeholder} type="text" />
+        <input className={`w-full rounded-lg border border-outline-variant font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 ${compact ? 'p-3' : 'p-4'} ${icon ? 'pl-10' : ''} ${prefix ? 'pl-16' : ''}`} onChange={onChange ? (event) => onChange(event.target.value) : undefined} placeholder={placeholder} type={type} value={value} />
       </div>
     </label>
   )

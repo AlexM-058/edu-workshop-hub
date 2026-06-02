@@ -57,3 +57,26 @@ export async function createTeacherInvitation(token, email) {
 
   return payload;
 }
+
+export async function createTeacherWorkshop(token, payload) {
+  const response = await fetch(`${apiBaseUrl}/teacher/workshops`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responsePayload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(responsePayload.message ?? `Workshop creation failed with ${response.status}`);
+    error.status = response.status;
+    error.payload = responsePayload;
+    throw error;
+  }
+
+  return responsePayload;
+}
