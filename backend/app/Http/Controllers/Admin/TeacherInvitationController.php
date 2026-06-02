@@ -18,15 +18,22 @@ class TeacherInvitationController extends Controller
             'expires_at' => ['nullable', 'date', 'after:now'],
         ]);
 
-        $invitation = TeacherInvitation::query()->updateOrCreate(
-            ['email' => strtolower($validated['email'])],
-            [
+        $email = strtolower($validated['email']);
+        $invitation = TeacherInvitation::query()->where('email', $email)->first();
+        $status = $invitation ? 200 : 201;
+
+        if (! $invitation) {
+            $invitation = new TeacherInvitation(['email' => $email]);
+        }
+
+        if ($invitation->accepted_at === null) {
+            $invitation->fill([
                 'role' => $validated['role'] ?? 'teacher',
                 'invited_by' => $request->user()->id,
-                'accepted_at' => null,
                 'expires_at' => $validated['expires_at'] ?? null,
-            ]
-        );
+            ]);
+            $invitation->save();
+        }
 
         return response()->json([
             'invitation' => [
@@ -36,6 +43,6 @@ class TeacherInvitationController extends Controller
                 'accepted_at' => $invitation->accepted_at,
                 'expires_at' => $invitation->expires_at,
             ],
-        ], 201);
+        ], $status);
     }
 }

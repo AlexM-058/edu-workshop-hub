@@ -34,3 +34,26 @@ export async function fetchCurrentUser(token) {
 
   return response.json();
 }
+
+export async function createTeacherInvitation(token, email) {
+  const response = await fetch(`${apiBaseUrl}/admin/teacher-invitations`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(payload.message ?? `Teacher invitation failed with ${response.status}`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}

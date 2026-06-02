@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import AdminShell from '../components/AdminShell'
 import Icon from '../components/Icon'
+import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
+import { createTeacherInvitation } from '../lib/api'
 
 const users = [
   ['ED', 'Elena Dumitrescu', 'elena.d@educraft.ro', 'admin.roleAttender', 'admin.active', '14 Oct 2023', true],
@@ -11,6 +14,30 @@ const users = [
 
 export default function AdminUsersPage() {
   const { t } = useI18n()
+  const { getToken } = useAppAuth()
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteError, setInviteError] = useState('')
+  const [invitedEmail, setInvitedEmail] = useState('')
+  const [isInviting, setIsInviting] = useState(false)
+
+  async function handleInviteTeacher(event) {
+    event.preventDefault()
+    setInviteError('')
+    setInvitedEmail('')
+
+    try {
+      setIsInviting(true)
+      const token = await getToken()
+      const payload = await createTeacherInvitation(token, inviteEmail.trim())
+      setInviteEmail('')
+      setInvitedEmail(payload.invitation.email)
+    } catch (error) {
+      const validationError = error.payload?.errors?.email?.[0]
+      setInviteError(validationError ?? t('admin.users.inviteError'))
+    } finally {
+      setIsInviting(false)
+    }
+  }
 
   return (
     <AdminShell searchKey="admin.searchUsers">
@@ -37,12 +64,33 @@ export default function AdminUsersPage() {
             </div>
           </div>
           <div className="flex flex-col justify-between rounded-xl bg-primary p-md text-white md:col-span-4">
-            <span className="font-label-md uppercase opacity-80">{t('admin.quickActions')}</span>
-            <div className="mt-md space-y-sm">
-              <ActionRow label={t('admin.users.rolesPermissions')} />
-              <div className="h-px bg-white/20" />
-              <ActionRow label={t('admin.users.activityReport')} />
+            <div>
+              <span className="font-label-md uppercase opacity-80">{t('admin.users.inviteTeacher')}</span>
+              <p className="mt-2 text-sm leading-6 text-white/80">{t('admin.users.inviteTeacherText')}</p>
             </div>
+            <form className="mt-md space-y-sm" onSubmit={handleInviteTeacher}>
+              <label className="block text-sm font-label-md" htmlFor="teacher-invite-email">{t('admin.users.inviteEmail')}</label>
+              <input
+                className="w-full rounded border border-white/30 bg-white px-3 py-2 text-sm text-primary outline-none transition focus:border-white focus:ring-2 focus:ring-white/50 disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={isInviting}
+                id="teacher-invite-email"
+                onChange={(event) => setInviteEmail(event.target.value)}
+                placeholder={t('admin.users.inviteEmailPlaceholder')}
+                required
+                type="email"
+                value={inviteEmail}
+              />
+              {inviteError ? <p className="rounded border border-error-container bg-error-container px-3 py-2 text-sm text-on-error-container">{inviteError}</p> : null}
+              {invitedEmail ? <p className="rounded border border-secondary-container bg-secondary-container px-3 py-2 text-sm text-on-secondary-container">{t('admin.users.inviteSuccess')} <span className="font-label-md">{invitedEmail}</span></p> : null}
+              <button
+                className="inline-flex w-full items-center justify-center gap-2 rounded bg-white px-4 py-2 text-label-md font-label-md text-primary transition hover:bg-primary-fixed disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={isInviting}
+                type="submit"
+              >
+                <Icon>{isInviting ? 'hourglass_top' : 'person_add'}</Icon>
+                {isInviting ? t('admin.users.inviting') : t('admin.users.sendInvite')}
+              </button>
+            </form>
           </div>
         </div>
         <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0_4px_12px_rgba(26,54,93,0.05)]">
@@ -96,10 +144,6 @@ export default function AdminUsersPage() {
 
 function SmallCount({ value, label, last = false }) {
   return <div className={`px-4 text-center ${last ? '' : 'border-r border-outline-variant'}`}><span className="block font-h3 text-h3 text-primary">{value}</span><span className="text-caption text-on-surface-variant">{label}</span></div>
-}
-
-function ActionRow({ label }) {
-  return <button className="group flex w-full cursor-not-allowed items-center justify-between text-left opacity-80" disabled title="Demo action unavailable" type="button"><span className="font-body-md">{label}</span><Icon>chevron_right</Icon></button>
 }
 
 function FilterSelect({ icon, options }) {

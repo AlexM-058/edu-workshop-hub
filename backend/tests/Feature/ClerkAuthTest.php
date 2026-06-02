@@ -116,6 +116,31 @@ class ClerkAuthTest extends TestCase
         ]);
     }
 
+    public function test_duplicate_teacher_invitation_preserves_accepted_state(): void
+    {
+        config(['services.clerk.admin_emails' => ['admin@example.com']]);
+
+        $acceptedAt = now()->subDay()->startOfSecond();
+        TeacherInvitation::create([
+            'email' => 'existing.teacher@example.com',
+            'role' => 'teacher',
+            'accepted_at' => $acceptedAt,
+        ]);
+
+        $this->withToken($this->clerkToken([
+            'sub' => 'user_admin',
+            'email' => 'admin@example.com',
+            'name' => 'Admin User',
+        ]))
+            ->postJson('/api/admin/teacher-invitations', ['email' => 'Existing.Teacher@example.com'])
+            ->assertOk()
+            ->assertJsonPath('invitation.email', 'existing.teacher@example.com')
+            ->assertJsonPath('invitation.role', 'teacher');
+
+        $this->assertDatabaseCount('teacher_invitations', 1);
+        $this->assertEquals($acceptedAt->toISOString(), TeacherInvitation::first()->accepted_at->toISOString());
+    }
+
     private function clerkToken(array $claims): string
     {
         return 'test:'.base64_encode(json_encode(array_merge([
