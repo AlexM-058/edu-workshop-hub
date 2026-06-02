@@ -20,7 +20,8 @@ class TeacherInvitationController extends Controller
 
         $email = strtolower($validated['email']);
         $invitation = TeacherInvitation::query()->where('email', $email)->first();
-        $status = $invitation ? 200 : 201;
+        $wasCreated = $invitation === null;
+        $httpStatus = $wasCreated ? 201 : 200;
 
         if (! $invitation) {
             $invitation = new TeacherInvitation(['email' => $email]);
@@ -36,6 +37,7 @@ class TeacherInvitationController extends Controller
         }
 
         return response()->json([
+            'status' => $wasCreated ? 'created' : 'existing',
             'invitation' => [
                 'id' => $invitation->id,
                 'email' => $invitation->email,
@@ -43,6 +45,6 @@ class TeacherInvitationController extends Controller
                 'accepted_at' => $invitation->accepted_at,
                 'expires_at' => $invitation->expires_at,
             ],
-        ], $status);
+        ], $httpStatus);
     }
 }

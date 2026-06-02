@@ -107,6 +107,7 @@ class ClerkAuthTest extends TestCase
         ]))
             ->postJson('/api/admin/teacher-invitations', ['email' => 'new.teacher@example.com'])
             ->assertCreated()
+            ->assertJsonPath('status', 'created')
             ->assertJsonPath('invitation.email', 'new.teacher@example.com')
             ->assertJsonPath('invitation.role', 'teacher');
 
@@ -134,6 +135,7 @@ class ClerkAuthTest extends TestCase
         ]))
             ->postJson('/api/admin/teacher-invitations', ['email' => 'Existing.Teacher@example.com'])
             ->assertOk()
+            ->assertJsonPath('status', 'existing')
             ->assertJsonPath('invitation.email', 'existing.teacher@example.com')
             ->assertJsonPath('invitation.role', 'teacher');
 

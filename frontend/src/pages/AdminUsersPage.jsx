@@ -4,6 +4,11 @@ import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { createTeacherInvitation } from '../lib/api'
+import {
+  getTeacherInvitationFormControlState,
+  getTeacherInvitationSuccessMessage,
+  submitTeacherInvitationForm,
+} from './adminTeacherInvitationForm'
 
 const users = [
   ['ED', 'Elena Dumitrescu', 'elena.d@educraft.ro', 'admin.roleAttender', 'admin.active', '14 Oct 2023', true],
@@ -18,25 +23,32 @@ export default function AdminUsersPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteError, setInviteError] = useState('')
   const [invitedEmail, setInvitedEmail] = useState('')
+  const [inviteStatus, setInviteStatus] = useState('')
   const [isInviting, setIsInviting] = useState(false)
+  const inviteControls = getTeacherInvitationFormControlState(isInviting)
 
   async function handleInviteTeacher(event) {
     event.preventDefault()
     setInviteError('')
     setInvitedEmail('')
+    setInviteStatus('')
 
-    try {
-      setIsInviting(true)
-      const token = await getToken()
-      const payload = await createTeacherInvitation(token, inviteEmail.trim())
-      setInviteEmail('')
-      setInvitedEmail(payload.invitation.email)
-    } catch (error) {
-      const validationError = error.payload?.errors?.email?.[0]
-      setInviteError(validationError ?? t('admin.users.inviteError'))
-    } finally {
-      setIsInviting(false)
+    setIsInviting(true)
+    const result = await submitTeacherInvitationForm({
+      email: inviteEmail,
+      getToken,
+      createInvitation: createTeacherInvitation,
+      t,
+    })
+
+    if (result.inviteEmail !== undefined) {
+      setInviteEmail(result.inviteEmail)
     }
+
+    setInviteError(result.inviteError)
+    setInvitedEmail(result.invitedEmail)
+    setInviteStatus(result.inviteStatus)
+    setIsInviting(false)
   }
 
   return (
@@ -72,7 +84,7 @@ export default function AdminUsersPage() {
               <label className="block text-sm font-label-md" htmlFor="teacher-invite-email">{t('admin.users.inviteEmail')}</label>
               <input
                 className="w-full rounded border border-white/30 bg-white px-3 py-2 text-sm text-primary outline-none transition focus:border-white focus:ring-2 focus:ring-white/50 disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={isInviting}
+                disabled={inviteControls.inputDisabled}
                 id="teacher-invite-email"
                 onChange={(event) => setInviteEmail(event.target.value)}
                 placeholder={t('admin.users.inviteEmailPlaceholder')}
@@ -81,14 +93,14 @@ export default function AdminUsersPage() {
                 value={inviteEmail}
               />
               {inviteError ? <p className="rounded border border-error-container bg-error-container px-3 py-2 text-sm text-on-error-container">{inviteError}</p> : null}
-              {invitedEmail ? <p className="rounded border border-secondary-container bg-secondary-container px-3 py-2 text-sm text-on-secondary-container">{t('admin.users.inviteSuccess')} <span className="font-label-md">{invitedEmail}</span></p> : null}
+              {invitedEmail ? <p className="rounded border border-secondary-container bg-secondary-container px-3 py-2 text-sm text-on-secondary-container">{getTeacherInvitationSuccessMessage(inviteStatus, invitedEmail, t)}</p> : null}
               <button
                 className="inline-flex w-full items-center justify-center gap-2 rounded bg-white px-4 py-2 text-label-md font-label-md text-primary transition hover:bg-primary-fixed disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={isInviting}
+                disabled={inviteControls.submitDisabled}
                 type="submit"
               >
-                <Icon>{isInviting ? 'hourglass_top' : 'person_add'}</Icon>
-                {isInviting ? t('admin.users.inviting') : t('admin.users.sendInvite')}
+                <Icon>{inviteControls.buttonIcon}</Icon>
+                {t(inviteControls.buttonLabelKey)}
               </button>
             </form>
           </div>
