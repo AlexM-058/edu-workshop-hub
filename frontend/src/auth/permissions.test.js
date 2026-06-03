@@ -1,16 +1,15 @@
-import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { describe, it, expect } from 'vitest'
 import { canAccessRole } from './permissions.js'
 
 describe('auth permissions', () => {
   it('allows any synced role when route has no explicit role list', () => {
-    assert.equal(canAccessRole('attender'), true)
-    assert.equal(canAccessRole(null), false)
+    expect(canAccessRole('attender')).toBe(true)
+    expect(canAccessRole(null)).toBe(false)
   })
 
   it('allows teachers and admins into teacher routes', () => {
-    assert.equal(canAccessRole('teacher', ['teacher', 'admin']), true)
-    assert.equal(canAccessRole('admin', ['teacher', 'admin']), true)
-    assert.equal(canAccessRole('attender', ['teacher', 'admin']), false)
+    expect(canAccessRole('teacher', ['teacher', 'admin'])).toBe(true)
+    expect(canAccessRole('admin', ['teacher', 'admin'])).toBe(true)
+    expect(canAccessRole('attender', ['teacher', 'admin'])).toBe(false)
   })
 })

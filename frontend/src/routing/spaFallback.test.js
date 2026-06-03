@@ -1,11 +1,12 @@
-import assert from 'node:assert/strict'
+import { it, expect, describe } from 'vitest'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { join } from 'node:path'
-import { test } from 'node:test'
+import { dirname, join } from 'node:path'
 
-const frontendRoot = fileURLToPath(new URL('../../', import.meta.url))
-const repoRoot = fileURLToPath(new URL('../../../', import.meta.url))
+const currentFile = fileURLToPath(import.meta.url)
+const currentDir = dirname(currentFile)
+const frontendRoot = join(currentDir, '../../')
+const repoRoot = join(currentDir, '../../../')
 
 function readRepoFile(path) {
   if (path.startsWith('frontend/')) {
@@ -28,33 +29,35 @@ function sourceFiles(dir) {
     .filter((path) => /\.(jsx?|tsx?)$/.test(path))
 }
 
-test('static hosting redirects all frontend routes to the SPA entrypoint', () => {
-  const redirects = readFileSync(join(frontendRoot, 'public/_redirects'), 'utf8')
+describe('SPA fallback', () => {
+  it('static hosting redirects all frontend routes to the SPA entrypoint', () => {
+    const redirects = readFileSync(join(frontendRoot, 'public/_redirects'), 'utf8')
 
-  assert.match(redirects, /^\/\*\s+\/index\.html\s+200$/m)
+    expect(redirects).toMatch(/^\/\*\s+\/index\.html\s+200$/m)
 })
 
-test('production nginx serves index.html for client-side routes', () => {
-  const nginxConfig = readRepoFile('docker/frontend/nginx.conf')
+  it('production nginx serves index.html for client-side routes', () => {
+    const nginxConfig = readRepoFile('docker/frontend/nginx.conf')
 
-  assert.match(nginxConfig, /location\s+\/\s+\{[\s\S]*try_files\s+\$uri\s+\$uri\/\s+\/index\.html;/)
+    expect(nginxConfig).toMatch(/location\s+\/\s+\{[\s\S]*try_files\s+\$uri\s+\$uri\/\s+\/index\.html;/)
 })
 
-test('frontend source does not expose placeholder hash links as navigation', () => {
-  const filesWithHashLinks = sourceFiles(join(frontendRoot, 'src'))
-    .filter((path) => /href=\{?["']#["']\}?/.test(readFileSync(path, 'utf8')))
+  it('frontend source does not expose placeholder hash links as navigation', () => {
+    const filesWithHashLinks = sourceFiles(join(frontendRoot, 'src'))
+      .filter((path) => /href=\{?["']#["']\}?/.test(readFileSync(path, 'utf8')))
 
-  assert.deepEqual(filesWithHashLinks, [])
+    expect(filesWithHashLinks).toEqual([])
 })
 
-test('app exposes canonical attender and teacher dashboard routes with legacy redirects', () => {
-  const appSource = readRepoFile('frontend/src/App.jsx')
+  it('app exposes canonical attender and teacher dashboard routes with legacy redirects', () => {
+    const appSource = readRepoFile('frontend/src/App.jsx')
 
-  assert.match(appSource, /path="\/demo\/dashboard\/attender"/)
-  assert.match(appSource, /path="\/demo\/dashboard\/teacher"/)
-  assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops"/)
-  assert.match(appSource, /path="\/dashboard\/attender"/)
-  assert.match(appSource, /path="\/dashboard\/teacher"/)
-  assert.match(appSource, /path="\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
-  assert.match(appSource, /path="\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
+    expect(appSource).toMatch(/path="\/demo\/dashboard\/attender"/)
+    expect(appSource).toMatch(/path="\/demo\/dashboard\/teacher"/)
+    expect(appSource).toMatch(/path="\/demo\/dashboard\/teacher\/workshops"/)
+    expect(appSource).toMatch(/path="\/dashboard\/attender"/)
+    expect(appSource).toMatch(/path="\/dashboard\/teacher"/)
+    expect(appSource).toMatch(/path="\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
+    expect(appSource).toMatch(/path="\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
+  })
 })

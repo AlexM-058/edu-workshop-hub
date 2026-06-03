@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it, expect } from 'vitest';
 import {
   getEnrollmentErrorMessage,
   getEnrollmentSuccessMessage,
@@ -41,26 +40,26 @@ describe('workshop enrollment helper', () => {
       t,
     });
 
-    assert.deepEqual(calls, [['attender-token', 7]]);
-    assert.deepEqual(result, {
+    expect(calls).toEqual([['attender-token', 7]]);
+    expect(result).toEqual({
       errorMessage: '',
       successMessage: 'Înscriere confirmată.',
     });
   });
 
   it('returns waitlist position success state', () => {
-    assert.equal(getEnrollmentSuccessMessage({
+    expect(getEnrollmentSuccessMessage({
       enrollment: {
         status: 'waiting',
         waitlist_position: 3,
       },
-    }, t), 'Ai fost adăugat pe lista de așteptare. Poziția ta: 3.');
+    }, t)).toBe('Ai fost adăugat pe lista de așteptare. Poziția ta: 3.');
   });
 
   it('maps duplicate, unpublished, and forbidden errors to inline text', () => {
-    assert.equal(getEnrollmentErrorMessage({ status: 409 }, t), translations['detail.enrollErrorDuplicate']);
-    assert.equal(getEnrollmentErrorMessage({ status: 422 }, t), translations['detail.enrollErrorUnpublished']);
-    assert.equal(getEnrollmentErrorMessage({ status: 403 }, t), translations['detail.enrollErrorForbidden']);
+    expect(getEnrollmentErrorMessage({ status: 409 }, t)).toBe(translations['detail.enrollErrorDuplicate']);
+    expect(getEnrollmentErrorMessage({ status: 422 }, t)).toBe(translations['detail.enrollErrorUnpublished']);
+    expect(getEnrollmentErrorMessage({ status: 403 }, t)).toBe(translations['detail.enrollErrorForbidden']);
   });
 
   it('uses a generic inline error for unknown failures', async () => {
@@ -73,7 +72,7 @@ describe('workshop enrollment helper', () => {
       t,
     });
 
-    assert.deepEqual(result, {
+    expect(result).toEqual({
       errorMessage: translations['detail.enrollErrorGeneric'],
       successMessage: '',
     });

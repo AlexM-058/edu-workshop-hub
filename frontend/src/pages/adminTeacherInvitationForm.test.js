@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it, expect } from 'vitest';
 import {
   getTeacherInvitationFormControlState,
   getTeacherInvitationSuccessMessage,
@@ -34,8 +33,8 @@ describe('admin teacher invitation form', () => {
       t,
     });
 
-    assert.deepEqual(calls, [['admin-token', 'new.teacher@example.com']]);
-    assert.deepEqual(result, {
+    expect(calls).toEqual([['admin-token', 'new.teacher@example.com']]);
+    expect(result).toEqual({
       inviteEmail: '',
       inviteError: '',
       invitedEmail: 'new.teacher@example.com',
@@ -55,8 +54,8 @@ describe('admin teacher invitation form', () => {
       t,
     });
 
-    assert.equal(result.inviteStatus, 'existing');
-    assert.equal(result.successMessage, 'Invitația există deja pentru existing.teacher@example.com');
+    expect(result.inviteStatus).toBe('existing');
+    expect(result.successMessage).toBe('Invitația există deja pentru existing.teacher@example.com');
   });
 
   it('returns visible inline error state when the backend rejects the invite', async () => {
@@ -76,7 +75,7 @@ describe('admin teacher invitation form', () => {
       t,
     });
 
-    assert.deepEqual(result, {
+    expect(result).toEqual({
       inviteError: 'Emailul este invalid.',
       invitedEmail: '',
       inviteStatus: '',
@@ -94,29 +93,27 @@ describe('admin teacher invitation form', () => {
       t,
     });
 
-    assert.equal(result.inviteError, 'Invitația nu a putut fi creată.');
+    expect(result.inviteError).toBe('Invitația nu a putut fi creată.');
   });
 
   it('formats created and existing messages from stable invitation status', () => {
-    assert.equal(
+    expect(
       getTeacherInvitationSuccessMessage('created', 'teacher@example.com', t),
-      'Invitație pregătită pentru teacher@example.com',
-    );
-    assert.equal(
+    ).toBe('Invitație pregătită pentru teacher@example.com');
+    expect(
       getTeacherInvitationSuccessMessage('existing', 'teacher@example.com', t),
-      'Invitația există deja pentru teacher@example.com',
-    );
+    ).toBe('Invitația există deja pentru teacher@example.com');
   });
 
   it('disables input and submit controls while an invitation is loading', () => {
-    assert.deepEqual(getTeacherInvitationFormControlState(true), {
+    expect(getTeacherInvitationFormControlState(true)).toEqual({
       inputDisabled: true,
       submitDisabled: true,
       buttonIcon: 'hourglass_top',
       buttonLabelKey: 'admin.users.inviting',
     });
 
-    assert.deepEqual(getTeacherInvitationFormControlState(false), {
+    expect(getTeacherInvitationFormControlState(false)).toEqual({
       inputDisabled: false,
       submitDisabled: false,
       buttonIcon: 'person_add',

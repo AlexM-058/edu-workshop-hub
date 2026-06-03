@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it, expect } from 'vitest';
 import {
   buildWorkshopPayload,
   getWorkshopSubmitErrorMessage,
@@ -29,7 +28,7 @@ function t(key) {
 
 describe('create workshop form', () => {
   it('builds a draft payload from trimmed form values', () => {
-    assert.deepEqual(buildWorkshopPayload(baseForm, 'draft'), {
+    expect(buildWorkshopPayload(baseForm, 'draft')).toEqual({
       title: 'Applied Digital Pedagogy',
       category: 'Data Science',
       description: 'Classroom methods with practical data exercises.',
@@ -45,7 +44,7 @@ describe('create workshop form', () => {
   });
 
   it('builds a published payload and omits empty optional values', () => {
-    assert.deepEqual(buildWorkshopPayload({
+    expect(buildWorkshopPayload({
       ...baseForm,
       coordinatorName: '',
       coordinatorBio: '',
@@ -54,7 +53,7 @@ describe('create workshop form', () => {
       duration: '',
       capacity: '',
       location: '',
-    }, 'published'), {
+    }, 'published')).toEqual({
       title: 'Applied Digital Pedagogy',
       category: 'Data Science',
       description: 'Classroom methods with practical data exercises.',
@@ -83,9 +82,9 @@ describe('create workshop form', () => {
       t,
     });
 
-    assert.equal(calls[0][0], 'teacher-token');
-    assert.equal(calls[0][1].status, 'draft');
-    assert.deepEqual(result, {
+    expect(calls[0][0]).toBe('teacher-token');
+    expect(calls[0][1].status).toBe('draft');
+    expect(result).toEqual({
       errorMessage: '',
       workshop: {
         id: 7,
@@ -96,17 +95,17 @@ describe('create workshop form', () => {
   });
 
   it('maps the first backend validation error to inline error text', () => {
-    assert.equal(getWorkshopSubmitErrorMessage({
+    expect(getWorkshopSubmitErrorMessage({
       payload: {
         errors: {
           title: ['Titlul este obligatoriu.'],
           status: ['Status invalid.'],
         },
       },
-    }, t), 'Titlul este obligatoriu.');
+    }, t)).toBe('Titlul este obligatoriu.');
   });
 
   it('uses a generic inline error when no validation message exists', () => {
-    assert.equal(getWorkshopSubmitErrorMessage(new Error('Network failed'), t), 'Workshop-ul nu a putut fi salvat.');
+    expect(getWorkshopSubmitErrorMessage(new Error('Network failed'), t)).toBe('Workshop-ul nu a putut fi salvat.');
   });
 });
