@@ -27,7 +27,7 @@ export default function WorkshopDetailPage() {
               <Info icon="group">Limited to 25 Participants</Info>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Link to="/demo/dashboard/professor" className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95">{t('detail.enrollNow')}</Link>
+              <Link to="/demo/dashboard/attender" className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95">{t('detail.enrollNow')}</Link>
               <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">{t('detail.download')}</button>
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function WorkshopDetailPage() {
           </div>
         </section>
         <div className="mb-xl grid grid-cols-1 gap-gutter md:grid-cols-3">
-          <article className="rounded-xl border border-outline-variant bg-white p-margin shadow-sm md:col-span-2">
+          <article className="rounded-xl border border-outline-variant bg-white p-8 shadow-sm md:col-span-2">
             <h2 className="mb-6 font-h2 text-h2 text-primary">{t('detail.overview')}</h2>
             <div className="space-y-4 font-body-md leading-relaxed text-on-surface-variant">
               <p>In an era of rapid technological advancement, the digital classroom requires more than just screen sharing.</p>
@@ -54,7 +54,7 @@ export default function WorkshopDetailPage() {
               ))}
             </div>
           </article>
-          <article className="flex flex-col items-center rounded-xl border border-outline-variant bg-surface-container-low p-margin text-center">
+          <article className="flex flex-col items-center rounded-xl border border-outline-variant bg-surface-container-low p-8 text-center">
             <img className="mb-6 h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg" src={images.profile} alt="Dr. Sarah Jenkins" />
             <h3 className="mb-1 font-h3 text-h3 text-primary">Dr. Sarah Jenkins</h3>
             <p className="mb-6 font-label-md text-secondary">Lead Instructional Designer, Stanford EdTech</p>

@@ -15,7 +15,7 @@ export default function Footer({ offset = false }) {
       <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-8 px-8 py-12 md:flex-row md:items-center">
         <div className="space-y-3">
           <h3 className="font-h3 text-lg font-semibold text-blue-900">EduCraft</h3>
-          <p className="max-w-xs font-h3 text-sm text-slate-500">© 2024 Higher Education Professional Development. All rights reserved.</p>
+          <p className="max-w-[320px] font-h3 text-sm text-slate-500">© 2024 Higher Education Professional Development. All rights reserved.</p>
         </div>
         <nav className="flex flex-wrap gap-x-8 gap-y-4">
           {links.map(([labelKey, to]) => (

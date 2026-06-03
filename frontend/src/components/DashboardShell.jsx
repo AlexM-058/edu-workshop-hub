@@ -4,35 +4,35 @@ import TopNav from './TopNav'
 import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
-  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/professor' },
+  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
   { labelKey: 'nav.activeCourses', icon: 'school', to: '/catalog' },
-  { labelKey: 'nav.history', icon: 'history', to: '/demo/dashboard/professor?panel=history' },
-  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/dashboard/professor?panel=certificates' },
-  { labelKey: 'nav.profile', icon: 'person', to: '/register/professor' },
+  { labelKey: 'nav.history', icon: 'history', to: '/demo/dashboard/attender?panel=history' },
+  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/dashboard/attender?panel=certificates' },
+  { labelKey: 'nav.profile', icon: 'person', to: '/register/attender' },
 ]
 
 const instructorLinks = [
-  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/referent' },
-  { labelKey: 'nav.myWorkshops', icon: 'school', to: '/demo/dashboard/referent/workshops' },
-  { labelKey: 'nav.createNew', icon: 'add_circle', to: '/demo/dashboard/referent/workshops/new' },
-  { labelKey: 'nav.analytics', icon: 'analytics', to: '/demo/dashboard/referent/analytics' },
-  { labelKey: 'nav.profile', icon: 'account_circle', to: '/register/professor' },
+  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/teacher' },
+  { labelKey: 'nav.myWorkshops', icon: 'school', to: '/demo/dashboard/teacher/workshops' },
+  { labelKey: 'nav.createNew', icon: 'add_circle', to: '/demo/dashboard/teacher/workshops/new' },
+  { labelKey: 'nav.analytics', icon: 'analytics', to: '/demo/dashboard/teacher/analytics' },
+  { labelKey: 'nav.profile', icon: 'account_circle', to: '/register/attender' },
 ]
 
-export default function DashboardShell({ children, mode = 'professor' }) {
-  const links = mode === 'instructor' ? instructorLinks : professorLinks
+export default function DashboardShell({ children, mode = 'attender' }) {
+  const links = mode === 'teacher' ? instructorLinks : professorLinks
   const { t } = useI18n()
   const location = useLocation()
   const currentPath = `${location.pathname}${location.search}`
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <TopNav instructor={mode === 'instructor'} searchKey={mode === 'instructor' ? 'nav.searchWorkshops' : 'nav.searchResources'} />
+      <TopNav instructor={mode === 'teacher'} searchKey={mode === 'teacher' ? 'nav.searchWorkshops' : 'nav.searchResources'} />
       <aside className="fixed left-0 top-16 z-40 hidden h-[calc(100vh-64px)] w-64 flex-col border-r border-slate-200 bg-slate-50 p-4 lg:flex">
         <div className="mb-8 px-4 pt-4">
-          <h2 className="font-h3 text-xl font-bold text-blue-900">{mode === 'instructor' ? 'EduCraft' : t('nav.dashboard')}</h2>
+          <h2 className="font-h3 text-xl font-bold text-blue-900">{mode === 'teacher' ? 'EduCraft' : t('nav.dashboard')}</h2>
           <p className="text-caption font-label-md uppercase tracking-widest text-slate-500">
-            {mode === 'instructor' ? 'Instructor Portal' : 'EduCraft'}
+            {mode === 'teacher' ? 'Teacher Portal' : 'EduCraft'}
           </p>
         </div>
         <nav className="flex-1 space-y-1">
@@ -57,11 +57,11 @@ export default function DashboardShell({ children, mode = 'professor' }) {
         </nav>
         <div className="mt-auto pt-4">
           <Link
-            to={mode === 'instructor' ? '/demo/dashboard/referent/workshops/new' : '/catalog'}
+            to={mode === 'teacher' ? '/demo/dashboard/teacher/workshops/new' : '/catalog'}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container"
           >
-            <Icon className="h-5 w-5">{mode === 'instructor' ? 'add' : 'school'}</Icon>
-            {mode === 'instructor' ? t('nav.createNew') : t('landing.explore')}
+            <Icon className="h-5 w-5">{mode === 'teacher' ? 'add' : 'school'}</Icon>
+            {mode === 'teacher' ? t('nav.createNew') : t('landing.explore')}
           </Link>
         </div>
       </aside>
