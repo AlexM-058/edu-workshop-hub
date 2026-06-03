@@ -7,29 +7,29 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
-     *
      * Creates the `workshops` table.
      *
      * `occupied_slots` is a denormalized counter kept in sync by the
-     * application layer (service/action class) whenever a registration
-     * status changes. This avoids expensive COUNT() queries on the hot
-     * catalog read path.
+     * application layer whenever a registration status changes. This avoids
+     * expensive COUNT() queries on the hot catalog read path.
      *
-     * Both `title_ro` / `title_de` and `description_ro` / `description_de`
+     * Both `title_ro`/`title_de` and `description_ro`/`description_de`
      * support the platform's bilingual (Romanian / German) requirement.
+     *
+     * `referent_id` references the referent (teacher role) who owns
+     * this workshop.
      */
     public function up(): void
     {
-        Schema::create('workshops', function (Blueprint $table) {
+        Schema::create('workshops', function (Blueprint $table): void {
             $table->id();
 
-            // The referent who owns this workshop
+            // The referent who created and manages this workshop
             $table->foreignId('referent_id')
                   ->constrained('users')
                   ->cascadeOnDelete();
 
-            // Bilingual titles — both are required
+            // Bilingual titles — both required
             $table->string('title_ro');
             $table->string('title_de');
 
@@ -52,9 +52,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('workshops');

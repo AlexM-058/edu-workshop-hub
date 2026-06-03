@@ -9,9 +9,9 @@ platform for teachers.
 
 The application has three user-facing roles:
 
-- Professor: browses workshops, enrolls, joins waiting lists, downloads
+- Attender: browses workshops, enrolls, joins waiting lists, downloads
   participation certificates.
-- Referent: creates workshops, manages participants and attendance, exports
+- Teacher: creates workshops, manages participants and attendance, exports
   attendance lists.
 - Admin: manages users, categories, translations, and audit data.
 
@@ -113,8 +113,11 @@ Current frontend i18n conventions:
 - Keep Romanian and German translation dictionaries synchronized when adding
   user-facing labels.
 - Demo routes currently live under `/demo/*`; keep the TODO in
-  `frontend/src/App.jsx` until authenticated role-based routes replace those
-  public prototype paths.
+  `frontend/src/App.jsx` until production role-based routes replace those
+  prototype paths.
+- Canonical authenticated dashboard routes use `attender` and `teacher` path
+  segments. Keep legacy `professor` and `referent` dashboard paths as redirects
+  only.
 
 ## Testing Guidelines
 
@@ -176,12 +179,12 @@ For medium or high risk changes, explicitly check:
 ## Product Gotchas
 
 - Waiting list promotion must preserve first-come, first-served order.
-- A professor may download a participation certificate only after attendance is
-  confirmed by a referent.
+- An attender may download a participation certificate only after attendance is
+  confirmed by a teacher.
 - Romanian and German language support should be considered when naming UI
   labels and statuses.
-- Revenue figures in the referent prototype are placeholders only. Revenue is
-  outside the current Referent product scope unless the product brief is updated.
+- Revenue figures in the teacher prototype are placeholders only. Revenue is
+  outside the current Teacher product scope unless the product brief is updated.
 - PostgreSQL is internal to Docker Compose as `db:5432`; do not expose host
   port `5432` unless there is a concrete reason.
 - Backend Docker uses PHP 8.4 because the installed Laravel dependencies require

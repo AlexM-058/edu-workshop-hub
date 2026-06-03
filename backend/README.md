@@ -7,6 +7,25 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Edu Workshop Hub Backend
+
+This Laravel API uses Clerk bearer tokens for authenticated API routes.
+
+Technical roles:
+
+- `attender` is the default role for a newly synced Clerk user.
+- `teacher` can create and manage workshops after an admin creates a teacher
+  invitation for their email.
+- `admin` is assigned when the synced email appears in `EDUCRAFT_ADMIN_EMAILS`.
+
+Required Clerk environment variables:
+
+- `CLERK_SECRET_KEY`
+- `CLERK_ISSUER`
+- `CLERK_JWKS_URL`
+- `CLERK_AUTHORIZED_PARTIES`
+- `EDUCRAFT_ADMIN_EMAILS`
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

@@ -25,10 +25,16 @@ return new class extends Migration
             $table->string('first_name', 100);
             $table->string('last_name', 100);
             $table->string('email')->unique();
+<<<<<<< HEAD
 
             // Possible values: 'admin', 'referent', 'professor'
             $table->string('role')->default('professor');
 
+=======
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password')->nullable();
+            $table->rememberToken();
+>>>>>>> origin/main
             $table->timestamps();
         });
     }

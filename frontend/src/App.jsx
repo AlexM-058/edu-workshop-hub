@@ -9,37 +9,39 @@ import InstructorWorkshopsPage from './pages/InstructorWorkshopsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import WorkshopPreviewPage from './pages/WorkshopPreviewPage';
+import SignInPage from './pages/SignInPage';
+import SsoCallbackPage from './pages/SsoCallbackPage';
+import ProtectedRoute from './auth/ProtectedRoute';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminAuditPage from './pages/AdminAuditPage';
-// TODO: Re-enable RequireAuth and wrap the real role-based routes (not /demo/*)
-// once backend Google OAuth + Laravel session are implemented.
-// See: frontend/src/components/RequireAuth.jsx and frontend/src/lib/auth.js
-// import RequireAuth from './components/RequireAuth';
 import './App.css';
 
 function App() {
   return (
     <Routes>
-      {/* Public route */}
+      {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/register/professor" element={<RegisterProfessor />} />
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/sign-up" element={<Navigate replace to="/sign-in" />} />
+      <Route path="/sso-callback" element={<SsoCallbackPage />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/workshops/:id" element={<WorkshopDetailPage />} />
 
-      {/* TODO: Remove the /demo prefix once authenticated role-based routes replace the public prototype paths. */}
-      <Route path="/demo/dashboard/professor" element={<ProfessorDashboard />} />
-      <Route path="/demo/dashboard/referent" element={<ReferentDashboard />} />
-      <Route path="/demo/dashboard/referent/workshops" element={<InstructorWorkshopsPage />} />
-      <Route path="/demo/dashboard/referent/workshops/new" element={<CreateWorkshopPage />} />
-      <Route path="/demo/dashboard/referent/workshops/preview" element={<WorkshopPreviewPage />} />
-      <Route path="/demo/dashboard/referent/analytics" element={<AnalyticsPage />} />
-      <Route path="/demo/admin" element={<Navigate replace to="/demo/admin/users" />} />
-      <Route path="/demo/admin/users" element={<AdminUsersPage />} />
-      <Route path="/demo/admin/settings" element={<AdminSettingsPage />} />
-      <Route path="/demo/admin/audit" element={<AdminAuditPage />} />
+      {/* TODO: Remove the /demo prefix once production role-based routes replace the prototype paths. */}
+      <Route path="/demo/dashboard/professor" element={<ProtectedRoute><ProfessorDashboard /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent" element={<ProtectedRoute roles={['referent', 'admin']}><ReferentDashboard /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops" element={<ProtectedRoute roles={['referent', 'admin']}><InstructorWorkshopsPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops/new" element={<ProtectedRoute roles={['referent', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/workshops/preview" element={<ProtectedRoute roles={['referent', 'admin']}><WorkshopPreviewPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/referent/analytics" element={<ProtectedRoute roles={['referent', 'admin']}><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/demo/admin" element={<ProtectedRoute roles={['admin']}><Navigate replace to="/demo/admin/users" /></ProtectedRoute>} />
+      <Route path="/demo/admin/users" element={<ProtectedRoute roles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
+      <Route path="/demo/admin/settings" element={<ProtectedRoute roles={['admin']}><AdminSettingsPage /></ProtectedRoute>} />
+      <Route path="/demo/admin/audit" element={<ProtectedRoute roles={['admin']}><AdminAuditPage /></ProtectedRoute>} />
 
-      {/* Redirects from old /dashboard/* paths */}
+      {/* Legacy /dashboard/* redirects */}
       <Route path="/dashboard/professor" element={<Navigate replace to="/demo/dashboard/professor" />} />
       <Route path="/dashboard/referent" element={<Navigate replace to="/demo/dashboard/referent" />} />
       <Route path="/dashboard/referent/workshops" element={<Navigate replace to="/demo/dashboard/referent/workshops" />} />

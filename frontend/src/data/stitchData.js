@@ -104,9 +104,9 @@ export const catalogWorkshops = [
 ]
 
 export const navItems = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/professor' },
+  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
   { label: 'Active Courses', icon: 'school', to: '/catalog' },
-  { label: 'History', icon: 'history', to: '/demo/dashboard/professor' },
-  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/dashboard/professor' },
-  { label: 'Profile', icon: 'person', to: '/register/professor' },
+  { label: 'History', icon: 'history', to: '/demo/dashboard/attender' },
+  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/dashboard/attender' },
+  { label: 'Profile', icon: 'person', to: '/register/attender' },
 ]

@@ -9,7 +9,7 @@ export default function WorkshopPreviewPage() {
   const { t } = useI18n()
 
   return (
-    <DashboardShell mode="instructor">
+    <DashboardShell mode="teacher">
       <main className="min-h-screen">
         <div className="flex items-center justify-between bg-primary-container px-margin py-4 text-on-primary-container">
           <div className="flex items-center gap-3"><Icon>verified</Icon><span className="font-label-md uppercase">{t('preview.mode')}</span></div>
@@ -65,7 +65,7 @@ export default function WorkshopPreviewPage() {
                 </div>
                 <div className="mt-lg space-y-3">
                   <button className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 font-label-md text-white opacity-60" disabled title={t('common.demoUnavailable')} type="button"><Icon>upload</Icon>{t('common.publish')}</button>
-                  <Link className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-primary px-6 py-4 font-label-md text-primary transition-colors hover:bg-surface-container-high" to="/demo/dashboard/referent/workshops/new"><Icon>edit</Icon>{t('preview.backToEdit')}</Link>
+                  <Link className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-primary px-6 py-4 font-label-md text-primary transition-colors hover:bg-surface-container-high" to="/demo/dashboard/teacher/workshops/new"><Icon>edit</Icon>{t('preview.backToEdit')}</Link>
                 </div>
               </section>
             </aside>

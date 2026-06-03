@@ -9,8 +9,8 @@ export default function AnalyticsPage() {
   const { t } = useI18n()
 
   return (
-    <DashboardShell mode="instructor">
-      <div className="mx-auto max-w-[1200px] p-margin">
+    <DashboardShell mode="teacher">
+      <div className="mx-auto max-w-[1200px] p-8">
         <div className="mb-lg rounded-lg border border-primary-fixed bg-primary-fixed px-4 py-3 text-sm font-label-md text-primary">
           {t('analytics.demo')}
         </div>

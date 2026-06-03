@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'clerk' => [
+        'secret_key' => env('CLERK_SECRET_KEY'),
+        'issuer' => env('CLERK_ISSUER'),
+        'jwks_url' => env('CLERK_JWKS_URL'),
+        'allow_test_tokens' => env('CLERK_ALLOW_TEST_TOKENS', false),
+        'authorized_parties' => array_filter(array_map(
+            'trim',
+            explode(',', env('CLERK_AUTHORIZED_PARTIES', env('FRONTEND_URL', 'http://localhost:5173')))
+        )),
+        'admin_emails' => array_filter(array_map('strtolower', array_map(
+            'trim',
+            explode(',', env('EDUCRAFT_ADMIN_EMAILS', ''))
+        ))),
+    ],
+
 ];

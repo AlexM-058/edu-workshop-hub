@@ -7,24 +7,22 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
-     *
      * Creates the `certificates` table.
      *
      * One certificate record is created per registration after the referent
      * confirms attendance. The `file_path` stores the relative path within
      * the application's storage disk (e.g. "certificates/2026/cert-42.pdf").
      *
-     * The 1-to-1 relationship with `registrations` is enforced at the database
+     * The 1-to-1 relationship with `registrations` is enforced at the DB
      * level by a UNIQUE constraint on `registration_id`, added in migration
-     * `2026_05_20_000005_add_unique_registration_id_to_certificates_table`.
+     * `2026_06_03_000005_add_unique_registration_id_to_certificates`.
      *
-     * Cascading on the registration ensures that if a registration record is
-     * removed, the associated certificate row is also cleaned up automatically.
+     * Cascading on the registration ensures that if a registration is removed,
+     * the associated certificate row is also cleaned up automatically.
      */
     public function up(): void
     {
-        Schema::create('certificates', function (Blueprint $table) {
+        Schema::create('certificates', function (Blueprint $table): void {
             $table->id();
 
             $table->foreignId('registration_id')
@@ -38,9 +36,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('certificates');

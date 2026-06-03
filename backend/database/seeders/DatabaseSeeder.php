@@ -3,41 +3,43 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Seeds the development environment with one user per platform role.
      *
-     * Creates one representative user per role so every application layout
-     * can be tested in the local dev environment without a real Google login.
+     * These records use predictable clerk_id values so they can be targeted
+     * in local test scripts. Do not seed production with this class.
      */
     public function run(): void
     {
-        // Admin
-        User::factory()->withRole('admin')->create([
+        // Platform administrator
+        User::factory()->admin()->create([
+            'clerk_id'   => 'user_dev_admin',
             'first_name' => 'Admin',
-            'last_name'  => 'User',
-            'email'      => 'admin@edu-workshop.local',
+            'last_name'  => 'Dev',
+            'name'       => 'Admin Dev',
+            'email'      => 'admin@edu-workshop.dev',
         ]);
 
-        // Referent
-        User::factory()->withRole('referent')->create([
+        // Referent — creates and manages workshops
+        User::factory()->referent()->create([
+            'clerk_id'   => 'user_dev_referent',
             'first_name' => 'Referent',
-            'last_name'  => 'User',
-            'email'      => 'referent@edu-workshop.local',
+            'last_name'  => 'Dev',
+            'name'       => 'Referent Dev',
+            'email'      => 'referent@edu-workshop.dev',
         ]);
 
-        // Professor (default role — also produced by a plain User::factory())
+        // Professor — browses and enrols in workshops
         User::factory()->create([
+            'clerk_id'   => 'user_dev_professor',
             'first_name' => 'Professor',
-            'last_name'  => 'User',
-            'email'      => 'professor@edu-workshop.local',
+            'last_name'  => 'Dev',
+            'name'       => 'Professor Dev',
+            'email'      => 'professor@edu-workshop.dev',
         ]);
     }
 }
-

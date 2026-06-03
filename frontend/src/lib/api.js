@@ -19,3 +19,18 @@ export async function getHealth() {
 
   return payload;
 }
+
+export async function fetchCurrentUser(token) {
+  const response = await fetch(`${apiBaseUrl}/auth/me`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Auth sync failed with ${response.status}`);
+  }
+
+  return response.json();
+}

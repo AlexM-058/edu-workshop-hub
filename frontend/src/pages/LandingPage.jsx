@@ -20,7 +20,7 @@ export default function LandingPage() {
                 {t('landing.badge')}
               </span>
               <h1 className="font-h1 text-h1 leading-tight text-primary">{t('landing.title')}</h1>
-              <p className="max-w-xl font-body-lg text-body-lg text-on-surface-variant">
+              <p className="max-w-[560px] font-body-lg text-body-lg text-on-surface-variant">
                 {t('landing.summary')}
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
@@ -28,7 +28,7 @@ export default function LandingPage() {
                   {t('landing.explore')}
                   <Icon>arrow_forward</Icon>
                 </Link>
-                <Link to="/demo/dashboard/professor" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
+                <Link to="/demo/dashboard/attender" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
                   {t('landing.demo')}
                 </Link>
               </div>
@@ -46,7 +46,7 @@ export default function LandingPage() {
               <div className="relative overflow-hidden rounded-xl border-4 border-white shadow-2xl">
                 <img className="aspect-[4/3] h-auto w-full object-cover" src={images.hero} alt="Modern university classroom with engaged educators" />
               </div>
-              <div className="absolute -bottom-6 -left-6 max-w-xs rounded-xl border border-slate-100 bg-white p-6 shadow-lg">
+              <div className="absolute -bottom-6 -left-6 max-w-[260px] rounded-xl border border-slate-100 bg-white p-6 shadow-lg">
                 <div className="mb-2 flex items-center gap-3">
                   <Icon filled className="text-secondary">workspace_premium</Icon>
                   <span className="text-label-md font-label-md text-primary">{t('landing.certificate')}</span>

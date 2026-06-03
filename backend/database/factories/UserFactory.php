@@ -2,46 +2,42 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
     /**
      * Define the model's default state.
      *
-     * Produces a professor-role user without a google_id (simulating a user
-     * created directly by an admin). Set google_id explicitly in tests that
-     * exercise the OAuth login path.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
+        $firstName = fake()->firstName();
+        $lastName  = fake()->lastName();
+
         return [
-            'google_id'  => null,
-            'first_name' => fake()->firstName(),
-            'last_name'  => fake()->lastName(),
+            'clerk_id'   => 'user_' . fake()->unique()->lexify('??????????'),
+            'first_name' => $firstName,
+            'last_name'  => $lastName,
+            'name'       => "{$firstName} {$lastName}",
             'email'      => fake()->unique()->safeEmail(),
             'role'       => 'professor',
         ];
     }
 
-    /**
-     * Return a factory state that overrides the role.
-     *
-     * Usage:
-     *   User::factory()->withRole('admin')->create();
-     *   User::factory()->withRole('referent')->create();
-     */
-    public function withRole(string $role): static
+    /** Create a referent (workshop organiser). */
+    public function referent(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => $role,
-        ]);
+        return $this->state(['role' => 'referent']);
+    }
+
+    /** Create a platform admin. */
+    public function admin(): static
+    {
+        return $this->state(['role' => 'admin']);
     }
 }
-

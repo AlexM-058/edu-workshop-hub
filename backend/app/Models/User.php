@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,40 +10,30 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * @property int         $id
- * @property string|null $google_id
- * @property string      $first_name
- * @property string      $last_name
- * @property string      $email
- * @property string      $role         One of: admin, referent, professor
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * Platform user authenticated exclusively via Clerk.
+ *
+ * Roles: 'professor' (attender / learner), 'referent' (teacher / organiser),
+ * 'admin'.
+ *
+ * The `password` column exists in the stock Laravel `users` table but is never
+ * populated by this application — authentication is handled entirely by Clerk.
+ * It is excluded from $fillable and from casts to avoid accidental use.
  */
-#[Fillable(['google_id', 'first_name', 'last_name', 'email', 'role'])]
-#[Hidden(['remember_token'])]
+#[Fillable(['clerk_id', 'first_name', 'last_name', 'name', 'email', 'role'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Return the user's full name.
+     * Returns the user's full display name.
+     * Falls back to first_name, then email if both name parts are empty.
      */
     public function fullName(): string
     {
-        return "{$this->first_name} {$this->last_name}";
-    }
+        $full = trim("{$this->first_name} {$this->last_name}");
 
-    /**
-     * Attribute casts.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            // No password or email_verified_at — authentication is Google OAuth only.
-        ];
+        return $full !== '' ? $full : ($this->name ?? $this->email);
     }
 }
-

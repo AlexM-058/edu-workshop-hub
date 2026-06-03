@@ -7,7 +7,7 @@ export default function CreateWorkshopPage() {
   const { t } = useI18n()
 
   return (
-    <DashboardShell mode="instructor">
+    <DashboardShell mode="teacher">
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1000px] px-margin py-lg">
           <header className="mb-xl">
@@ -91,7 +91,7 @@ export default function CreateWorkshopPage() {
 
           <footer className="sticky bottom-0 z-40 mt-xl flex items-center justify-between border-t border-slate-200 bg-white/80 py-md backdrop-blur-sm">
             <button className="inline-flex cursor-not-allowed items-center gap-base rounded-lg border border-primary px-lg py-3 font-bold text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button"><Icon>close</Icon>{t('common.saveDraft')}</button>
-            <Link className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110" to="/demo/dashboard/referent/workshops/preview">{t('create.continuePreview')} <Icon>arrow_forward</Icon></Link>
+            <Link className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110" to="/demo/dashboard/teacher/workshops/preview">{t('create.continuePreview')} <Icon>arrow_forward</Icon></Link>
           </footer>
         </div>
       </main>
