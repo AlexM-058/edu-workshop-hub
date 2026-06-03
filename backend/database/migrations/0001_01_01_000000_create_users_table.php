@@ -7,41 +7,32 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Creates the base `users` table.
      *
-     * Creates the `users` table for all platform roles (admin, referent, professor).
-     * Authentication is handled exclusively via Google OAuth, so no password column
-     * is included. The `google_id` column is nullable to allow future non-OAuth
-     * user creation by admins if needed.
+     * Authentication is handled exclusively via Clerk (JWT bearer tokens).
+     * The `password` and `remember_token` columns are kept because they exist
+     * in Laravel's stock migration and some framework internals reference them,
+     * but they are never populated by this application.
+     *
+     * `name`, `email`, `first_name`, `last_name` are populated by SyncClerkUser
+     * on every first login.
+     *
+     * `clerk_id`, `role` are added by the next migration
+     * (2026_05_29_103444_add_clerk_auth_to_users_and_teacher_invitations).
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table): void {
             $table->id();
-
-            // Google OAuth identifier — nullable for admin-created accounts
-            $table->string('google_id')->nullable()->unique();
-
-            $table->string('first_name', 100);
-            $table->string('last_name', 100);
+            $table->string('name');
             $table->string('email')->unique();
-<<<<<<< HEAD
-
-            // Possible values: 'admin', 'referent', 'professor'
-            $table->string('role')->default('professor');
-
-=======
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();
->>>>>>> origin/main
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
