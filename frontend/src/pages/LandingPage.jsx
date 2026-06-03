@@ -28,8 +28,8 @@ export default function LandingPage() {
                   {t('landing.explore')}
                   <Icon>arrow_forward</Icon>
                 </Link>
-                <Link to="/demo/dashboard/attender" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
-                  {t('landing.demo')}
+                <Link to="/demo/dashboard/professor" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
+                  {t('landing.viewDashboard')}
                 </Link>
               </div>
               <div className="flex items-center gap-4 pt-8 text-sm font-medium text-on-surface-variant">

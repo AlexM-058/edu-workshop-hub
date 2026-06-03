@@ -102,11 +102,10 @@ export const catalogWorkshops = [
     image: images.office,
   },
 ]
-
-export const navItems = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
+export const professorDashboardLinks = [
+  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/professor' },
   { label: 'Active Courses', icon: 'school', to: '/catalog' },
-  { label: 'History', icon: 'history', to: '/demo/dashboard/attender' },
-  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/dashboard/attender' },
+  { label: 'History', icon: 'history', to: '/demo/dashboard/professor' },
+  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/dashboard/professor' },
   { label: 'Profile', icon: 'person', to: '/register/attender' },
 ]

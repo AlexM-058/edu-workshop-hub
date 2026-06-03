@@ -39,8 +39,8 @@ Core features:
 
 Current prototype notes:
 
-- Canonical demo dashboards use `/demo/dashboard/attender` and
-  `/demo/dashboard/teacher`; legacy professor/referent dashboard URLs redirect
+- Canonical demo dashboards use `/demo/dashboard/professor` and
+  `/demo/dashboard/referent`; legacy dashboard URLs may redirect or be deprecated.
   to those paths.
 - Revenue values shown in teacher-facing prototype screens are placeholders;
   revenue management is not part of the current Teacher scope.
