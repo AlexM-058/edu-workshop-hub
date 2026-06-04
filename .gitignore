@@ -2,6 +2,7 @@
 
 # Dependencies
 backend/vendor/
+node_modules/
 frontend/node_modules/
 
 # Environment files
