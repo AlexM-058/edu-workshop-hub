@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LanguageToggle from './LanguageToggle';
-import { useI18n } from '../i18n/I18nContext';
+import LanguageToggle from '../src/components/LanguageToggle';
+import { useI18n } from '../src/i18n/I18nContext';
 
 // Mock the i18n context
-vi.mock('../i18n/I18nContext', () => ({
+vi.mock('../src/i18n/I18nContext', () => ({
   useI18n: vi.fn(),
 }));
 

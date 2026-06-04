@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getInitialLocale, translations, translate } from './translations.js';
+import { getInitialLocale, translations, translate } from '../src/i18n/translations.js';
 
 describe('i18n translations', () => {
   it('returns Romanian and German labels for the same key', () => {

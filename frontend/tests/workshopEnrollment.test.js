@@ -3,7 +3,7 @@ import {
   getEnrollmentErrorMessage,
   getEnrollmentSuccessMessage,
   submitWorkshopEnrollment,
-} from './workshopEnrollment.js';
+} from '../src/pages/workshopEnrollment.js';
 
 const translations = {
   'detail.enrollErrorDuplicate': 'Ești deja înscris sau pe lista de așteptare pentru acest workshop.',

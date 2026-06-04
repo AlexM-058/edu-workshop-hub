@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { canAccessRole } from './permissions.js'
+import { canAccessRole } from '../src/auth/permissions.js'
 
 describe('auth permissions', () => {
   it('allows any synced role when route has no explicit role list', () => {

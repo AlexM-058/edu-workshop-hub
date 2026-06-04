@@ -1,15 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import MetricCard from './MetricCard';
-import { useI18n } from '../i18n/I18nContext';
+import MetricCard from '../src/components/MetricCard';
+import { useI18n } from '../src/i18n/I18nContext';
 
 // Mock the i18n context
-vi.mock('../i18n/I18nContext', () => ({
+vi.mock('../src/i18n/I18nContext', () => ({
   useI18n: vi.fn(),
 }));
 
 // Mock the Icon component
-vi.mock('./Icon', () => ({
+vi.mock('../src/components/Icon', () => ({
   default: ({ children, className }) => (
     <span data-testid="icon" className={className}>
       {children}
@@ -77,7 +77,7 @@ describe('MetricCard', () => {
   });
 
   it('applies blue tone styling by default', () => {
-    const { container } = render(
+    render(
       <MetricCard
         icon="trending_up"
         label="Total Workshops"
@@ -90,7 +90,7 @@ describe('MetricCard', () => {
   });
 
   it('applies green tone styling when specified', () => {
-    const { container } = render(
+    render(
       <MetricCard
         icon="trending_up"
         label="Total Workshops"
@@ -104,7 +104,7 @@ describe('MetricCard', () => {
   });
 
   it('applies amber tone styling when specified', () => {
-    const { container } = render(
+    render(
       <MetricCard
         icon="trending_up"
         label="Total Workshops"

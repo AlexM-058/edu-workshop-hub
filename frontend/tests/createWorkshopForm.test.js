@@ -3,7 +3,7 @@ import {
   buildWorkshopPayload,
   getWorkshopSubmitErrorMessage,
   submitWorkshopForm,
-} from './createWorkshopForm.js';
+} from '../src/pages/createWorkshopForm.js';
 
 const baseForm = {
   title: ' Applied Digital Pedagogy ',

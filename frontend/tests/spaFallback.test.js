@@ -5,8 +5,8 @@ import { dirname, join } from 'node:path'
 
 const currentFile = fileURLToPath(import.meta.url)
 const currentDir = dirname(currentFile)
-const frontendRoot = join(currentDir, '../../')
-const repoRoot = join(currentDir, '../../../')
+const frontendRoot = join(currentDir, '../')
+const repoRoot = join(currentDir, '../../')
 
 function readRepoFile(path) {
   if (path.startsWith('frontend/')) {

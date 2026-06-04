@@ -3,7 +3,7 @@ import {
   getTeacherInvitationFormControlState,
   getTeacherInvitationSuccessMessage,
   submitTeacherInvitationForm,
-} from './adminTeacherInvitationForm.js';
+} from '../src/pages/adminTeacherInvitationForm.js';
 
 const translations = {
   'admin.users.inviteCreated': 'Invitație pregătită pentru',

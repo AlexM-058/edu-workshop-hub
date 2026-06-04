@@ -13,6 +13,16 @@ Canonical role dashboard paths:
 Legacy professor/referent dashboard paths redirect to the canonical attender and
 teacher paths.
 
+## Testing
+
+The frontend test suite uses Vitest, React Testing Library, Testing Library
+user-event, jest-dom, and jsdom. It includes unit tests for pure helpers and
+components, plus integration-style tests for auth routing, auth provider sync,
+API request wiring, and the main user actions.
+
+See [TESTING.md](TESTING.md) for the full guide, including what each integration
+test covers and the terminal commands for running tests and lint.
+
 ## React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

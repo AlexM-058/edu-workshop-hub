@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { MarketingWorkshopCard, CatalogWorkshopCard } from './WorkshopCard';
+import { MarketingWorkshopCard, CatalogWorkshopCard } from '../src/components/WorkshopCard';
 
 // Mock the Icon component
-vi.mock('./Icon', () => ({
+vi.mock('../src/components/Icon', () => ({
   default: ({ children, className, filled }) => (
     <span data-testid="icon" className={className} data-filled={filled ? 'true' : 'false'}>
       {children}
