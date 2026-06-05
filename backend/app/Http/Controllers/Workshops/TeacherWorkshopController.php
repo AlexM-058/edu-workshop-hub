@@ -23,7 +23,7 @@ class TeacherWorkshopController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $perPage = min((int) $request->query('per_page', 12), 50);
+        $perPage = max(1, min((int) $request->query('per_page', 12), 50));
 
         $workshops = Workshop::query()
             ->where('referent_id', $request->user()->id)

@@ -24,7 +24,7 @@ class AdminController extends Controller
      */
     public function users(Request $request): JsonResponse
     {
-        $perPage = min((int) $request->query('per_page', 20), 100);
+        $perPage = max(1, min((int) $request->query('per_page', 20), 100));
         $role    = $request->query('role');
 
         $query = User::query()->orderBy('last_name')->orderBy('first_name');

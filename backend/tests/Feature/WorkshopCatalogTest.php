@@ -74,6 +74,20 @@ class WorkshopCatalogTest extends TestCase
             ->assertJsonPath('meta.per_page', 50);
     }
 
+    public function test_index_clamps_per_page_zero_to_one(): void
+    {
+        $this->getJson('/api/workshops?per_page=0')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 1);
+    }
+
+    public function test_index_clamps_per_page_negative_to_one(): void
+    {
+        $this->getJson('/api/workshops?per_page=-5')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 1);
+    }
+
     // -------------------------------------------------------------------------
     // GET /api/workshops/{workshop}
     // -------------------------------------------------------------------------

@@ -26,7 +26,7 @@ class AttenderController extends Controller
      */
     public function registrations(Request $request): AnonymousResourceCollection
     {
-        $perPage = min((int) $request->query('per_page', 12), 50);
+        $perPage = max(1, min((int) $request->query('per_page', 12), 50));
         $status  = $request->query('status');
 
         $query = Registration::query()

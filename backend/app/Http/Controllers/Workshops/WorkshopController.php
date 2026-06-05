@@ -22,7 +22,7 @@ class WorkshopController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $perPage = min((int) $request->query('per_page', 12), 50);
+        $perPage = max(1, min((int) $request->query('per_page', 12), 50));
 
         $workshops = Workshop::query()
             ->active()
