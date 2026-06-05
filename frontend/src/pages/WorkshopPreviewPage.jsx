@@ -65,7 +65,7 @@ export default function WorkshopPreviewPage() {
                 </div>
                 <div className="mt-lg space-y-3">
                   <button className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 font-label-md text-white opacity-60" disabled title={t('common.demoUnavailable')} type="button"><Icon>upload</Icon>{t('common.publish')}</button>
-                  <Link className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-primary px-6 py-4 font-label-md text-primary transition-colors hover:bg-surface-container-high" to="/demo/dashboard/teacher/workshops/new"><Icon>edit</Icon>{t('preview.backToEdit')}</Link>
+                  <Link className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-primary px-6 py-4 font-label-md text-primary transition-colors hover:bg-surface-container-high" to="/demo/dashboard/referent/workshops/new"><Icon>edit</Icon>{t('preview.backToEdit')}</Link>
                 </div>
               </section>
             </aside>

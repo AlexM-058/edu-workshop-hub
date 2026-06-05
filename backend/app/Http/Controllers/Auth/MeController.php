@@ -14,11 +14,13 @@ class MeController extends Controller
 
         return response()->json([
             'user' => [
-                'id' => $user->id,
-                'clerk_id' => $user->clerk_id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
+                'id'         => $user->id,
+                'clerk_id'   => $user->clerk_id,
+                'first_name' => $user->first_name,
+                'last_name'  => $user->last_name,
+                'name'       => $user->fullName(),
+                'email'      => $user->email,
+                'role'       => $user->role,
             ],
         ]);
     }

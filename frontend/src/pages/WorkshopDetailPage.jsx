@@ -27,7 +27,7 @@ export default function WorkshopDetailPage() {
               <Info icon="group">Limited to 25 Participants</Info>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Link to="/demo/dashboard/attender" className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95">{t('detail.enrollNow')}</Link>
+              <Link to="/demo/dashboard/professor" className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95">{t('detail.enrollNow')}</Link>
               <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">{t('detail.download')}</button>
             </div>
           </div>

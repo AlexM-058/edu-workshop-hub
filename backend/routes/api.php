@@ -13,7 +13,7 @@ Route::get('/health', function () {
 
 Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/auth/me', MeController::class);
-    Route::middleware('role:teacher,admin')->get('/teacher/status', fn () => response()->json(['status' => 'ok']));
+    Route::middleware('role:referent,admin')->get('/teacher/status', fn () => response()->json(['status' => 'ok']));
 
     Route::middleware('role:admin')->post('/admin/teacher-invitations', [TeacherInvitationController::class, 'store']);
 });

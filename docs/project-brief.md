@@ -105,24 +105,26 @@ The admin can:
 4. A professor whose attendance was confirmed can download a participation
    certificate.
 
-## Data Model Notes
+## Data Model
 
-Likely entities:
+The following tables are implemented in the database:
 
-- User
-- Role
-- Workshop
-- WorkshopCategory
-- Enrollment
-- WaitingListEntry
-- Attendance
-- Certificate
-- Translation
-- AuditLog
+| Table | Key Columns |
+| --- | --- |
+| `users` | `id`, `google_id` (nullable, unique), `first_name`, `last_name`, `email` (unique), `role` (default: `professor`) |
+| `workshops` | `id`, `referent_id` (FK), `title_ro`, `title_de`, `description_ro`, `description_de`, `location`, `max_slots`, `occupied_slots`, `scheduled_at`, `is_active` |
+| `registrations` | `id`, `workshop_id` (FK), `user_id` (FK), `status` (`enrolled` / `waitlist` / `cancelled`), `attended` |
+| `certificates` | `id`, `registration_id` (FK), `file_path` |
+
+Entities planned for future phases:
+
+- `WorkshopCategory`
+- `Translation`
+- `AuditLog`
 
 ## Non-Functional Requirements
 
-- Passwords must be encrypted.
+- Authentication is handled via Google OAuth; no password storage is required.
 - Sessions must be secure and role-aware.
 - The interface must be usable on desktop and tablet.
 - PDF generation should complete in under 3 seconds for normal workshop sizes.

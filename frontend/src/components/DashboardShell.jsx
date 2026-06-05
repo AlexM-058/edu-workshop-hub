@@ -4,18 +4,18 @@ import TopNav from './TopNav'
 import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
-  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
+  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/professor' },
   { labelKey: 'nav.activeCourses', icon: 'school', to: '/catalog' },
-  { labelKey: 'nav.history', icon: 'history', to: '/demo/dashboard/attender?panel=history' },
-  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/dashboard/attender?panel=certificates' },
+  { labelKey: 'nav.history', icon: 'history', to: '/demo/dashboard/professor?panel=history' },
+  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/dashboard/professor?panel=certificates' },
   { labelKey: 'nav.profile', icon: 'person', to: '/register/attender' },
 ]
 
 const instructorLinks = [
-  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/teacher' },
-  { labelKey: 'nav.myWorkshops', icon: 'school', to: '/demo/dashboard/teacher/workshops' },
-  { labelKey: 'nav.createNew', icon: 'add_circle', to: '/demo/dashboard/teacher/workshops/new' },
-  { labelKey: 'nav.analytics', icon: 'analytics', to: '/demo/dashboard/teacher/analytics' },
+  { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/referent' },
+  { labelKey: 'nav.myWorkshops', icon: 'school', to: '/demo/dashboard/referent/workshops' },
+  { labelKey: 'nav.createNew', icon: 'add_circle', to: '/demo/dashboard/referent/workshops/new' },
+  { labelKey: 'nav.analytics', icon: 'analytics', to: '/demo/dashboard/referent/analytics' },
   { labelKey: 'nav.profile', icon: 'account_circle', to: '/register/attender' },
 ]
 
@@ -57,7 +57,7 @@ export default function DashboardShell({ children, mode = 'attender' }) {
         </nav>
         <div className="mt-auto pt-4">
           <Link
-            to={mode === 'teacher' ? '/demo/dashboard/teacher/workshops/new' : '/catalog'}
+            to={mode === 'teacher' ? '/demo/dashboard/referent/workshops/new' : '/catalog'}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container"
           >
             <Icon className="h-5 w-5">{mode === 'teacher' ? 'add' : 'school'}</Icon>

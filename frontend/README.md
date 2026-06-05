@@ -6,12 +6,11 @@ static auth provider and the sign-in page shows a visible configuration message.
 
 Canonical role dashboard paths:
 
-- `/demo/dashboard/attender`
-- `/demo/dashboard/teacher`
+- `/demo/dashboard/professor`
+- `/demo/dashboard/referent`
 - `/demo/admin`
 
-Legacy professor/referent dashboard paths redirect to the canonical attender and
-teacher paths.
+Legacy dashboard paths redirect to the canonical professor and referent paths.
 
 ## React + Vite
 

@@ -11,8 +11,8 @@ export default function SsoCallbackPage() {
         <h1 className="mb-2 font-h2 text-2xl text-primary">{t('auth.callbackTitle')}</h1>
         <p className="font-body-md text-on-surface-variant">{t('auth.callbackText')}</p>
         <AuthenticateWithRedirectCallback
-          signInFallbackRedirectUrl="/demo/dashboard/attender"
-          signUpFallbackRedirectUrl="/demo/dashboard/attender"
+          signInFallbackRedirectUrl="/demo/dashboard/professor"
+          signUpFallbackRedirectUrl="/demo/dashboard/professor"
         />
       </section>
     </main>

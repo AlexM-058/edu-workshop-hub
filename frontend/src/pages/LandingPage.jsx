@@ -28,8 +28,8 @@ export default function LandingPage() {
                   {t('landing.explore')}
                   <Icon>arrow_forward</Icon>
                 </Link>
-                <Link to="/demo/dashboard/attender" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
-                  {t('landing.demo')}
+                <Link to="/demo/dashboard/professor" className="rounded-lg border border-primary px-8 py-4 text-label-md font-label-md text-primary transition-all hover:bg-surface-container">
+                  {t('landing.viewDashboard')}
                 </Link>
               </div>
               <div className="flex items-center gap-4 pt-8 text-sm font-medium text-on-surface-variant">
@@ -112,7 +112,7 @@ export default function LandingPage() {
             <div className="relative">
               <div className="relative z-10 rounded-xl border border-white/10 bg-white/10 p-lg backdrop-blur-md">
                 <Icon filled className="mb-4 text-5xl text-secondary opacity-40">format_quote</Icon>
-                <p className="mb-6 font-h3 text-h3 italic leading-relaxed">"Workshop-ul despre tehnologie digitală mi-a transformat complet orele de istorie. Elevii sunt acum mult mai implicați."</p>
+                <p className="mb-6 font-h3 text-h3 italic leading-relaxed">„Workshop-ul despre tehnologie digitală mi-a transformat complet orele de istorie. Elevii sunt acum mult mai implicați."</p>
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-full bg-slate-200" />
                   <div><p className="font-bold">Maria Popescu</p><p className="text-sm opacity-70">Profesor de Istorie, Grad I</p></div>

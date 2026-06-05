@@ -51,10 +51,10 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-slate-200 pt-4">
-          <Link className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container" to="/demo/dashboard/teacher/workshops/new">
+        <div className="flex w-full flex-col gap-4 border-t border-slate-100 p-6">
+          <Link className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container" to="/demo/dashboard/referent/workshops/new">
             <Icon>add_circle</Icon>
-            {t('admin.newWorkshop')}
+            Create New Workshop
           </Link>
         </div>
       </aside>

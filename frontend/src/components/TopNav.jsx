@@ -7,15 +7,15 @@ import { useI18n } from '../i18n/I18nContext'
 
 const professorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
-  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/attender' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
+  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/professor' },
+  { labelKey: 'nav.certificates', to: '/demo/dashboard/professor?panel=certificates' },
   { labelKey: 'nav.resources', to: '/' },
 ]
 
 const instructorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
-  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/teacher/workshops' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
+  { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/referent/workshops' },
+  { labelKey: 'nav.certificates', to: '/demo/dashboard/professor?panel=certificates' },
   { labelKey: 'nav.resources', to: '/' },
 ]
 

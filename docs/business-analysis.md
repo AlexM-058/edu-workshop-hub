@@ -124,7 +124,8 @@ Expected formats:
 
 Security:
 
-- Passwords must be encrypted.
+- Authentication is handled exclusively via Google OAuth; no password storage is
+  required.
 - Sessions must be secure.
 - Users must only access features allowed by their role.
 
@@ -154,18 +155,37 @@ The current repository contains:
 
 - Laravel backend API.
 - React Vite frontend.
-- PostgreSQL database service.
-- Docker-first local development setup.
+- PostgreSQL 16 database service with a `healthcheck`.
+- Docker-first local development setup with an explicit `appnet` bridge network.
 - Health endpoint at `GET /api/health`.
 - Starter frontend that checks backend connectivity.
+- pgAdmin 4 database GUI (dev profile, http://localhost:5050).
+- Completed database migrations:
+  - `users` — `id`, `google_id` (nullable, unique), `first_name`, `last_name`,
+    `email` (unique), `role` (default: `professor`), timestamps.
+  - `workshops` — `id`, `referent_id` (FK → users), bilingual `title_ro` /
+    `title_de`, bilingual `description_ro` / `description_de` (nullable),
+    `location`, `max_slots`, `occupied_slots` (denormalized, default 0),
+    `scheduled_at`, `is_active` (default true), timestamps.
+  - `registrations` — `id`, `workshop_id` (FK → workshops), `user_id`
+    (FK → users), `status` (`enrolled` / `waitlist` / `cancelled`), `attended`
+    (default false), timestamps. Unique constraint on `(workshop_id, user_id)`.
+  - `certificates` — `id`, `registration_id` (FK → registrations),
+    `file_path` (max 500 chars), timestamps.
+  - `sessions` — `id` (PK, string), `user_id` (nullable, indexed), `ip_address`,
+    `user_agent`, `payload`, `last_activity`. Required by `SESSION_DRIVER=database`.
+    Supports the Google OAuth redirect state and CSRF tokens for unauthenticated
+    visitors.
 
 ## 10. Next Product Decisions
 
-Before implementing the first feature, the team should confirm:
+Remaining open decisions before implementing the first feature:
 
-- Exact fields required for a workshop.
-- Exact user profile fields for professors and referents.
 - Whether certificates need a fixed official template.
 - Whether attendance lists need signatures.
 - Whether email notifications are required in the MVP or can be added later.
-- Whether German translations are manually managed or stored in files first.
+- Whether German translations are manually managed or stored in a database table.
+- Whether an `AuditLog` table is needed in the MVP or can be added in a later
+  phase.
+- Whether workshop categories (`WorkshopCategory`) are in scope for the initial
+  release.

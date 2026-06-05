@@ -36,95 +36,100 @@ class ClerkAuthTest extends TestCase
             ->assertUnauthorized();
     }
 
-    public function test_auth_me_syncs_a_new_clerk_user_as_attender_by_default(): void
+    public function test_auth_me_syncs_a_new_clerk_user_as_professor_by_default(): void
     {
         $this->withToken($this->clerkToken([
-            'sub' => 'user_attender',
-            'email' => 'attender@example.com',
-            'name' => 'Ada Attender',
+            'sub'   => 'user_professor',
+            'email' => 'professor@example.com',
+            'name'  => 'Ana Professor',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.email', 'attender@example.com')
-            ->assertJsonPath('user.role', 'attender');
+            ->assertJsonPath('user.email', 'professor@example.com')
+            ->assertJsonPath('user.role', 'professor')
+            ->assertJsonPath('user.first_name', 'Ana')
+            ->assertJsonPath('user.last_name', 'Professor');
 
         $this->assertDatabaseHas('users', [
-            'clerk_id' => 'user_attender',
-            'email' => 'attender@example.com',
-            'role' => 'attender',
+            'clerk_id'   => 'user_professor',
+            'email'      => 'professor@example.com',
+            'first_name' => 'Ana',
+            'last_name'  => 'Professor',
+            'role'       => 'professor',
         ]);
     }
 
-    public function test_auth_me_accepts_teacher_invitation_during_sync(): void
+    public function test_auth_me_accepts_referent_invitation_during_first_sync(): void
     {
         TeacherInvitation::create([
-            'email' => 'teacher@example.com',
-            'role' => 'teacher',
+            'email' => 'referent@example.com',
+            'role'  => 'referent',
         ]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
-            'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
+            'sub'   => 'user_referent',
+            'email' => 'referent@example.com',
+            'name'  => 'Tina Referent',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'referent');
 
         $this->assertNotNull(TeacherInvitation::first()->accepted_at);
 
+        // Re-login: role must remain 'referent' even after invitation expires
         $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
-            'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
+            'sub'   => 'user_referent',
+            'email' => 'referent@example.com',
+            'name'  => 'Tina Referent',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'referent');
     }
 
-    public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void
+    public function test_professor_is_forbidden_from_referent_and_admin_endpoints(): void
     {
         $token = $this->clerkToken([
-            'sub' => 'user_attender',
-            'email' => 'attender@example.com',
+            'sub'   => 'user_professor',
+            'email' => 'professor@example.com',
         ]);
 
         $this->withToken($token)->getJson('/api/teacher/status')->assertForbidden();
         $this->withToken($token)
-            ->postJson('/api/admin/teacher-invitations', ['email' => 'teacher@example.com'])
+            ->postJson('/api/admin/teacher-invitations', ['email' => 'referent@example.com'])
             ->assertForbidden();
     }
 
-    public function test_admin_can_create_teacher_invitations(): void
+    public function test_admin_can_create_referent_invitations(): void
     {
         config(['services.clerk.admin_emails' => ['admin@example.com']]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_admin',
+            'sub'   => 'user_admin',
             'email' => 'admin@example.com',
-            'name' => 'Admin User',
+            'name'  => 'Admin User',
         ]))
-            ->postJson('/api/admin/teacher-invitations', ['email' => 'new.teacher@example.com'])
+            ->postJson('/api/admin/teacher-invitations', ['email' => 'new.referent@example.com'])
             ->assertCreated()
-            ->assertJsonPath('invitation.email', 'new.teacher@example.com')
-            ->assertJsonPath('invitation.role', 'teacher');
+            ->assertJsonPath('invitation.email', 'new.referent@example.com')
+            ->assertJsonPath('invitation.role', 'referent');
 
         $this->assertDatabaseHas('teacher_invitations', [
-            'email' => 'new.teacher@example.com',
-            'role' => 'teacher',
+            'email' => 'new.referent@example.com',
+            'role'  => 'referent',
         ]);
     }
 
     private function clerkToken(array $claims): string
     {
-        return 'test:'.base64_encode(json_encode(array_merge([
-            'sub' => 'user_123',
+        return 'test:' . base64_encode(json_encode(array_merge([
+            'sub'   => 'user_123',
             'email' => 'alex@example.com',
-            'name' => 'Alex Teacher',
-            'iss' => config('services.clerk.issuer'),
-            'exp' => time() + 3600,
-            'nbf' => time() - 60,
+            'name'  => 'Alex Test',
+            'iss'   => config('services.clerk.issuer'),
+            'exp'   => time() + 3600,
+            'nbf'   => time() - 60,
         ], $claims), JSON_THROW_ON_ERROR));
     }
 }

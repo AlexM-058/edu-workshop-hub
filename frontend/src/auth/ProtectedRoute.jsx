@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children, roles }) {
   }
 
   if (!canAccessRole(role, roles)) {
-    return <Navigate replace to="/demo/dashboard/attender" />
+    return <Navigate replace to="/demo/dashboard/professor" />
   }
 
   return children

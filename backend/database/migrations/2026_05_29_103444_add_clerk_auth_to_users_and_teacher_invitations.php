@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table): void {
             $table->string('clerk_id')->nullable()->unique()->after('id');
-            $table->string('role')->default('attender')->after('email');
+            $table->string('role')->default('professor')->after('email');
             if (Schema::getConnection()->getDriverName() !== 'sqlite') {
                 $table->string('password')->nullable()->change();
             }
@@ -19,7 +19,7 @@ return new class extends Migration
         Schema::create('teacher_invitations', function (Blueprint $table): void {
             $table->id();
             $table->string('email')->unique();
-            $table->string('role')->default('teacher');
+            $table->string('role')->default('referent');
             $table->foreignId('invited_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('expires_at')->nullable();
