@@ -3,11 +3,13 @@ import Footer from '../components/Footer';
 import Icon from '../components/Icon';
 import TopNav from '../components/TopNav';
 import { MarketingWorkshopCard } from '../components/WorkshopCard';
-import { featuredWorkshops, images } from '../data/stitchData';
+import { images } from '../data/stitchData';
 import { useI18n } from '../i18n/I18nContext';
+import { useWorkshops } from '../lib/workshops';
 
 export default function LandingPage() {
   const { t } = useI18n();
+  const { workshops: featuredWorkshops, isLoading: loadingFeatured } = useWorkshops({ page: 1, perPage: 3 });
 
   return (
     <div className="bg-background text-on-background">
@@ -94,7 +96,20 @@ export default function LandingPage() {
               </Link>
             </div>
             <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:grid-cols-3">
-              {featuredWorkshops.map((workshop) => <MarketingWorkshopCard key={workshop.title} workshop={workshop} />)}
+              {loadingFeatured
+                ? Array.from({ length: 3 }, (_, i) => (
+                    <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white">
+                      <div className="aspect-video bg-slate-100" />
+                      <div className="p-6 space-y-3">
+                        <div className="h-3 w-1/3 rounded bg-slate-100" />
+                        <div className="h-5 w-3/4 rounded bg-slate-100" />
+                      </div>
+                    </div>
+                  ))
+                : (featuredWorkshops ?? []).map((workshop) => (
+                    <MarketingWorkshopCard key={workshop.id} workshop={workshop} />
+                  ))
+              }
             </div>
           </div>
         </section>
