@@ -30,7 +30,7 @@ function App() {
       <Route path="/workshops/:id" element={<WorkshopDetailPage />} />
 
       {/* TODO: Remove the /demo prefix once production role-based routes replace the prototype paths. */}
-      <Route path="/demo/dashboard/attender" element={<ProtectedRoute><ProfessorDashboard /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/attender" element={<ProtectedRoute roles={['attender', 'professor']}><ProfessorDashboard /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><ReferentDashboard /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><InstructorWorkshopsPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops/new" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />

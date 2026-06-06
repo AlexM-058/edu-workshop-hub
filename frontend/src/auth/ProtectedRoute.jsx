@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAppAuth } from './AuthContext'
-import { canAccessRole } from './permissions'
+import { canAccessRole, dashboardPathForRole } from './permissions'
 import { useI18n } from '../i18n/I18nContext'
 
 export default function ProtectedRoute({ children, roles }) {
@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children, roles }) {
   }
 
   if (!canAccessRole(role, roles)) {
-    return <Navigate replace to="/demo/dashboard/professor" />
+    return <Navigate replace to={dashboardPathForRole(role)} />
   }
 
   return children

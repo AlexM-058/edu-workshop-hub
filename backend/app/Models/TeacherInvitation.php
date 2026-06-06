@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['email', 'role', 'invited_by', 'accepted_at', 'expires_at'])]
+#[Fillable(['email', 'role', 'invited_by', 'accepted_at', 'notice_seen_at', 'expires_at'])]
 class TeacherInvitation extends Model
 {
     protected function casts(): array
     {
         return [
             'accepted_at' => 'datetime',
+            'notice_seen_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
     }

@@ -1,7 +1,8 @@
+import { UserButton } from '@clerk/clerk-react'
 import { Link, NavLink } from 'react-router-dom'
 import Icon from './Icon'
 import LanguageToggle from './LanguageToggle'
-import { images } from '../data/stitchData'
+import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 
 const adminLinks = [
@@ -12,6 +13,7 @@ const adminLinks = [
 
 export default function AdminShell({ children, searchKey = 'admin.searchSettings' }) {
   const { t } = useI18n()
+  const { clerkConfigured, isSignedIn, signOut } = useAppAuth()
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -23,15 +25,21 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
             <input className="w-64 rounded border border-outline-variant bg-surface-container-low py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary" placeholder={t(searchKey)} type="text" />
           </div>
           <button className="rounded p-2 text-slate-600 transition-colors hover:bg-slate-50" aria-label={t('admin.notifications')} type="button"><Icon>notifications</Icon></button>
-          <button className="rounded p-2 text-slate-600 transition-colors hover:bg-slate-50" aria-label={t('common.needHelp')} type="button"><Icon>help</Icon></button>
+          <button className="rounded p-2 text-slate-600 transition-colors hover:bg-slate-50" aria-label={t('common.needHelp')} type="button"><Icon>help_outline</Icon></button>
           <LanguageToggle />
-          <img className="h-8 w-8 rounded-full border border-slate-200 object-cover" src={images.profile} alt="" />
+          {isSignedIn && clerkConfigured ? (
+            <UserButton afterSignOutUrl="/sign-in" />
+          ) : (
+            <button className="rounded border border-slate-200 px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-slate-50" onClick={() => signOut()} type="button">
+              {t('auth.signOut')}
+            </button>
+          )}
         </div>
       </header>
       <aside className="fixed left-0 top-16 z-40 hidden h-[calc(100vh-64px)] w-64 flex-col border-r border-slate-200 bg-slate-50 p-4 md:flex">
         <div className="mb-8 px-2">
-          <h2 className="font-h3 text-xl font-bold text-blue-900">EduCraft</h2>
-          <p className="text-caption text-slate-500">{t('admin.portal')}</p>
+          <h2 className="font-h3 text-xl font-bold text-blue-900">{t('admin.portal')}</h2>
+          <p className="text-caption text-slate-500">{t('admin.sidebarSubtitle')}</p>
         </div>
         <nav className="flex-1 space-y-1">
           {adminLinks.map((item) => (
@@ -54,7 +62,7 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
         <div className="flex w-full flex-col gap-4 border-t border-slate-100 p-6">
           <Link className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container" to="/demo/dashboard/referent/workshops/new">
             <Icon>add_circle</Icon>
-            Create New Workshop
+            {t('instructorDashboard.createWorkshop')}
           </Link>
         </div>
       </aside>

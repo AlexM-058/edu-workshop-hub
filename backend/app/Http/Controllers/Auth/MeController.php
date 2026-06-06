@@ -24,6 +24,7 @@ class MeController extends Controller
             ],
             'notifications' => [
                 'teacher_invitation_accepted' => (bool) $request->attributes->get('teacher_invitation_accepted', false),
+                'teacher_invitation_notice_pending' => (bool) $request->attributes->get('teacher_invitation_notice_pending', false),
             ],
         ]);
     }

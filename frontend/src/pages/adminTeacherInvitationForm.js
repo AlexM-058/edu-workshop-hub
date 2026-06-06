@@ -23,6 +23,7 @@ export async function submitTeacherInvitationForm({ email, getToken, createInvit
     const inviteStatus = payload.status ?? 'created';
 
     return {
+      didInvite: true,
       inviteEmail: '',
       inviteError: '',
       invitedEmail,
@@ -33,6 +34,7 @@ export async function submitTeacherInvitationForm({ email, getToken, createInvit
     const validationError = error.payload?.errors?.email?.[0];
 
     return {
+      didInvite: false,
       inviteError: validationError ?? t('admin.users.inviteError'),
       invitedEmail: '',
       inviteStatus: '',

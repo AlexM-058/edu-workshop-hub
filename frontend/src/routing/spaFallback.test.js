@@ -62,6 +62,7 @@ test('app exposes canonical attender and teacher dashboard routes with legacy re
   const appSource = readRepoFile('frontend/src/App.jsx')
 
   assert.match(appSource, /path="\/demo\/dashboard\/attender"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/attender"[\s\S]*roles=\{\['attender', 'professor'\]\}/)
   assert.match(appSource, /path="\/demo\/dashboard\/teacher"/)
   assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops"/)
   assert.match(appSource, /path="\/dashboard\/attender"/)

@@ -36,6 +36,7 @@ describe('admin teacher invitation form', () => {
 
     assert.deepEqual(calls, [['admin-token', 'new.teacher@example.com']]);
     assert.deepEqual(result, {
+      didInvite: true,
       inviteEmail: '',
       inviteError: '',
       invitedEmail: 'new.teacher@example.com',
@@ -77,6 +78,7 @@ describe('admin teacher invitation form', () => {
     });
 
     assert.deepEqual(result, {
+      didInvite: false,
       inviteError: 'Emailul este invalid.',
       invitedEmail: '',
       inviteStatus: '',

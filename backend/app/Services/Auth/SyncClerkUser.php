@@ -11,7 +11,7 @@ class SyncClerkUser
     public function __construct(private readonly ClerkUserClient $clerkUserClient) {}
 
     /**
-     * @return array{user: User, teacher_invitation_accepted: bool}
+     * @return array{user: User, teacher_invitation_accepted: bool, teacher_invitation_notice_pending: bool}
      */
     public function sync(array $claims): array
     {
@@ -37,15 +37,16 @@ class SyncClerkUser
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'email'      => $email,
-            'role'       => $isNewUser ? $role : $user->role,
+            'role'       => $this->syncedRole($user, $role, $isNewUser),
         ]);
         $user->save();
 
-        $teacherInvitationAccepted = $isNewUser && $this->acceptTeacherInvitation($user);
+        $teacherInvitationAccepted = $this->acceptTeacherInvitation($user);
 
         return [
             'user' => $user,
             'teacher_invitation_accepted' => $teacherInvitationAccepted,
+            'teacher_invitation_notice_pending' => $this->hasPendingTeacherInvitationNotice($user),
         ];
     }
 
@@ -78,6 +79,22 @@ class SyncClerkUser
         return $invitation ? $invitation->role : 'attender';
     }
 
+    private function syncedRole(User $user, string $resolvedRole, bool $isNewUser): string
+    {
+        if ($isNewUser) {
+            return $resolvedRole;
+        }
+
+        if (
+            $resolvedRole === 'teacher'
+            && in_array($user->role, ['attender', 'professor'], true)
+        ) {
+            return 'teacher';
+        }
+
+        return $user->role;
+    }
+
     /**
      * Marks any pending teacher invitation as accepted once the user first logs in.
      */
@@ -91,6 +108,20 @@ class SyncClerkUser
             ->where('email', $user->email)
             ->whereNull('accepted_at')
             ->update(['accepted_at' => now()]) > 0;
+    }
+
+    private function hasPendingTeacherInvitationNotice(User $user): bool
+    {
+        if ($user->role !== 'teacher') {
+            return false;
+        }
+
+        return TeacherInvitation::query()
+            ->where('email', $user->email)
+            ->where('role', 'teacher')
+            ->whereNotNull('accepted_at')
+            ->whereNull('notice_seen_at')
+            ->exists();
     }
 
     /**
