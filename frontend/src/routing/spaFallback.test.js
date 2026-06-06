@@ -55,6 +55,8 @@ test('app exposes canonical attender and teacher dashboard routes with legacy re
   assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops"/)
   assert.match(appSource, /path="\/dashboard\/attender"/)
   assert.match(appSource, /path="\/dashboard\/teacher"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
   assert.match(appSource, /path="\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
   assert.match(appSource, /path="\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
 })

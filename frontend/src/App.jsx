@@ -36,6 +36,12 @@ function App() {
       <Route path="/demo/dashboard/teacher/workshops/new" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops/preview" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><WorkshopPreviewPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/analytics" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/professor" element={<Navigate replace to="/demo/dashboard/attender" />} />
+      <Route path="/demo/dashboard/referent" element={<Navigate replace to="/demo/dashboard/teacher" />} />
+      <Route path="/demo/dashboard/referent/workshops" element={<Navigate replace to="/demo/dashboard/teacher/workshops" />} />
+      <Route path="/demo/dashboard/referent/workshops/new" element={<Navigate replace to="/demo/dashboard/teacher/workshops/new" />} />
+      <Route path="/demo/dashboard/referent/workshops/preview" element={<Navigate replace to="/demo/dashboard/teacher/workshops/preview" />} />
+      <Route path="/demo/dashboard/referent/analytics" element={<Navigate replace to="/demo/dashboard/teacher/analytics" />} />
       <Route path="/demo/admin" element={<ProtectedRoute roles={['admin']}><Navigate replace to="/demo/admin/users" /></ProtectedRoute>} />
       <Route path="/demo/admin/users" element={<ProtectedRoute roles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
       <Route path="/demo/admin/settings" element={<ProtectedRoute roles={['admin']}><AdminSettingsPage /></ProtectedRoute>} />
