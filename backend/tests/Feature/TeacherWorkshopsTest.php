@@ -1,0 +1,170 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use App\Models\Workshop;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class TeacherWorkshopsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.clerk.allow_test_tokens' => true]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Token helper — same format as ClerkAuthTest
+    // -------------------------------------------------------------------------
+
+    private function tokenFor(User $user): string
+    {
+        return 'test:' . base64_encode(json_encode([
+            'sub'   => $user->clerk_id,
+            'email' => $user->email,
+            'name'  => $user->name,
+            'iss'   => config('services.clerk.issuer'),
+            'exp'   => time() + 3600,
+            'nbf'   => time() - 60,
+        ], JSON_THROW_ON_ERROR));
+    }
+
+    private function makeReferent(): User
+    {
+        return User::factory()->create(['role' => 'referent']);
+    }
+
+    private function makeWorkshop(User $referent, array $overrides = []): Workshop
+    {
+        return Workshop::factory()->create(array_merge([
+            'referent_id'    => $referent->id,
+            'is_active'      => true,
+            'scheduled_at'   => now()->addDays(7),
+            'occupied_slots' => 5,
+            'max_slots'      => 20,
+        ], $overrides));
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/teacher/workshops
+    // -------------------------------------------------------------------------
+
+    public function test_index_requires_authentication(): void
+    {
+        $this->getJson('/api/teacher/workshops')->assertUnauthorized();
+    }
+
+    public function test_professor_cannot_access_teacher_workshops(): void
+    {
+        $professor = User::factory()->create(['role' => 'professor']);
+
+        $this->withToken($this->tokenFor($professor))
+            ->getJson('/api/teacher/workshops')
+            ->assertForbidden();
+    }
+
+    public function test_referent_sees_only_own_workshops(): void
+    {
+        $referent = $this->makeReferent();
+        $other    = $this->makeReferent();
+
+        $this->makeWorkshop($referent);
+        $this->makeWorkshop($referent);
+        $this->makeWorkshop($other); // must NOT appear
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->getJson('/api/teacher/workshops');
+
+        $response->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonStructure([
+                'data' => [[
+                    'id', 'title', 'location',
+                    'max_slots', 'occupied_slots', 'is_active', 'scheduled_at',
+                ]],
+                'meta',
+            ]);
+    }
+
+    public function test_referent_sees_both_active_and_inactive_own_workshops(): void
+    {
+        $referent = $this->makeReferent();
+        $this->makeWorkshop($referent, ['is_active' => true]);
+        $this->makeWorkshop($referent, ['is_active' => false]);
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->getJson('/api/teacher/workshops');
+
+        $response->assertOk()->assertJsonCount(2, 'data');
+    }
+
+    public function test_admin_can_access_teacher_workshops_endpoint(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->makeWorkshop($admin);
+
+        $response = $this->withToken($this->tokenFor($admin))
+            ->getJson('/api/teacher/workshops');
+
+        $response->assertOk()->assertJsonCount(1, 'data');
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/teacher/stats
+    // -------------------------------------------------------------------------
+
+    public function test_stats_requires_authentication(): void
+    {
+        $this->getJson('/api/teacher/stats')->assertUnauthorized();
+    }
+
+    public function test_stats_professor_is_forbidden(): void
+    {
+        $professor = User::factory()->create(['role' => 'professor']);
+
+        $this->withToken($this->tokenFor($professor))
+            ->getJson('/api/teacher/stats')
+            ->assertForbidden();
+    }
+
+    public function test_stats_returns_correct_aggregates(): void
+    {
+        $referent = $this->makeReferent();
+        $other    = $this->makeReferent();
+
+        $this->makeWorkshop($referent, ['is_active' => true,  'occupied_slots' => 10, 'max_slots' => 20]);
+        $this->makeWorkshop($referent, ['is_active' => true,  'occupied_slots' => 5,  'max_slots' => 15]);
+        $this->makeWorkshop($referent, ['is_active' => false, 'occupied_slots' => 3,  'max_slots' => 10]);
+        $this->makeWorkshop($other,    ['is_active' => true,  'occupied_slots' => 8,  'max_slots' => 25]); // excluded
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->getJson('/api/teacher/stats');
+
+        $response->assertOk()
+            ->assertExactJson([
+                'total_workshops'  => 3,
+                'active_workshops' => 2,
+                'total_enrolled'   => 18, // 10 + 5 + 3
+                'total_capacity'   => 45, // 20 + 15 + 10
+            ]);
+    }
+
+    public function test_stats_returns_zeros_when_no_workshops(): void
+    {
+        $referent = $this->makeReferent();
+
+        $this->withToken($this->tokenFor($referent))
+            ->getJson('/api/teacher/stats')
+            ->assertOk()
+            ->assertExactJson([
+                'total_workshops'  => 0,
+                'active_workshops' => 0,
+                'total_enrolled'   => 0,
+                'total_capacity'   => 0,
+            ]);
+    }
+}

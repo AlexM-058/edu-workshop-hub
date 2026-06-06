@@ -2,21 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
- * @extends Factory<User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
     /**
      * Define the model's default state.
      *
@@ -24,22 +16,28 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstName = fake()->firstName();
+        $lastName  = fake()->lastName();
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'clerk_id'   => 'user_' . fake()->unique()->lexify('??????????'),
+            'first_name' => $firstName,
+            'last_name'  => $lastName,
+            'name'       => "{$firstName} {$lastName}",
+            'email'      => fake()->unique()->safeEmail(),
+            'role'       => 'attender',
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    /** Create a teacher (legacy helper name kept for older tests). */
+    public function referent(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(['role' => 'teacher']);
+    }
+
+    /** Create a platform admin. */
+    public function admin(): static
+    {
+        return $this->state(['role' => 'admin']);
     }
 }

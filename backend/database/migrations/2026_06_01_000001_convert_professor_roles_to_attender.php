@@ -10,12 +10,14 @@ return new class extends Migration
         DB::table('users')
             ->where('role', 'professor')
             ->update(['role' => 'attender']);
+
+        DB::table('users')
+            ->where('role', 'referent')
+            ->update(['role' => 'teacher']);
     }
 
     public function down(): void
     {
-        DB::table('users')
-            ->where('role', 'attender')
-            ->update(['role' => 'professor']);
+        // Intentionally left empty — this migration only cleans up legacy data.
     }
 };

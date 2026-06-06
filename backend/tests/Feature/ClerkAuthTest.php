@@ -39,33 +39,37 @@ class ClerkAuthTest extends TestCase
     public function test_auth_me_syncs_a_new_clerk_user_as_attender_by_default(): void
     {
         $this->withToken($this->clerkToken([
-            'sub' => 'user_attender',
+            'sub'   => 'user_attender',
             'email' => 'attender@example.com',
-            'name' => 'Ada Attender',
+            'name'  => 'Ana Attender',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.email', 'attender@example.com')
-            ->assertJsonPath('user.role', 'attender');
+            ->assertJsonPath('user.role', 'attender')
+            ->assertJsonPath('user.first_name', 'Ana')
+            ->assertJsonPath('user.last_name', 'Attender');
 
         $this->assertDatabaseHas('users', [
-            'clerk_id' => 'user_attender',
-            'email' => 'attender@example.com',
-            'role' => 'attender',
+            'clerk_id'   => 'user_attender',
+            'email'      => 'attender@example.com',
+            'first_name' => 'Ana',
+            'last_name'  => 'Attender',
+            'role'       => 'attender',
         ]);
     }
 
-    public function test_auth_me_accepts_teacher_invitation_during_sync(): void
+    public function test_auth_me_accepts_teacher_invitation_during_first_sync(): void
     {
         TeacherInvitation::create([
             'email' => 'teacher@example.com',
-            'role' => 'teacher',
+            'role'  => 'teacher',
         ]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
+            'sub'   => 'user_teacher',
             'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
+            'name'  => 'Tina Teacher',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
@@ -73,10 +77,11 @@ class ClerkAuthTest extends TestCase
 
         $this->assertNotNull(TeacherInvitation::first()->accepted_at);
 
+        // Re-login: role must remain 'teacher' even after invitation expires
         $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
+            'sub'   => 'user_teacher',
             'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
+            'name'  => 'Tina Teacher',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
@@ -86,8 +91,8 @@ class ClerkAuthTest extends TestCase
     public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void
     {
         $token = $this->clerkToken([
-            'sub' => 'user_attender',
-            'email' => 'attender@example.com',
+            'sub'   => 'user_attender_forbidden',
+            'email' => 'attender.forbidden@example.com',
         ]);
 
         $this->withToken($token)->getJson('/api/teacher/status')->assertForbidden();
@@ -101,9 +106,9 @@ class ClerkAuthTest extends TestCase
         config(['services.clerk.admin_emails' => ['admin@example.com']]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_admin',
+            'sub'   => 'user_admin',
             'email' => 'admin@example.com',
-            'name' => 'Admin User',
+            'name'  => 'Admin User',
         ]))
             ->postJson('/api/admin/teacher-invitations', ['email' => 'new.teacher@example.com'])
             ->assertCreated()
@@ -113,7 +118,7 @@ class ClerkAuthTest extends TestCase
 
         $this->assertDatabaseHas('teacher_invitations', [
             'email' => 'new.teacher@example.com',
-            'role' => 'teacher',
+            'role'  => 'teacher',
         ]);
     }
 
@@ -145,13 +150,13 @@ class ClerkAuthTest extends TestCase
 
     private function clerkToken(array $claims): string
     {
-        return 'test:'.base64_encode(json_encode(array_merge([
-            'sub' => 'user_123',
+        return 'test:' . base64_encode(json_encode(array_merge([
+            'sub'   => 'user_123',
             'email' => 'alex@example.com',
-            'name' => 'Alex Teacher',
-            'iss' => config('services.clerk.issuer'),
-            'exp' => time() + 3600,
-            'nbf' => time() - 60,
+            'name'  => 'Alex Test',
+            'iss'   => config('services.clerk.issuer'),
+            'exp'   => time() + 3600,
+            'nbf'   => time() - 60,
         ], $claims), JSON_THROW_ON_ERROR));
     }
 }
