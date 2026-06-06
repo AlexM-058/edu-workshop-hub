@@ -198,6 +198,30 @@ Run only the backend health test:
 docker compose run --rm backend php artisan test --filter=HealthTest
 ```
 
+Seed the database with demo data:
+
+```bash
+docker compose run --rm backend php artisan db:seed
+```
+
+Reset the database and reseed (wipes all data):
+
+```bash
+docker compose run --rm backend php artisan migrate:fresh --seed
+```
+
+Demo accounts created by the seeder:
+
+| Role      | Email                         | clerk_id              |
+| --------- | ----------------------------- | --------------------- |
+| Admin     | admin@edu-workshop.dev        | user_dev_admin        |
+| Referent  | referent@edu-workshop.dev     | user_dev_referent     |
+| Referent  | referent2@edu-workshop.dev    | user_dev_referent2    |
+| Professor | professor@edu-workshop.dev    | user_dev_professor    |
+| Professor | professor2@edu-workshop.dev   | user_dev_professor2   |
+| Professor | professor3@edu-workshop.dev   | user_dev_professor3   |
+
+
 Run the frontend production build:
 
 ```bash
@@ -281,6 +305,19 @@ VITE_API_URL=http://localhost:8000/api
   - `certificates` (PDF path, linked to registration)
   - `sessions` (required by `SESSION_DRIVER=database`, supports OAuth redirect flow)
 - Project documentation under `docs/`.
+- Clerk-based authentication with role sync.
+- API endpoints implemented:
+  - `GET /api/health` — public health check
+  - `GET /api/workshops` — public catalog (paginated, active only)
+  - `GET /api/workshops/{id}` — public workshop detail
+  - `GET /api/auth/me` — authenticated user profile sync
+  - `GET /api/teacher/workshops` — referent's own workshops (auth: referent/admin)
+  - `GET /api/teacher/stats` — referent aggregated stats (auth: referent/admin)
+  - `GET /api/attender/registrations` — professor's registrations (auth: professor/admin)
+  - `GET /api/attender/stats` — professor aggregated stats (auth: professor/admin)
+  - `POST /api/admin/teacher-invitations` — invite a referent (auth: admin)
+- Demo seed data with 6 users, 7 workshops, 10 registrations, and 2 certificates.
+
 
 ## Troubleshooting
 
