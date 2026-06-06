@@ -20,6 +20,7 @@ export default function ProtectedRoute({ children, roles }) {
     return (
       <AuthStatusPage
         actionLabel={t('auth.signOut')}
+        detail={syncError.message}
         onAction={() => signOut()}
         title={t('auth.syncFailedTitle')}
         text={t('auth.syncFailedText')}
@@ -38,13 +39,18 @@ export default function ProtectedRoute({ children, roles }) {
   return children
 }
 
-function AuthStatusPage({ actionLabel, onAction, title, text }) {
+function AuthStatusPage({ actionLabel, detail, onAction, title, text }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-16 text-on-background">
       <section className="w-full max-w-[520px] rounded-xl border border-outline-variant bg-white p-8 shadow-sm">
         <p className="mb-3 text-xs font-label-md uppercase tracking-widest text-slate-500">EduCraft</p>
         <h1 className="mb-3 font-h2 text-3xl text-primary">{title}</h1>
         <p className="font-body-md leading-7 text-on-surface-variant">{text}</p>
+        {detail ? (
+          <p className="mt-4 rounded-lg border border-outline-variant bg-surface-container p-3 font-body-sm text-sm text-on-surface-variant">
+            {detail}
+          </p>
+        ) : null}
         {actionLabel ? (
           <button
             className="mt-8 rounded-lg bg-primary px-6 py-3 text-label-md font-label-md text-white transition-colors hover:bg-primary-container"
