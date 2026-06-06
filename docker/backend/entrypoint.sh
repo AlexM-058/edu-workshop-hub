@@ -13,4 +13,8 @@ if [ -f artisan ] && [ -z "$APP_KEY" ] && ! grep -q '^APP_KEY=base64:' .env; the
   php artisan key:generate --force
 fi
 
+if [ -f artisan ] && [ "$RUN_MIGRATIONS" = "true" ]; then
+  php artisan migrate --force
+fi
+
 exec "$@"
