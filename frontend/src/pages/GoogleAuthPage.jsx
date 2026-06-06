@@ -8,7 +8,7 @@ export default function GoogleAuthPage() {
   const { clerkConfigured, isSignedIn } = useAppAuth()
   const { t } = useI18n()
   const [searchParams] = useSearchParams()
-  const redirectUrl = searchParams.get('redirect_url') || '/demo/dashboard/professor'
+  const redirectUrl = searchParams.get('redirect_url') || '/demo/dashboard/attender'
 
   if (isSignedIn) {
     return <Navigate replace to={redirectUrl} />
