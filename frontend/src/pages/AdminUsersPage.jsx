@@ -322,17 +322,3 @@ function SmallCount({ value, label, last = false }) {
     </div>
   )
 }
-
-function ActionRow({ label }) {
-  return (
-    <button
-      className="group flex w-full cursor-not-allowed items-center justify-between text-left opacity-80"
-      disabled
-      title="Demo action unavailable"
-      type="button"
-    >
-      <span className="font-body-md">{label}</span>
-      <Icon>chevron_right</Icon>
-    </button>
-  )
-}

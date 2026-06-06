@@ -49,8 +49,8 @@ export default function AdminSettingsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-base">
-                      <button className="p-2 text-slate-400 transition-colors hover:text-primary" aria-label={t('common.edit')} type="button"><Icon>edit</Icon></button>
-                      <button className="p-2 text-slate-400 transition-colors hover:text-error" aria-label={t('admin.delete')} type="button"><Icon>delete</Icon></button>
+                      <button className="cursor-not-allowed p-2 text-slate-400 opacity-60 transition-colors hover:text-primary" aria-label={t('common.edit')} disabled title={t('common.demoUnavailable')} type="button"><Icon>edit</Icon></button>
+                      <button className="cursor-not-allowed p-2 text-slate-400 opacity-60 transition-colors hover:text-error" aria-label={t('admin.delete')} disabled title={t('common.demoUnavailable')} type="button"><Icon>delete</Icon></button>
                     </div>
                   </div>
                 ))}
@@ -94,8 +94,8 @@ export default function AdminSettingsPage() {
                 ))}
               </div>
               <div className="flex justify-end gap-base border-t border-slate-100 bg-slate-50 p-md">
-                <button className="rounded px-6 py-2 font-label-md text-slate-600 transition-all hover:bg-slate-200" type="button">{t('admin.cancel')}</button>
-                <button className="rounded bg-primary px-6 py-2 font-label-md text-white shadow-sm transition-all hover:brightness-110" type="button">{t('admin.saveChanges')}</button>
+                <button className="cursor-not-allowed rounded px-6 py-2 font-label-md text-slate-600 opacity-60 transition-all hover:bg-slate-200" disabled title={t('common.demoUnavailable')} type="button">{t('admin.cancel')}</button>
+                <button className="cursor-not-allowed rounded bg-primary px-6 py-2 font-label-md text-white opacity-60 shadow-sm transition-all hover:brightness-110" disabled title={t('common.demoUnavailable')} type="button">{t('admin.saveChanges')}</button>
               </div>
             </div>
           </section>

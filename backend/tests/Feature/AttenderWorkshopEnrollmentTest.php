@@ -16,7 +16,6 @@ class AttenderWorkshopEnrollmentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         config(['services.clerk.allow_test_tokens' => true]);
     }
 
@@ -25,7 +24,7 @@ class AttenderWorkshopEnrollmentTest extends TestCase
         $workshop = $this->workshop(['capacity' => 2]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_attender_open',
+            'sub'   => 'user_attender_open',
             'email' => 'open.attender@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertCreated()
@@ -45,13 +44,12 @@ class AttenderWorkshopEnrollmentTest extends TestCase
     {
         $workshop = $this->workshop(['capacity' => 1]);
         $this->withToken($this->clerkToken([
-            'sub' => 'user_existing_enrolled',
+            'sub'   => 'user_existing_enrolled',
             'email' => 'existing@example.com',
-        ]))->postJson("/api/workshops/{$workshop->id}/enroll")
-            ->assertCreated();
+        ]))->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_attender_waiting',
+            'sub'   => 'user_attender_waiting',
             'email' => 'waiting.attender@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertCreated()
@@ -63,20 +61,19 @@ class AttenderWorkshopEnrollmentTest extends TestCase
     {
         $workshop = $this->workshop(['capacity' => 1]);
         $this->withToken($this->clerkToken([
-            'sub' => 'user_existing_enrolled',
+            'sub'   => 'user_existing_enrolled',
             'email' => 'existing@example.com',
-        ]))->postJson("/api/workshops/{$workshop->id}/enroll")
-            ->assertCreated();
+        ]))->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_waiting_first',
+            'sub'   => 'user_waiting_first',
             'email' => 'first.waiting@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertCreated()
             ->assertJsonPath('enrollment.waitlist_position', 1);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_waiting_second',
+            'sub'   => 'user_waiting_second',
             'email' => 'second.waiting@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertCreated()
@@ -87,12 +84,11 @@ class AttenderWorkshopEnrollmentTest extends TestCase
     {
         $workshop = $this->workshop(['capacity' => 2]);
         $token = $this->clerkToken([
-            'sub' => 'user_duplicate_attender',
+            'sub'   => 'user_duplicate_attender',
             'email' => 'duplicate.attender@example.com',
         ]);
 
-        $this->withToken($token)->postJson("/api/workshops/{$workshop->id}/enroll")
-            ->assertCreated();
+        $this->withToken($token)->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
 
         $this->withToken($token)->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertStatus(409)
@@ -106,38 +102,87 @@ class AttenderWorkshopEnrollmentTest extends TestCase
         $workshop = $this->workshop(['status' => 'draft']);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_draft_attender',
+            'sub'   => 'user_draft_attender',
             'email' => 'draft.attender@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertStatus(422)
             ->assertJsonPath('message', 'Enrollment is only available for published workshops.');
 
-        $this->assertDatabaseCount('workshop_enrollments', 0);
+        $this->assertDatabaseCount('registrations', 0);
     }
 
     public function test_teacher_and_admin_cannot_use_attender_enrollment_endpoint(): void
     {
         $workshop = $this->workshop();
-        TeacherInvitation::create([
-            'email' => 'teacher@example.com',
-            'role' => 'teacher',
-        ]);
+        TeacherInvitation::create(['email' => 'teacher@example.com', 'role' => 'referent']);
         config(['services.clerk.admin_emails' => ['admin@example.com']]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher_enroll',
+            'sub'   => 'user_teacher_enroll',
             'email' => 'teacher@example.com',
-        ]))->postJson("/api/workshops/{$workshop->id}/enroll")
-            ->assertForbidden();
+        ]))->postJson("/api/workshops/{$workshop->id}/enroll")->assertForbidden();
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_admin_enroll',
+            'sub'   => 'user_admin_enroll',
             'email' => 'admin@example.com',
-        ]))->postJson("/api/workshops/{$workshop->id}/enroll")
-            ->assertForbidden();
+        ]))->postJson("/api/workshops/{$workshop->id}/enroll")->assertForbidden();
 
-        $this->assertDatabaseCount('workshop_enrollments', 0);
+        $this->assertDatabaseCount('registrations', 0);
     }
+
+    public function test_attender_withdraws_and_first_waitlisted_registration_is_promoted(): void
+    {
+        $workshop = $this->workshop(['capacity' => 1]);
+
+        $firstToken = $this->clerkToken([
+            'sub'   => 'user_confirmed_attender',
+            'email' => 'confirmed.attender@example.com',
+        ]);
+        $waitingToken = $this->clerkToken([
+            'sub'   => 'user_promoted_attender',
+            'email' => 'promoted.attender@example.com',
+        ]);
+
+        $this->withToken($firstToken)->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
+        $this->withToken($waitingToken)->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
+
+        $confirmed = Registration::whereHas('user', fn ($q) => $q->where('email', 'confirmed.attender@example.com'))->firstOrFail();
+        $waiting   = Registration::whereHas('user', fn ($q) => $q->where('email', 'promoted.attender@example.com'))->firstOrFail();
+
+        $this->withToken($firstToken)->deleteJson("/api/attender/registrations/{$confirmed->id}")
+            ->assertOk()
+            ->assertJsonPath('registration.status', 'cancelled')
+            ->assertJsonPath('promoted.id', $waiting->id);
+
+        $this->assertDatabaseHas('registrations', ['id' => $confirmed->id, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('registrations', ['id' => $waiting->id,   'status' => 'enrolled']);
+        $this->assertDatabaseHas('workshops',     ['id' => $workshop->id,  'occupied_slots' => 1]);
+    }
+
+    public function test_attender_can_download_certificate_only_for_own_attended_registration(): void
+    {
+        $workshop = $this->workshop(['capacity' => 2]);
+        $token = $this->clerkToken([
+            'sub'   => 'user_certificate_attender',
+            'email' => 'certificate.attender@example.com',
+        ]);
+
+        $this->withToken($token)->postJson("/api/workshops/{$workshop->id}/enroll")->assertCreated();
+
+        $registration = Registration::with('user')
+            ->whereHas('user', fn ($q) => $q->where('email', 'certificate.attender@example.com'))
+            ->firstOrFail();
+        $registration->forceFill(['attended' => true])->save();
+        $registration->certificate()->create(['file_path' => 'certificates/test.pdf']);
+
+        $this->withToken($token)->get("/api/attender/registrations/{$registration->id}/certificate")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     private function workshop(array $overrides = []): Workshop
     {
@@ -146,13 +191,13 @@ class AttenderWorkshopEnrollmentTest extends TestCase
             'role'  => 'referent',
         ]);
 
-        // Map legacy status/capacity aliases used in individual tests
-        $mappedOverrides = [];
+        // Map legacy aliases used in individual tests
+        $mapped = [];
         foreach ($overrides as $key => $value) {
             match ($key) {
-                'capacity' => $mappedOverrides['max_slots']  = $value,
-                'status'   => $mappedOverrides['is_active']  = $value === 'published',
-                default    => $mappedOverrides[$key] = $value,
+                'capacity' => $mapped['max_slots'] = $value,
+                'status'   => $mapped['is_active'] = $value === 'published',
+                default    => $mapped[$key] = $value,
             };
         }
 
@@ -165,18 +210,18 @@ class AttenderWorkshopEnrollmentTest extends TestCase
             'max_slots'      => 24,
             'occupied_slots' => 0,
             'is_active'      => true,
-        ], $mappedOverrides));
+        ], $mapped));
     }
 
     private function clerkToken(array $claims): string
     {
-        return 'test:'.base64_encode(json_encode(array_merge([
-            'sub' => 'user_123',
+        return 'test:' . base64_encode(json_encode(array_merge([
+            'sub'   => 'user_123',
             'email' => 'alex@example.com',
-            'name' => 'Alex Attender',
-            'iss' => config('services.clerk.issuer'),
-            'exp' => time() + 3600,
-            'nbf' => time() - 60,
+            'name'  => 'Alex Attender',
+            'iss'   => config('services.clerk.issuer'),
+            'exp'   => time() + 3600,
+            'nbf'   => time() - 60,
         ], $claims), JSON_THROW_ON_ERROR));
     }
 }

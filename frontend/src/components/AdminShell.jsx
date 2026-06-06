@@ -6,9 +6,14 @@ import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 
 const adminLinks = [
+  { labelKey: 'admin.nav.dashboard', icon: 'dashboard', to: '/demo/admin/dashboard' },
   { labelKey: 'admin.nav.users', icon: 'group', to: '/demo/admin/users' },
+  { labelKey: 'admin.nav.workshops', icon: 'school', to: '/demo/admin/workshops' },
   { labelKey: 'admin.nav.settings', icon: 'settings', to: '/demo/admin/settings' },
   { labelKey: 'admin.nav.audit', icon: 'security', to: '/demo/admin/audit' },
+  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/certificates' },
+  { labelKey: 'nav.resources', icon: 'menu_book', to: '/demo/resources' },
+  { labelKey: 'nav.profile', icon: 'account_circle', to: '/demo/profile' },
 ]
 
 export default function AdminShell({ children, searchKey = 'admin.searchSettings' }) {
@@ -24,8 +29,8 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
             <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">search</Icon>
             <input className="w-64 rounded border border-outline-variant bg-surface-container-low py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary" placeholder={t(searchKey)} type="text" />
           </div>
-          <button className="rounded p-2 text-slate-600 transition-colors hover:bg-slate-50" aria-label={t('admin.notifications')} type="button"><Icon>notifications</Icon></button>
-          <button className="rounded p-2 text-slate-600 transition-colors hover:bg-slate-50" aria-label={t('common.needHelp')} type="button"><Icon>help_outline</Icon></button>
+          <button className="cursor-not-allowed rounded p-2 text-slate-600 opacity-60 transition-colors hover:bg-slate-50" aria-label={t('admin.notifications')} disabled title={t('common.demoUnavailable')} type="button"><Icon>notifications</Icon></button>
+          <button className="cursor-not-allowed rounded p-2 text-slate-600 opacity-60 transition-colors hover:bg-slate-50" aria-label={t('common.needHelp')} disabled title={t('common.demoUnavailable')} type="button"><Icon>help_outline</Icon></button>
           <LanguageToggle />
           {isSignedIn && clerkConfigured ? (
             <UserButton afterSignOutUrl="/sign-in" />

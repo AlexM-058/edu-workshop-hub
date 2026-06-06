@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Registration;
 use App\Models\Workshop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -166,5 +167,79 @@ class TeacherWorkshopsTest extends TestCase
                 'total_enrolled'   => 0,
                 'total_capacity'   => 0,
             ]);
+    }
+
+    public function test_teacher_can_list_participants_for_own_workshop(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeWorkshop($referent);
+        $attender = User::factory()->create(['role' => 'attender']);
+        Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $attender->id,
+            'status' => 'enrolled',
+            'attended' => false,
+        ]);
+
+        $this->withToken($this->tokenFor($referent))
+            ->getJson("/api/teacher/workshops/{$workshop->id}/participants")
+            ->assertOk()
+            ->assertJsonPath('data.0.user.email', $attender->email)
+            ->assertJsonPath('data.0.status', 'enrolled')
+            ->assertJsonPath('data.0.attended', false);
+    }
+
+    public function test_teacher_can_mark_attendance_and_create_certificate(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeWorkshop($referent);
+        $attender = User::factory()->create(['role' => 'attender']);
+        $registration = Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $attender->id,
+            'status' => 'enrolled',
+            'attended' => false,
+        ]);
+
+        $this->withToken($this->tokenFor($referent))
+            ->patchJson("/api/teacher/registrations/{$registration->id}/attendance", [
+                'attended' => true,
+            ])
+            ->assertOk()
+            ->assertJsonPath('registration.attended', true)
+            ->assertJsonPath('registration.can_download_certificate', true);
+
+        $this->assertDatabaseHas('registrations', [
+            'id' => $registration->id,
+            'attended' => true,
+        ]);
+        $this->assertDatabaseHas('certificates', [
+            'registration_id' => $registration->id,
+        ]);
+    }
+
+    public function test_teacher_can_export_attendance_csv_for_own_workshop(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeWorkshop($referent);
+        $attender = User::factory()->create([
+            'role' => 'attender',
+            'first_name' => 'Mara',
+            'last_name' => 'Ionescu',
+            'email' => 'mara@example.com',
+        ]);
+        Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $attender->id,
+            'status' => 'enrolled',
+            'attended' => true,
+        ]);
+
+        $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=csv")
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertSee('mara@example.com')
+            ->assertSee('attended');
     }
 }

@@ -6,9 +6,10 @@ import { useI18n } from '../i18n/I18nContext'
 const professorLinks = [
   { labelKey: 'nav.dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
   { labelKey: 'nav.activeCourses', icon: 'school', to: '/catalog' },
-  { labelKey: 'nav.history', icon: 'history', to: '/demo/dashboard/attender?panel=history' },
-  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/dashboard/attender?panel=certificates' },
-  { labelKey: 'nav.profile', icon: 'person', to: '/register/attender' },
+  { labelKey: 'nav.history', icon: 'history', to: '/demo/history' },
+  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/certificates' },
+  { labelKey: 'nav.resources', icon: 'menu_book', to: '/demo/resources' },
+  { labelKey: 'nav.profile', icon: 'person', to: '/demo/profile' },
 ]
 
 const instructorLinks = [
@@ -16,7 +17,9 @@ const instructorLinks = [
   { labelKey: 'nav.myWorkshops', icon: 'school', to: '/demo/dashboard/teacher/workshops' },
   { labelKey: 'nav.createNew', icon: 'add_circle', to: '/demo/dashboard/teacher/workshops/new' },
   { labelKey: 'nav.analytics', icon: 'analytics', to: '/demo/dashboard/teacher/analytics' },
-  { labelKey: 'nav.profile', icon: 'account_circle', to: '/register/attender' },
+  { labelKey: 'nav.certificates', icon: 'workspace_premium', to: '/demo/certificates' },
+  { labelKey: 'nav.resources', icon: 'menu_book', to: '/demo/resources' },
+  { labelKey: 'nav.profile', icon: 'account_circle', to: '/demo/profile' },
 ]
 
 export default function DashboardShell({ children, mode = 'attender' }) {
