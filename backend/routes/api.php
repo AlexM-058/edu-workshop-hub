@@ -31,12 +31,17 @@ Route::middleware('clerk.auth')->group(function (): void {
         Route::get('/teacher/status', fn () => response()->json(['status' => 'ok']));
         Route::get('/teacher/workshops', [TeacherWorkshopController::class, 'index']);
         Route::post('/teacher/workshops', [TeacherWorkshopCreationController::class, 'store']);
+        Route::get('/teacher/workshops/{workshop}/participants', [TeacherWorkshopController::class, 'participants']);
+        Route::get('/teacher/workshops/{workshop}/attendance-list', [TeacherWorkshopController::class, 'attendanceList']);
+        Route::patch('/teacher/registrations/{registration}/attendance', [TeacherWorkshopController::class, 'markAttendance']);
         Route::get('/teacher/stats', [TeacherWorkshopController::class, 'stats']);
     });
 
     // Attender endpoints — accept canonical attender and legacy professor roles while old data is migrated.
     Route::middleware('role:attender,professor,admin')->group(function (): void {
         Route::get('/attender/registrations', [AttenderController::class, 'registrations']);
+        Route::delete('/attender/registrations/{registration}', [WorkshopEnrollmentController::class, 'destroy']);
+        Route::get('/attender/registrations/{registration}/certificate', [WorkshopEnrollmentController::class, 'certificate']);
         Route::get('/attender/stats', [AttenderController::class, 'stats']);
     });
 

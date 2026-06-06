@@ -65,10 +65,52 @@ test('app exposes canonical attender and teacher dashboard routes with legacy re
   assert.match(appSource, /path="\/demo\/dashboard\/attender"[\s\S]*roles=\{\['attender', 'professor'\]\}/)
   assert.match(appSource, /path="\/demo\/dashboard\/teacher"/)
   assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops"/)
+  assert.match(appSource, /path="\/demo\/dashboard\/teacher\/workshops\/:id\/participants"/)
   assert.match(appSource, /path="\/dashboard\/attender"/)
   assert.match(appSource, /path="\/dashboard\/teacher"/)
   assert.match(appSource, /path="\/demo\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
   assert.match(appSource, /path="\/demo\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
   assert.match(appSource, /path="\/dashboard\/professor"[\s\S]*to="\/demo\/dashboard\/attender"/)
   assert.match(appSource, /path="\/dashboard\/referent"[\s\S]*to="\/demo\/dashboard\/teacher"/)
+  assert.match(appSource, /path="\/dashboard\/referent\/workshops\/:id\/participants"[\s\S]*WorkshopParticipantsRedirect/)
+})
+
+test('app exposes final support pages instead of placeholder navigation targets', () => {
+  const appSource = readRepoFile('frontend/src/App.jsx')
+
+  assert.match(appSource, /path="\/demo\/certificates"/)
+  assert.match(appSource, /path="\/demo\/history"/)
+  assert.match(appSource, /path="\/demo\/profile"/)
+  assert.match(appSource, /path="\/demo\/resources"/)
+  assert.match(appSource, /path="\/demo\/admin\/dashboard"/)
+  assert.match(appSource, /path="\/demo\/admin\/workshops"/)
+  assert.match(appSource, /path="\/certificates"[\s\S]*to="\/demo\/certificates"/)
+  assert.match(appSource, /path="\/history"[\s\S]*to="\/demo\/history"/)
+  assert.match(appSource, /path="\/profile"[\s\S]*to="\/demo\/profile"/)
+  assert.match(appSource, /path="\/resources"[\s\S]*to="\/demo\/resources"/)
+  assert.match(appSource, /path="\/register\/attender"[\s\S]*to="\/demo\/profile"/)
+  assert.match(appSource, /path="\/admin\/dashboard"[\s\S]*to="\/demo\/admin\/dashboard"/)
+  assert.match(appSource, /path="\/admin\/workshops"[\s\S]*to="\/demo\/admin\/workshops"/)
+})
+
+test('role shells link to all final pages reachable by that role', () => {
+  const topNavSource = readRepoFile('frontend/src/components/TopNav.jsx')
+  const dashboardShellSource = readRepoFile('frontend/src/components/DashboardShell.jsx')
+  const adminShellSource = readRepoFile('frontend/src/components/AdminShell.jsx')
+
+  for (const path of ['/catalog', '/demo/dashboard/attender', '/demo/history', '/demo/certificates', '/demo/resources', '/demo/profile']) {
+    assert.match(dashboardShellSource, new RegExp(`to: '${path.replaceAll('/', '\\/')}'`))
+  }
+
+  for (const path of ['/catalog', '/demo/dashboard/teacher', '/demo/dashboard/teacher/workshops', '/demo/dashboard/teacher/workshops/new', '/demo/dashboard/teacher/analytics', '/demo/certificates', '/demo/resources', '/demo/profile']) {
+    assert.match(dashboardShellSource, new RegExp(`to: '${path.replaceAll('/', '\\/')}'`))
+  }
+
+  for (const path of ['/demo/admin/dashboard', '/demo/admin/users', '/demo/admin/workshops', '/demo/admin/settings', '/demo/admin/audit', '/demo/certificates', '/demo/resources', '/demo/profile']) {
+    assert.match(adminShellSource, new RegExp(`to: '${path.replaceAll('/', '\\/')}'`))
+  }
+
+  assert.match(topNavSource, /to: '\/demo\/resources'/)
+  assert.doesNotMatch(topNavSource, /labelKey: 'nav\.resources', to: '\/'/)
+  assert.doesNotMatch(dashboardShellSource, /register\/attender/)
 })

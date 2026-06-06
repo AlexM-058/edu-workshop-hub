@@ -8,7 +8,7 @@ export function canAccessRole(userRole, allowedRoles) {
 
 export function dashboardPathForRole(userRole) {
   if (userRole === 'admin') {
-    return '/demo/admin/users'
+    return '/demo/admin/dashboard'
   }
 
   if (userRole === 'teacher' || userRole === 'referent') {

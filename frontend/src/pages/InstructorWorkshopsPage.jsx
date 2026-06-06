@@ -154,7 +154,13 @@ export default function InstructorWorkshopsPage() {
                         )}
                       </div>
                     </div>
-                    <div className="mt-6 flex justify-end border-t border-slate-100 pt-4">
+                    <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-4">
+                      <Link
+                        to={`/demo/dashboard/teacher/workshops/${workshop.id}/participants`}
+                        className="rounded bg-secondary px-6 py-2 text-label-md font-label-md text-white transition-colors hover:opacity-90"
+                      >
+                        {locale === 'de' ? 'Teilnehmende' : 'Participanți'}
+                      </Link>
                       <Link
                         to={`/demo/dashboard/referent/workshops/new?id=${workshop.id}`}
                         className="rounded border border-primary px-6 py-2 text-label-md font-label-md text-primary transition-colors hover:bg-slate-50"

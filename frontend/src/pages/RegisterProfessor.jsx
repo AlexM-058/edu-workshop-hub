@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import Icon from '../components/Icon'
 import LanguageToggle from '../components/LanguageToggle'
 import { images } from '../data/stitchData'
@@ -8,6 +9,8 @@ const interests = ['Cognitive Pedagogy', 'Research Ethics', 'Faculty Mentorship'
 
 export default function RegisterProfessor() {
   const { t } = useI18n()
+  const [selectedTags, setSelectedTags] = useState(['Higher Education', 'Digital Literacy'])
+  const [selectedInterests, setSelectedInterests] = useState(['Research Ethics'])
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-on-background">
@@ -66,15 +69,28 @@ export default function RegisterProfessor() {
                     <input className="w-full border border-outline-variant py-sm pl-xl pr-md font-body-md text-body-md outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Search subjects (e.g., Computer Science, Linguistics)" type="text" />
                   </div>
                   <div className="mt-sm flex flex-wrap gap-xs">
-                    {['Higher Education', 'Digital Literacy'].map((tag) => <span key={tag} className="flex items-center gap-xs bg-surface-container px-sm py-xs text-caption font-label-md text-primary">{tag}<button type="button"><Icon className="text-[14px]">close</Icon></button></span>)}
+                    {selectedTags.map((tag) => (
+                      <span key={tag} className="flex items-center gap-xs bg-surface-container px-sm py-xs text-caption font-label-md text-primary">
+                        {tag}
+                        <button aria-label={`Remove ${tag}`} onClick={() => setSelectedTags((tags) => tags.filter((item) => item !== tag))} type="button">
+                          <Icon className="text-[14px]">close</Icon>
+                        </button>
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <div className="space-y-md md:col-span-2">
                   <label className="block text-label-md font-label-md text-primary">{t('register.interests')}</label>
                   <div className="grid grid-cols-2 gap-sm lg:grid-cols-3">
                     {interests.map((interest) => (
-                      <button key={interest} className={`flex flex-col items-start gap-sm border p-md text-left transition-all ${interest === 'Research Ethics' ? 'border-primary bg-surface-container-low ring-1 ring-primary' : 'border-outline-variant bg-surface-container-lowest hover:border-primary'}`} type="button">
-                        <Icon filled={interest === 'Research Ethics'} className="text-primary">{interest === 'Research Ethics' ? 'biotech' : 'psychology'}</Icon>
+                      <button
+                        key={interest}
+                        aria-pressed={selectedInterests.includes(interest)}
+                        className={`flex flex-col items-start gap-sm border p-md text-left transition-all ${selectedInterests.includes(interest) ? 'border-primary bg-surface-container-low ring-1 ring-primary' : 'border-outline-variant bg-surface-container-lowest hover:border-primary'}`}
+                        onClick={() => setSelectedInterests((items) => items.includes(interest) ? items.filter((item) => item !== interest) : [...items, interest])}
+                        type="button"
+                      >
+                        <Icon filled={selectedInterests.includes(interest)} className="text-primary">{interest === 'Research Ethics' ? 'biotech' : 'psychology'}</Icon>
                         <span className="text-label-md font-label-md">{interest}</span>
                       </button>
                     ))}

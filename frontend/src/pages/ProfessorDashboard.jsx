@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DashboardShell from '../components/DashboardShell'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { useAttenderRegistrations, useAttenderStats } from '../lib/attenderRegistrations'
+import { downloadCertificate, withdrawRegistration } from '../lib/api'
+import { downloadBlob } from '../lib/downloadFile'
 
 // Status config keyed by registration.status value
 const STATUS_CONFIG = {
@@ -14,10 +17,41 @@ const STATUS_CONFIG = {
 
 export default function ProfessorDashboard() {
   const { t, locale } = useI18n()
-  const { appUser } = useAppAuth()
+  const { appUser, getToken } = useAppAuth()
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [actionError, setActionError] = useState(null)
+  const [busyRegistrationId, setBusyRegistrationId] = useState(null)
 
-  const { registrations, meta, isLoading, error } = useAttenderRegistrations({ perPage: 5 })
+  const { registrations, meta, isLoading, error } = useAttenderRegistrations({ perPage: 5, refreshKey })
   const { stats, isLoading: statsLoading } = useAttenderStats()
+
+  async function handleCertificateDownload(registration) {
+    setActionError(null)
+    setBusyRegistrationId(registration.id)
+    try {
+      const token = await getToken()
+      const blob = await downloadCertificate({ token, registrationId: registration.id })
+      downloadBlob(blob, `certificate-${registration.id}.pdf`)
+    } catch (error) {
+      setActionError(error)
+    } finally {
+      setBusyRegistrationId(null)
+    }
+  }
+
+  async function handleWithdraw(registration) {
+    setActionError(null)
+    setBusyRegistrationId(registration.id)
+    try {
+      const token = await getToken()
+      await withdrawRegistration({ token, registrationId: registration.id })
+      setRefreshKey((value) => value + 1)
+    } catch (error) {
+      setActionError(error)
+    } finally {
+      setBusyRegistrationId(null)
+    }
+  }
 
   const greeting = appUser?.first_name
     ? (locale === 'de' ? `Willkommen, ${appUser.first_name}!` : `Bine ai revenit, ${appUser.first_name}!`)
@@ -60,6 +94,15 @@ export default function ProfessorDashboard() {
                     : 'Nu am putut încărca înregistrările.'}
                 </p>
                 <p className="mt-1 text-sm opacity-70">{error.message}</p>
+              </div>
+            )}
+
+            {actionError && (
+              <div className="rounded-lg border border-error/30 bg-error-container px-6 py-4 text-on-error-container">
+                <p className="font-label-md">
+                  {locale === 'de' ? 'Aktion konnte nicht abgeschlossen werden.' : 'Acțiunea nu a putut fi finalizată.'}
+                </p>
+                <p className="mt-1 text-sm opacity-70">{actionError.message}</p>
               </div>
             )}
 
@@ -113,6 +156,7 @@ export default function ProfessorDashboard() {
                     : '—'
                   const statusCfg = STATUS_CONFIG[reg.status] ?? STATUS_CONFIG.enrolled
                   const statusLabel = locale === 'de' ? statusCfg.de : statusCfg.ro
+                  const isBusy = busyRegistrationId === reg.id
 
                   return (
                     <article
@@ -153,13 +197,13 @@ export default function ProfessorDashboard() {
                         </div>
 
                         {/* Certificate CTA or attendance status */}
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+                        <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
                           {reg.can_download_certificate ? (
                             <button
-                              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-white transition-colors hover:opacity-90"
+                              className="inline-flex items-center justify-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-white transition-colors hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+                              disabled={isBusy}
+                              onClick={() => handleCertificateDownload(reg)}
                               type="button"
-                              title={t('common.demoUnavailable')}
-                              disabled
                             >
                               <Icon>workspace_premium</Icon>
                               {locale === 'de' ? 'Zertifikat herunterladen' : 'Descarcă certificatul'}
@@ -174,12 +218,24 @@ export default function ProfessorDashboard() {
                               {locale === 'de' ? 'Ausstehend' : 'În așteptare'}
                             </span>
                           )}
-                          <Link
-                            to={`/workshops/${reg.workshop?.id}`}
-                            className="font-label-md text-primary hover:underline"
-                          >
-                            {locale === 'de' ? 'Details' : 'Detalii'}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-3">
+                            {reg.status !== 'cancelled' && (
+                              <button
+                                className="rounded border border-error/40 px-4 py-2 text-sm font-label-md text-error transition hover:bg-error-container disabled:cursor-wait disabled:opacity-60"
+                                disabled={isBusy}
+                                onClick={() => handleWithdraw(reg)}
+                                type="button"
+                              >
+                                {locale === 'de' ? 'Zurückziehen' : 'Retrage'}
+                              </button>
+                            )}
+                            <Link
+                              to={`/workshops/${reg.workshop?.id}`}
+                              className="font-label-md text-primary hover:underline"
+                            >
+                              {locale === 'de' ? 'Details' : 'Detalii'}
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -193,13 +249,12 @@ export default function ProfessorDashboard() {
               <p className="mt-4 text-center text-sm text-on-surface-variant">
                 {meta.total - 5}{' '}
                 {locale === 'de' ? 'weitere Einschreibungen' : 'înregistrări suplimentare'} —{' '}
-                <button
+                <Link
                   className="font-label-md text-primary hover:underline"
-                  onClick={() => {/* pagination TBD */}}
-                  type="button"
+                  to="/demo/history"
                 >
                   {t('common.viewAll')}
-                </button>
+                </Link>
               </p>
             )}
           </section>

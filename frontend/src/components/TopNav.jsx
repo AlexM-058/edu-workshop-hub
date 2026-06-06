@@ -8,15 +8,15 @@ import { useI18n } from '../i18n/I18nContext'
 const professorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
   { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/attender' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
-  { labelKey: 'nav.resources', to: '/' },
+  { labelKey: 'nav.certificates', to: '/demo/certificates' },
+  { labelKey: 'nav.resources', to: '/demo/resources' },
 ]
 
 const instructorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
   { labelKey: 'nav.myWorkshops', to: '/demo/dashboard/teacher/workshops' },
-  { labelKey: 'nav.certificates', to: '/demo/dashboard/attender?panel=certificates' },
-  { labelKey: 'nav.resources', to: '/' },
+  { labelKey: 'nav.certificates', to: '/demo/certificates' },
+  { labelKey: 'nav.resources', to: '/demo/resources' },
 ]
 
 export default function TopNav({ searchKey = 'nav.searchCourses', instructor = false }) {
@@ -24,7 +24,7 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
   const { appUser, clerkConfigured, isSignedIn, signOut } = useAppAuth()
   const links = [
     ...(instructor ? instructorLinks : professorLinks),
-    ...(appUser?.role === 'admin' ? [{ labelKey: 'admin.portal', to: '/demo/admin/users' }] : []),
+    ...(appUser?.role === 'admin' ? [{ labelKey: 'admin.portal', to: '/demo/admin/dashboard' }] : []),
   ]
 
   return (
@@ -61,10 +61,10 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
               type="text"
             />
           </div>
-          <button className="rounded-lg p-2 text-slate-600 transition-colors duration-200 hover:bg-slate-50" aria-label="Notifications">
+          <button className="cursor-not-allowed rounded-lg p-2 text-slate-600 opacity-60 transition-colors duration-200 hover:bg-slate-50" aria-label="Notifications" disabled title={t('common.demoUnavailable')} type="button">
             <Icon>notifications</Icon>
           </button>
-          <button className="rounded-lg p-2 text-slate-600 transition-colors duration-200 hover:bg-slate-50" aria-label="Help">
+          <button className="cursor-not-allowed rounded-lg p-2 text-slate-600 opacity-60 transition-colors duration-200 hover:bg-slate-50" aria-label="Help" disabled title={t('common.demoUnavailable')} type="button">
             <Icon>help_outline</Icon>
           </button>
           {isSignedIn ? (
