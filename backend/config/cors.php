@@ -1,11 +1,16 @@
 <?php
 
+$frontendUrls = array_filter(array_map(
+    'trim',
+    explode(',', env('FRONTEND_URLS', env('FRONTEND_URL', '')))
+));
+
 return [
     'paths' => ['api/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [],
+    'allowed_origins' => $frontendUrls,
 
     'allowed_origins_patterns' => ['#^http://(localhost|127\.0\.0\.1):5173$#'],
 

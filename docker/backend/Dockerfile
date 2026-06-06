@@ -19,4 +19,4 @@ RUN sed -i 's/\r$//' /usr/local/bin/backend-entrypoint \
 EXPOSE 8000
 
 ENTRYPOINT ["backend-entrypoint"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
