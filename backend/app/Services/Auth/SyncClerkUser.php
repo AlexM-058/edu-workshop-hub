@@ -10,7 +10,10 @@ class SyncClerkUser
 {
     public function __construct(private readonly ClerkUserClient $clerkUserClient) {}
 
-    public function sync(array $claims): User
+    /**
+     * @return array{user: User, teacher_invitation_accepted: bool}
+     */
+    public function sync(array $claims): array
     {
         $clerkId = (string) $claims['sub'];
         $profile = $this->clerkUserClient->profileFromClaims($claims);
@@ -38,11 +41,12 @@ class SyncClerkUser
         ]);
         $user->save();
 
-        if ($isNewUser) {
-            $this->acceptTeacherInvitation($user);
-        }
+        $teacherInvitationAccepted = $isNewUser && $this->acceptTeacherInvitation($user);
 
-        return $user;
+        return [
+            'user' => $user,
+            'teacher_invitation_accepted' => $teacherInvitationAccepted,
+        ];
     }
 
     /**
@@ -77,16 +81,16 @@ class SyncClerkUser
     /**
      * Marks any pending teacher invitation as accepted once the user first logs in.
      */
-    private function acceptTeacherInvitation(User $user): void
+    private function acceptTeacherInvitation(User $user): bool
     {
-        if (! in_array($user->role, ['teacher', 'admin'], true)) {
-            return;
+        if ($user->role !== 'teacher') {
+            return false;
         }
 
-        TeacherInvitation::query()
+        return TeacherInvitation::query()
             ->where('email', $user->email)
             ->whereNull('accepted_at')
-            ->update(['accepted_at' => now()]);
+            ->update(['accepted_at' => now()]) > 0;
     }
 
     /**

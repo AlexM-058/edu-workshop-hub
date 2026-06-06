@@ -26,7 +26,8 @@ class AuthenticateWithClerk
 
         try {
             $claims = $this->tokens->verify($token);
-            $user = $this->users->sync($claims);
+            $syncResult = $this->users->sync($claims);
+            $user = $syncResult['user'];
         } catch (RuntimeException $exception) {
             report($exception);
 
@@ -34,6 +35,10 @@ class AuthenticateWithClerk
         }
 
         $request->attributes->set('clerk_claims', $claims);
+        $request->attributes->set(
+            'teacher_invitation_accepted',
+            $syncResult['teacher_invitation_accepted'],
+        );
         $request->setUserResolver(fn () => $user);
 
         return $next($request);

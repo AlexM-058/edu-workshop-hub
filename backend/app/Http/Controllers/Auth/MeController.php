@@ -22,6 +22,9 @@ class MeController extends Controller
                 'email'      => $user->email,
                 'role'       => $user->role,
             ],
+            'notifications' => [
+                'teacher_invitation_accepted' => (bool) $request->attributes->get('teacher_invitation_accepted', false),
+            ],
         ]);
     }
 }

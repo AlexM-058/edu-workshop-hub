@@ -73,7 +73,8 @@ class ClerkAuthTest extends TestCase
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', true);
 
         $this->assertNotNull(TeacherInvitation::first()->accepted_at);
 
@@ -85,7 +86,8 @@ class ClerkAuthTest extends TestCase
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false);
     }
 
     public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void
