@@ -49,6 +49,10 @@ class AuthenticateWithClerk
             'teacher_invitation_accepted',
             $syncResult['teacher_invitation_accepted'],
         );
+        $request->attributes->set(
+            'teacher_invitation_notice_pending',
+            $syncResult['teacher_invitation_notice_pending'],
+        );
         $request->setUserResolver(fn () => $user);
 
         return $next($request);

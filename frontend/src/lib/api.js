@@ -51,6 +51,13 @@ export async function fetchCurrentUser(token) {
   return apiFetch('/auth/me', { token });
 }
 
+export async function markTeacherInviteNoticeSeen(token) {
+  return apiFetch('/auth/teacher-invitation-notice/seen', {
+    method: 'POST',
+    token,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Workshops — public catalog
 // ---------------------------------------------------------------------------

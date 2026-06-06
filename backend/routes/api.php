@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\TeacherInvitationController;
 use App\Http\Controllers\Attender\WorkshopEnrollmentController;
 use App\Http\Controllers\Auth\MeController;
+use App\Http\Controllers\Auth\TeacherInvitationNoticeController;
 use App\Http\Controllers\Attender\AttenderController;
 use App\Http\Controllers\Teacher\WorkshopController as TeacherWorkshopCreationController;
 use App\Http\Controllers\Workshops\TeacherWorkshopController;
@@ -23,6 +24,7 @@ Route::get('/workshops/{workshop}', [CatalogWorkshopController::class, 'show']);
 
 Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/auth/me', MeController::class);
+    Route::post('/auth/teacher-invitation-notice/seen', [TeacherInvitationNoticeController::class, 'markSeen']);
 
     // Teacher endpoints — accept canonical teacher and legacy referent roles while old data is migrated.
     Route::middleware('role:teacher,referent,admin')->group(function (): void {

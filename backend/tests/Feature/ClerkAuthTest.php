@@ -76,28 +76,57 @@ class ClerkAuthTest extends TestCase
             'role'  => 'teacher',
         ]);
 
-        $this->withToken($this->clerkToken([
+        $token = $this->clerkToken([
             'sub'   => 'user_teacher',
             'email' => 'teacher@example.com',
             'name'  => 'Tina Teacher',
-        ]))
+        ]);
+
+        $this->withToken($token)
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.role', 'teacher')
-            ->assertJsonPath('notifications.teacher_invitation_accepted', true);
+            ->assertJsonPath('notifications.teacher_invitation_accepted', true)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
 
         $this->assertNotNull(TeacherInvitation::first()->accepted_at);
+        $this->assertNull(TeacherInvitation::first()->notice_seen_at);
 
-        // Re-login: role must remain 'teacher' even after invitation expires
-        $this->withToken($this->clerkToken([
-            'sub'   => 'user_teacher',
-            'email' => 'teacher@example.com',
-            'name'  => 'Tina Teacher',
-        ]))
+        // Re-login: role must remain 'teacher' and the notice stays pending until dismissed.
+        $this->withToken($token)
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.role', 'teacher')
-            ->assertJsonPath('notifications.teacher_invitation_accepted', false);
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
+
+        $this->withToken($token)
+            ->postJson('/api/auth/teacher-invitation-notice/seen')
+            ->assertOk()
+            ->assertJsonPath('status', 'seen');
+
+        $this->assertNotNull(TeacherInvitation::first()->notice_seen_at);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', false);
+    }
+
+    public function test_teacher_invitation_notice_seen_endpoint_is_idempotent(): void
+    {
+        $token = $this->clerkToken([
+            'sub'   => 'user_teacher_without_notice',
+            'email' => 'teacher.no.notice@example.com',
+            'name'  => 'Tina Teacher',
+        ]);
+
+        $this->withToken($token)
+            ->postJson('/api/auth/teacher-invitation-notice/seen')
+            ->assertOk()
+            ->assertJsonPath('status', 'none');
     }
 
     public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void

@@ -1,8 +1,8 @@
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
-import { fetchCurrentUser } from '../lib/api'
+import { fetchCurrentUser, markTeacherInviteNoticeSeen } from '../lib/api'
 import { AuthContext } from './AuthContext'
 import { shouldShowTeacherInviteNotice } from './teacherInviteNotice'
 
@@ -72,6 +72,15 @@ export function ClerkBackedAuthProvider({ children }) {
     }
   }, [getToken, isLoaded, isSignedIn])
 
+  const dismissTeacherInviteNotice = useCallback(async () => {
+    try {
+      const token = await getToken()
+      await markTeacherInviteNoticeSeen(token)
+    } finally {
+      setShowTeacherInviteNotice(false)
+    }
+  }, [getToken])
+
   const value = useMemo(() => ({
     appUser,
     clerkConfigured: true,
@@ -89,7 +98,7 @@ export function ClerkBackedAuthProvider({ children }) {
     <AuthContext.Provider value={value}>
       {children}
       {showTeacherInviteNotice ? (
-        <TeacherInviteNotice onDismiss={() => setShowTeacherInviteNotice(false)} t={t} />
+        <TeacherInviteNotice onDismiss={dismissTeacherInviteNotice} t={t} />
       ) : null}
     </AuthContext.Provider>
   )
@@ -116,6 +125,20 @@ function TeacherInviteNotice({ onDismiss, t }) {
           <p className="mt-2 text-sm leading-6 text-on-surface-variant">
             {t('auth.teacherInviteNoticeText')}
           </p>
+          <ul className="mt-3 space-y-2 text-sm leading-5 text-on-surface-variant">
+            <li className="flex gap-2">
+              <Icon className="mt-0.5 text-base text-primary">check_circle</Icon>
+              <span>{t('auth.teacherInviteNoticePrivilegeCreate')}</span>
+            </li>
+            <li className="flex gap-2">
+              <Icon className="mt-0.5 text-base text-primary">check_circle</Icon>
+              <span>{t('auth.teacherInviteNoticePrivilegeManage')}</span>
+            </li>
+            <li className="flex gap-2">
+              <Icon className="mt-0.5 text-base text-primary">check_circle</Icon>
+              <span>{t('auth.teacherInviteNoticePrivilegeDashboard')}</span>
+            </li>
+          </ul>
         </div>
         <button
           aria-label={t('auth.teacherInviteNoticeDismiss')}

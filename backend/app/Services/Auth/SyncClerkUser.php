@@ -11,7 +11,7 @@ class SyncClerkUser
     public function __construct(private readonly ClerkUserClient $clerkUserClient) {}
 
     /**
-     * @return array{user: User, teacher_invitation_accepted: bool}
+     * @return array{user: User, teacher_invitation_accepted: bool, teacher_invitation_notice_pending: bool}
      */
     public function sync(array $claims): array
     {
@@ -46,6 +46,7 @@ class SyncClerkUser
         return [
             'user' => $user,
             'teacher_invitation_accepted' => $teacherInvitationAccepted,
+            'teacher_invitation_notice_pending' => $this->hasPendingTeacherInvitationNotice($user),
         ];
     }
 
@@ -91,6 +92,20 @@ class SyncClerkUser
             ->where('email', $user->email)
             ->whereNull('accepted_at')
             ->update(['accepted_at' => now()]) > 0;
+    }
+
+    private function hasPendingTeacherInvitationNotice(User $user): bool
+    {
+        if ($user->role !== 'teacher') {
+            return false;
+        }
+
+        return TeacherInvitation::query()
+            ->where('email', $user->email)
+            ->where('role', 'teacher')
+            ->whereNotNull('accepted_at')
+            ->whereNull('notice_seen_at')
+            ->exists();
     }
 
     /**
