@@ -22,7 +22,10 @@ const instructorLinks = [
 export default function TopNav({ searchKey = 'nav.searchCourses', instructor = false }) {
   const { t } = useI18n()
   const { appUser, clerkConfigured, isSignedIn, signOut } = useAppAuth()
-  const links = instructor ? instructorLinks : professorLinks
+  const links = [
+    ...(instructor ? instructorLinks : professorLinks),
+    ...(appUser?.role === 'admin' ? [{ labelKey: 'admin.portal', to: '/demo/admin/users' }] : []),
+  ]
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur-md">
