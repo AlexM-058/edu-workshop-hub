@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ ! -f .env ] && [ -f .env.example ]; then
+if [ "${APP_ENV:-local}" != "production" ] && [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
 
