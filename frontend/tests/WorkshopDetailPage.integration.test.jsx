@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { useAppAuth } from '../src/auth/AuthContext'
 import { useI18n } from '../src/i18n/I18nContext'
-import { enrollInWorkshop } from '../src/lib/api'
+import { enrollInWorkshop, fetchWorkshop } from '../src/lib/api'
 import WorkshopDetailPage from '../src/pages/WorkshopDetailPage'
 
 vi.mock('../src/auth/AuthContext', () => ({
@@ -17,6 +17,7 @@ vi.mock('../src/i18n/I18nContext', () => ({
 
 vi.mock('../src/lib/api', () => ({
   enrollInWorkshop: vi.fn(),
+  fetchWorkshop: vi.fn(),
 }))
 
 vi.mock('../src/components/TopNav', () => ({
@@ -57,6 +58,25 @@ const translations = {
   'detail.waitlistSuccess': 'Waitlist position: {position}.',
 }
 
+const workshopPayload = {
+  data: {
+    id: 7,
+    available_slots: 5,
+    description: {
+      ro: 'Descriere workshop',
+    },
+    is_open: true,
+    location: 'Online',
+    max_slots: 20,
+    occupied_slots: 15,
+    referent: { name: 'Teacher Test' },
+    scheduled_at: '2026-09-01T10:00:00.000Z',
+    title: {
+      ro: 'Workshop test',
+    },
+  },
+}
+
 function t(key, params = {}) {
   const value = translations[key] ?? key
 
@@ -87,6 +107,7 @@ function renderWorkshopDetail(authOverrides = {}) {
 
 describe('WorkshopDetailPage enrollment integration', () => {
   beforeEach(() => {
+    fetchWorkshop.mockResolvedValue(workshopPayload)
     enrollInWorkshop.mockResolvedValue({
       enrollment: {
         status: 'enrolled',
@@ -98,7 +119,7 @@ describe('WorkshopDetailPage enrollment integration', () => {
   it('shows a sign-in error and does not call the API when the user is signed out', async () => {
     renderWorkshopDetail({ isSignedIn: false, role: null })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Enroll now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enroll now' }))
 
     expect(screen.getByRole('alert')).toHaveTextContent('Sign in with an attender account.')
     expect(enrollInWorkshop).not.toHaveBeenCalled()
@@ -107,7 +128,7 @@ describe('WorkshopDetailPage enrollment integration', () => {
   it('shows a forbidden error and does not call the API for non-attender roles', async () => {
     renderWorkshopDetail({ role: 'teacher' })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Enroll now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enroll now' }))
 
     expect(screen.getByRole('alert')).toHaveTextContent('Only attenders can enroll.')
     expect(enrollInWorkshop).not.toHaveBeenCalled()
@@ -118,7 +139,7 @@ describe('WorkshopDetailPage enrollment integration', () => {
 
     renderWorkshopDetail({ getToken })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Enroll now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enroll now' }))
 
     await waitFor(() => {
       expect(enrollInWorkshop).toHaveBeenCalledWith('attender-token', '7')
@@ -138,7 +159,7 @@ describe('WorkshopDetailPage enrollment integration', () => {
 
     renderWorkshopDetail()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Enroll now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enroll now' }))
 
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('Waitlist position: 3.')
@@ -152,7 +173,7 @@ describe('WorkshopDetailPage enrollment integration', () => {
 
     renderWorkshopDetail()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Enroll now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enroll now' }))
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('You are already enrolled or waitlisted.')

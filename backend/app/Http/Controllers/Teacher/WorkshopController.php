@@ -29,6 +29,14 @@ class WorkshopController extends Controller
         $workshop = Workshop::create([
             ...$validated,
             'teacher_id' => $request->user()->id,
+            'referent_id' => $request->user()->id,
+            'title_ro' => $validated['title'],
+            'title_de' => $validated['title'],
+            'description_ro' => $validated['description'],
+            'description_de' => $validated['description'],
+            'max_slots' => $validated['capacity'] ?? null,
+            'scheduled_at' => $validated['starts_at'] ?? null,
+            'is_active' => $validated['status'] === 'published',
         ]);
 
         return response()->json([

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -11,7 +10,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['clerk_id', 'name', 'email', 'role', 'password'])]
+/**
+ * Platform user authenticated exclusively via Clerk.
+ *
+ * Roles: 'professor' (attender / learner), 'referent' (teacher / organiser),
+ * 'admin'.
+ *
+ * The `password` column exists in the stock Laravel `users` table but is never
+ * populated by this application — authentication is handled entirely by Clerk.
+ * It is excluded from $fillable and from casts to avoid accidental use.
+ */
+#[Fillable(['clerk_id', 'first_name', 'last_name', 'name', 'email', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -19,16 +28,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Returns the user's full display name.
+     * Falls back to first_name, then email if both name parts are empty.
      */
-    protected function casts(): array
+    public function fullName(): string
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        $full = trim("{$this->first_name} {$this->last_name}");
+
+        return $full !== '' ? $full : ($this->name ?? $this->email);
     }
 
     public function workshopEnrollments(): HasMany

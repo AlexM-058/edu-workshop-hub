@@ -5,3 +5,19 @@ export function canAccessRole(userRole, allowedRoles) {
 
   return allowedRoles.includes(userRole)
 }
+
+export function dashboardPathForRole(userRole) {
+  if (userRole === 'admin') {
+    return '/demo/admin/users'
+  }
+
+  if (userRole === 'teacher' || userRole === 'referent') {
+    return '/demo/dashboard/teacher'
+  }
+
+  if (userRole === 'attender' || userRole === 'professor') {
+    return '/demo/dashboard/attender'
+  }
+
+  return '/sign-in'
+}

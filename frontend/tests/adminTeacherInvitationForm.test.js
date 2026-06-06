@@ -35,6 +35,7 @@ describe('admin teacher invitation form', () => {
 
     expect(calls).toEqual([['admin-token', 'new.teacher@example.com']]);
     expect(result).toEqual({
+      didInvite: true,
       inviteEmail: '',
       inviteError: '',
       invitedEmail: 'new.teacher@example.com',
@@ -76,6 +77,7 @@ describe('admin teacher invitation form', () => {
     });
 
     expect(result).toEqual({
+      didInvite: false,
       inviteError: 'Emailul este invalid.',
       invitedEmail: '',
       inviteStatus: '',

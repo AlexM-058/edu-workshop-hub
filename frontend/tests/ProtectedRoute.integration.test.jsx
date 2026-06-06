@@ -86,7 +86,7 @@ describe('ProtectedRoute integration', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
 
-    expect(screen.getByText('Sync failed')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sync failed' })).toBeInTheDocument()
     expect(screen.getByText('Backend sync failed')).toBeInTheDocument()
     expect(signOut).toHaveBeenCalledTimes(1)
   })

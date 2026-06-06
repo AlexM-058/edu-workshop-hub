@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { fetchCurrentUser } from '../src/lib/api'
+import { fetchCurrentUser, markTeacherInviteNoticeSeen } from '../src/lib/api'
 import { ClerkBackedAuthProvider, StaticAuthProvider } from '../src/auth/AuthProvider'
 import { useAppAuth } from '../src/auth/AuthContext'
+import { I18nContext } from '../src/i18n/I18nContext'
 
 vi.mock('@clerk/clerk-react', () => ({
   useAuth: vi.fn(),
@@ -12,7 +14,26 @@ vi.mock('@clerk/clerk-react', () => ({
 
 vi.mock('../src/lib/api', () => ({
   fetchCurrentUser: vi.fn(),
+  markTeacherInviteNoticeSeen: vi.fn(),
 }))
+
+const translations = {
+  'auth.teacherInviteNoticeDismiss': 'Dismiss',
+  'auth.teacherInviteNoticeHeading': 'Teacher access enabled',
+  'auth.teacherInviteNoticePrivilegeCreate': 'Create workshops',
+  'auth.teacherInviteNoticePrivilegeDashboard': 'Open dashboard',
+  'auth.teacherInviteNoticePrivilegeManage': 'Manage participants',
+  'auth.teacherInviteNoticeText': 'You can now use teacher tools.',
+  'auth.teacherInviteNoticeTitle': 'Teacher invitation',
+}
+
+function renderWithI18n(ui) {
+  return render(
+    <I18nContext.Provider value={{ locale: 'ro', setLocale: vi.fn(), t: (key) => translations[key] ?? key }}>
+      {ui}
+    </I18nContext.Provider>,
+  )
+}
 
 function AuthProbe() {
   const auth = useAppAuth()
@@ -67,7 +88,7 @@ describe('auth providers integration', () => {
   })
 
   it('syncs the Clerk session with the backend and exposes the backend role', async () => {
-    render(
+    renderWithI18n(
       <ClerkBackedAuthProvider>
         <AuthProbe />
       </ClerkBackedAuthProvider>,
@@ -84,10 +105,34 @@ describe('auth providers integration', () => {
     expect(screen.getByTestId('error')).toHaveTextContent('none')
   })
 
+  it('shows and dismisses the accepted teacher invitation notice', async () => {
+    fetchCurrentUser.mockResolvedValue({
+      notifications: {
+        teacher_invitation_notice_pending: true,
+      },
+      user: { id: 7, role: 'teacher' },
+    })
+
+    renderWithI18n(
+      <ClerkBackedAuthProvider>
+        <AuthProbe />
+      </ClerkBackedAuthProvider>,
+    )
+
+    expect(await screen.findByText('Teacher access enabled')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+
+    await waitFor(() => {
+      expect(markTeacherInviteNoticeSeen).toHaveBeenCalledWith('clerk-token')
+    })
+    expect(screen.queryByText('Teacher access enabled')).not.toBeInTheDocument()
+  })
+
   it('exposes syncError and clears app user when backend sync fails', async () => {
     fetchCurrentUser.mockRejectedValue(new Error('Backend unavailable'))
 
-    render(
+    renderWithI18n(
       <ClerkBackedAuthProvider>
         <AuthProbe />
       </ClerkBackedAuthProvider>,
@@ -109,7 +154,7 @@ describe('auth providers integration', () => {
       signOut: vi.fn(),
     })
 
-    render(
+    renderWithI18n(
       <ClerkBackedAuthProvider>
         <AuthProbe />
       </ClerkBackedAuthProvider>,

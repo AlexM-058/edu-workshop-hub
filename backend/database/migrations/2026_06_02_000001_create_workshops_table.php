@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('workshops', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('teacher_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title');
             $table->string('category');
             $table->text('description');

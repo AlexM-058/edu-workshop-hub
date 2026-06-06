@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { MarketingWorkshopCard, CatalogWorkshopCard } from '../src/components/WorkshopCard';
+import { I18nContext } from '../src/i18n/I18nContext';
 
 // Mock the Icon component
 vi.mock('../src/components/Icon', () => ({
@@ -13,79 +14,94 @@ vi.mock('../src/components/Icon', () => ({
 }));
 
 const marketingWorkshop = {
-  image: 'https://example.com/image.jpg',
-  badge: 'Nou',
-  category: 'Data Science',
-  title: 'Applied Digital Pedagogy',
-  description: 'Classroom methods with practical data exercises.',
-  duration: '12 hours',
-  rating: '4.8',
+  id: 1,
+  is_open: true,
+  max_slots: 24,
+  occupied_slots: 8,
+  referent: { name: 'John Doe' },
+  title: {
+    ro: 'Pedagogie digitală aplicată',
+    de: 'Angewandte digitale Pädagogik',
+  },
+  description: {
+    ro: 'Metode practice pentru clase digitale.',
+    de: 'Praktische Methoden für digitale Klassen.',
+  },
 };
 
 const catalogWorkshop = {
-  image: 'https://example.com/image.jpg',
-  open: true,
-  category: 'Data Science',
-  title: 'Applied Digital Pedagogy',
-  credits: '3 credits',
-  facilitator: 'John Doe',
-  date: '2026-09-01 - 2026-09-10',
-  locationIcon: 'location_on',
+  id: 1,
+  available_slots: 16,
+  is_open: true,
   location: 'Online',
-  price: '$99',
-  note: 'Limited spots',
+  max_slots: 24,
+  occupied_slots: 8,
+  referent: { name: 'John Doe' },
+  scheduled_at: '2026-09-01T10:00:00.000Z',
+  title: {
+    ro: 'Pedagogie digitală aplicată',
+    de: 'Angewandte digitale Pädagogik',
+  },
 };
+
+function renderWithI18n(ui, { locale = 'ro', router = true } = {}) {
+  const content = (
+    <I18nContext.Provider value={{ locale, setLocale: vi.fn(), t: (key) => key }}>
+      {ui}
+    </I18nContext.Provider>
+  );
+
+  return render(router ? <BrowserRouter>{content}</BrowserRouter> : content);
+}
 
 describe('MarketingWorkshopCard', () => {
   it('renders workshop image with correct src', () => {
-    const { container } = render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    const { container } = renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
     const image = container.querySelector('img');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
+    expect(image).toHaveAttribute('src', expect.stringContaining('googleusercontent.com'));
   });
 
   it('displays workshop title', () => {
-    render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    expect(screen.getByText('Applied Digital Pedagogy')).toBeInTheDocument();
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    expect(screen.getByText('Pedagogie digitală aplicată')).toBeInTheDocument();
   });
 
   it('displays workshop description', () => {
-    render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    expect(screen.getByText('Classroom methods with practical data exercises.')).toBeInTheDocument();
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    expect(screen.getByText('Metode practice pentru clase digitale.')).toBeInTheDocument();
   });
 
-  it('displays category with icon', () => {
-    render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    expect(screen.getByText('Data Science')).toBeInTheDocument();
+  it('displays referent with icon', () => {
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  it('displays duration with icon', () => {
-    render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    expect(screen.getByText('12 hours')).toBeInTheDocument();
+  it('displays occupancy with icon', () => {
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    expect(screen.getByText('8/24')).toBeInTheDocument();
   });
 
-  it('displays rating with star icon', () => {
-    render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    const ratingElements = screen.getAllByText('4.8');
-    expect(ratingElements.length).toBeGreaterThan(0);
+  it('links to workshop details', () => {
+    const { container } = renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />, { router: true });
+    const link = container.querySelector('a[href="/workshops/1"]');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveTextContent('Detalii');
   });
 
-  it('displays badge with correct styling for "Nou"', () => {
-    const { container } = render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
-    const badge = container.querySelector('[class*="bg-slate-100"]');
-    expect(badge).toBeInTheDocument();
-    expect(badge).toHaveTextContent('Nou');
+  it('displays open enrollment badge when open', () => {
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    expect(screen.getByText('Înscrieri deschise')).toBeInTheDocument();
   });
 
-  it('displays badge with secondary styling for non-"Nou" badges', () => {
-    const workshop = { ...marketingWorkshop, badge: 'Popular' };
-    const { container } = render(<MarketingWorkshopCard workshop={workshop} />);
-    const badge = container.querySelector('[class*="bg-secondary"]');
-    expect(badge).toBeInTheDocument();
+  it('uses the selected locale for marketing copy', () => {
+    renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />, { locale: 'de' });
+    expect(screen.getByText('Angewandte digitale Pädagogik')).toBeInTheDocument();
+    expect(screen.getByText('Praktische Methoden für digitale Klassen.')).toBeInTheDocument();
   });
 
   it('renders as article element', () => {
-    const { container } = render(<MarketingWorkshopCard workshop={marketingWorkshop} />);
+    const { container } = renderWithI18n(<MarketingWorkshopCard workshop={marketingWorkshop} />);
     const article = container.querySelector('article');
     expect(article).toBeInTheDocument();
   });
@@ -93,29 +109,29 @@ describe('MarketingWorkshopCard', () => {
 
 describe('CatalogWorkshopCard', () => {
   const renderWithRouter = (component) => {
-    return render(<BrowserRouter>{component}</BrowserRouter>);
+    return renderWithI18n(component, { router: true });
   };
 
   it('renders workshop image with correct src', () => {
     const { container } = renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
     const image = container.querySelector('img');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
+    expect(image).toHaveAttribute('src', expect.stringContaining('googleusercontent.com'));
   });
 
   it('displays workshop title', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('Applied Digital Pedagogy')).toBeInTheDocument();
+    expect(screen.getByText('Pedagogie digitală aplicată')).toBeInTheDocument();
   });
 
-  it('displays category badge', () => {
+  it('displays workshop badge', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('Data Science')).toBeInTheDocument();
+    expect(screen.getByText('Workshop')).toBeInTheDocument();
   });
 
-  it('displays credits information', () => {
+  it('displays available slot count', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('3 credits')).toBeInTheDocument();
+    expect(screen.getByText('16 locuri libere')).toBeInTheDocument();
   });
 
   it('displays facilitator name', () => {
@@ -125,7 +141,7 @@ describe('CatalogWorkshopCard', () => {
 
   it('displays workshop date', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('2026-09-01 - 2026-09-10')).toBeInTheDocument();
+    expect(screen.getByText('1 septembrie 2026')).toBeInTheDocument();
   });
 
   it('displays location', () => {
@@ -133,38 +149,36 @@ describe('CatalogWorkshopCard', () => {
     expect(screen.getByText('Online')).toBeInTheDocument();
   });
 
-  it('displays price', () => {
+  it('displays occupancy', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('$99')).toBeInTheDocument();
+    expect(screen.getByText('8/24')).toBeInTheDocument();
+    expect(screen.getByText('Participanți')).toBeInTheDocument();
   });
 
-  it('displays note when provided', () => {
+  it('shows open enrollment badge when open is true', () => {
     renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('Limited spots')).toBeInTheDocument();
+    expect(screen.getByText('Înscrieri deschise')).toBeInTheDocument();
   });
 
-  it('does not display note when not provided', () => {
-    const workshop = { ...catalogWorkshop, note: null };
+  it('does not show open enrollment badge when open is false', () => {
+    const workshop = { ...catalogWorkshop, is_open: false };
     renderWithRouter(<CatalogWorkshopCard workshop={workshop} />);
-    expect(screen.queryByText('Limited spots')).not.toBeInTheDocument();
+    expect(screen.queryByText('Înscrieri deschise')).not.toBeInTheDocument();
   });
 
-  it('shows "Enrollment Open" badge when open is true', () => {
-    renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
-    expect(screen.getByText('Enrollment Open')).toBeInTheDocument();
-  });
-
-  it('does not show "Enrollment Open" badge when open is false', () => {
-    const workshop = { ...catalogWorkshop, open: false };
-    renderWithRouter(<CatalogWorkshopCard workshop={workshop} />);
-    expect(screen.queryByText('Enrollment Open')).not.toBeInTheDocument();
-  });
-
-  it('renders enrollment button with link', () => {
+  it('renders details button with link', () => {
     const { container } = renderWithRouter(<CatalogWorkshopCard workshop={catalogWorkshop} />);
     const link = container.querySelector('a[href="/workshops/1"]');
     expect(link).toBeInTheDocument();
-    expect(link).toHaveTextContent('Înscrie-te');
+    expect(link).toHaveTextContent('Detalii');
+  });
+
+  it('uses German labels when locale is de', () => {
+    renderWithI18n(<CatalogWorkshopCard workshop={catalogWorkshop} />, { locale: 'de', router: true });
+
+    expect(screen.getByText('Angewandte digitale Pädagogik')).toBeInTheDocument();
+    expect(screen.getByText('16 Plätze frei')).toBeInTheDocument();
+    expect(screen.getByText('Teilnehmende')).toBeInTheDocument();
   });
 
   it('renders as article element', () => {

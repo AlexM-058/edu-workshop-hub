@@ -12,6 +12,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --optimize-autoloader
+
+COPY backend/ ./
+
 COPY docker/backend/entrypoint.sh /usr/local/bin/backend-entrypoint
 RUN sed -i 's/\r$//' /usr/local/bin/backend-entrypoint \
     && chmod +x /usr/local/bin/backend-entrypoint
@@ -19,4 +24,4 @@ RUN sed -i 's/\r$//' /usr/local/bin/backend-entrypoint \
 EXPOSE 8000
 
 ENTRYPOINT ["backend-entrypoint"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]

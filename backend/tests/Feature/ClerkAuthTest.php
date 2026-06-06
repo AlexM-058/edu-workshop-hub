@@ -29,6 +29,16 @@ class ClerkAuthTest extends TestCase
             ->assertUnauthorized();
     }
 
+    public function test_auth_me_can_return_debug_reason_for_invalid_tokens(): void
+    {
+        config(['services.clerk.auth_debug' => true]);
+
+        $this->withToken('not-a-token')
+            ->getJson('/api/auth/me')
+            ->assertUnauthorized()
+            ->assertJsonPath('message', 'Invalid authentication token: Malformed Clerk JWT.');
+    }
+
     public function test_auth_me_rejects_expired_tokens(): void
     {
         $this->withToken($this->clerkToken(['exp' => time() - 10]))
@@ -39,55 +49,146 @@ class ClerkAuthTest extends TestCase
     public function test_auth_me_syncs_a_new_clerk_user_as_attender_by_default(): void
     {
         $this->withToken($this->clerkToken([
-            'sub' => 'user_attender',
+            'sub'   => 'user_attender',
             'email' => 'attender@example.com',
-            'name' => 'Ada Attender',
+            'name'  => 'Ana Attender',
         ]))
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.email', 'attender@example.com')
-            ->assertJsonPath('user.role', 'attender');
+            ->assertJsonPath('user.role', 'attender')
+            ->assertJsonPath('user.first_name', 'Ana')
+            ->assertJsonPath('user.last_name', 'Attender');
 
         $this->assertDatabaseHas('users', [
-            'clerk_id' => 'user_attender',
-            'email' => 'attender@example.com',
-            'role' => 'attender',
+            'clerk_id'   => 'user_attender',
+            'email'      => 'attender@example.com',
+            'first_name' => 'Ana',
+            'last_name'  => 'Attender',
+            'role'       => 'attender',
         ]);
     }
 
-    public function test_auth_me_accepts_teacher_invitation_during_sync(): void
+    public function test_auth_me_syncs_configured_admin_email_as_admin_without_teacher_notice(): void
+    {
+        config(['services.clerk.admin_emails' => ['school.admin@example.com']]);
+
+        $this->withToken($this->clerkToken([
+            'sub' => 'user_school_admin',
+            'email' => 'school.admin@example.com',
+            'name' => 'School Admin',
+        ]))
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.email', 'school.admin@example.com')
+            ->assertJsonPath('user.role', 'admin')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', false);
+
+        $this->assertDatabaseHas('users', [
+            'clerk_id' => 'user_school_admin',
+            'email' => 'school.admin@example.com',
+            'role' => 'admin',
+        ]);
+    }
+
+    public function test_auth_me_accepts_teacher_invitation_during_first_sync(): void
     {
         TeacherInvitation::create([
             'email' => 'teacher@example.com',
-            'role' => 'teacher',
+            'role'  => 'teacher',
         ]);
 
-        $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
+        $token = $this->clerkToken([
+            'sub'   => 'user_teacher',
             'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
-        ]))
+            'name'  => 'Tina Teacher',
+        ]);
+
+        $this->withToken($token)
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', true)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
 
         $this->assertNotNull(TeacherInvitation::first()->accepted_at);
+        $this->assertNull(TeacherInvitation::first()->notice_seen_at);
 
-        $this->withToken($this->clerkToken([
-            'sub' => 'user_teacher',
-            'email' => 'teacher@example.com',
-            'name' => 'Tina Teacher',
-        ]))
+        // Re-login: role must remain 'teacher' and the notice stays pending until dismissed.
+        $this->withToken($token)
             ->getJson('/api/auth/me')
             ->assertOk()
-            ->assertJsonPath('user.role', 'teacher');
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
+
+        $this->withToken($token)
+            ->postJson('/api/auth/teacher-invitation-notice/seen')
+            ->assertOk()
+            ->assertJsonPath('status', 'seen');
+
+        $this->assertNotNull(TeacherInvitation::first()->notice_seen_at);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', false)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', false);
+    }
+
+    public function test_existing_attender_is_promoted_when_teacher_invitation_is_created_later(): void
+    {
+        $token = $this->clerkToken([
+            'sub'   => 'user_existing_attender',
+            'email' => 'existing.attender@example.com',
+            'name'  => 'Existing Attender',
+        ]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'attender');
+
+        TeacherInvitation::create([
+            'email' => 'existing.attender@example.com',
+            'role'  => 'teacher',
+        ]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', true)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'existing.attender@example.com',
+            'role' => 'teacher',
+        ]);
+        $this->assertNotNull(TeacherInvitation::firstWhere('email', 'existing.attender@example.com')->accepted_at);
+    }
+
+    public function test_teacher_invitation_notice_seen_endpoint_is_idempotent(): void
+    {
+        $token = $this->clerkToken([
+            'sub'   => 'user_teacher_without_notice',
+            'email' => 'teacher.no.notice@example.com',
+            'name'  => 'Tina Teacher',
+        ]);
+
+        $this->withToken($token)
+            ->postJson('/api/auth/teacher-invitation-notice/seen')
+            ->assertOk()
+            ->assertJsonPath('status', 'none');
     }
 
     public function test_attender_is_forbidden_from_teacher_and_admin_endpoints(): void
     {
         $token = $this->clerkToken([
-            'sub' => 'user_attender',
-            'email' => 'attender@example.com',
+            'sub'   => 'user_attender_forbidden',
+            'email' => 'attender.forbidden@example.com',
         ]);
 
         $this->withToken($token)->getJson('/api/teacher/status')->assertForbidden();
@@ -101,9 +202,9 @@ class ClerkAuthTest extends TestCase
         config(['services.clerk.admin_emails' => ['admin@example.com']]);
 
         $this->withToken($this->clerkToken([
-            'sub' => 'user_admin',
+            'sub'   => 'user_admin',
             'email' => 'admin@example.com',
-            'name' => 'Admin User',
+            'name'  => 'Admin User',
         ]))
             ->postJson('/api/admin/teacher-invitations', ['email' => 'new.teacher@example.com'])
             ->assertCreated()
@@ -113,7 +214,7 @@ class ClerkAuthTest extends TestCase
 
         $this->assertDatabaseHas('teacher_invitations', [
             'email' => 'new.teacher@example.com',
-            'role' => 'teacher',
+            'role'  => 'teacher',
         ]);
     }
 
@@ -145,13 +246,13 @@ class ClerkAuthTest extends TestCase
 
     private function clerkToken(array $claims): string
     {
-        return 'test:'.base64_encode(json_encode(array_merge([
-            'sub' => 'user_123',
+        return 'test:' . base64_encode(json_encode(array_merge([
+            'sub'   => 'user_123',
             'email' => 'alex@example.com',
-            'name' => 'Alex Teacher',
-            'iss' => config('services.clerk.issuer'),
-            'exp' => time() + 3600,
-            'nbf' => time() - 60,
+            'name'  => 'Alex Test',
+            'iss'   => config('services.clerk.issuer'),
+            'exp'   => time() + 3600,
+            'nbf'   => time() - 60,
         ], $claims), JSON_THROW_ON_ERROR));
     }
 }
