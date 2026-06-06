@@ -13,7 +13,7 @@ function optionalCapacity(value) {
   return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed;
 }
 
-export function buildWorkshopPayload(form, status) {
+export function buildWorkshopPayload(form, status, coverImage, professorImage) {
   const payload = {
     title: form.title.trim(),
     category: form.category.trim(),
@@ -25,32 +25,54 @@ export function buildWorkshopPayload(form, status) {
     duration: optionalText(form.duration),
     capacity: optionalCapacity(form.capacity),
     location: optionalText(form.location),
+    cost: optionalText(form.cost),
     status,
   };
 
-  return Object.fromEntries(
-    Object.entries(payload).filter(([, value]) => value !== undefined),
-  );
+  const formData = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined) {
+      formData.append(key, value);
+    }
+  });
+
+  if (coverImage) {
+    formData.append('cover_image', coverImage);
+  }
+
+  if (professorImage) {
+    formData.append('professor_image', professorImage);
+  }
+
+  return formData;
 }
 
 export function getWorkshopSubmitErrorMessage(error, t) {
   const validationErrors = error.payload?.errors;
 
   if (validationErrors) {
-    const firstMessage = Object.values(validationErrors).flat()[0];
+    const firstField = Object.keys(validationErrors)[0];
 
-    if (firstMessage) {
-      return firstMessage;
+    if (firstField) {
+      const translationKey = `create.error.${firstField}`;
+      const translated = t(translationKey);
+      
+      if (translated !== translationKey) {
+        return translated;
+      }
+      
+      return `${t('create.error.field_invalid')}: ${firstField}`;
     }
   }
 
   return t('create.errorGeneric');
 }
 
-export async function submitWorkshopForm({ form, status, getToken, createWorkshop, t }) {
+export async function submitWorkshopForm({ form, status, coverImage, professorImage, getToken, createWorkshop, t }) {
   try {
     const token = await getToken();
-    const payload = buildWorkshopPayload(form, status);
+    const payload = buildWorkshopPayload(form, status, coverImage, professorImage);
     const response = await createWorkshop(token, payload);
 
     return {

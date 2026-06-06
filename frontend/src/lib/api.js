@@ -164,6 +164,10 @@ export async function fetchAttenderStats({ token } = {}) {
   return apiFetch('/attender/stats', { token });
 }
 
+export async function fetchRegistrationStatus({ token, workshopId } = {}) {
+  return apiFetch(`/attender/workshops/${encodeURIComponent(workshopId)}/registration-status`, { token });
+}
+
 export async function withdrawRegistration({ token, registrationId } = {}) {
   return apiFetch(`/attender/registrations/${encodeURIComponent(registrationId)}`, {
     method: 'DELETE',
@@ -238,14 +242,21 @@ export async function createTeacherInvitation(token, email) {
 }
 
 export async function createTeacherWorkshop(token, payload) {
+  const isFormData = payload instanceof FormData;
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(`${apiBaseUrl}/teacher/workshops`, {
     method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+    headers,
+    body: isFormData ? payload : JSON.stringify(payload),
   });
 
   const responsePayload = await response.json().catch(() => ({}));

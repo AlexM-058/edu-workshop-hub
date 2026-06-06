@@ -75,4 +75,16 @@ class AttenderController extends Controller
             'total_certificates' => $certificates,
         ]);
     }
+
+    public function registrationStatus(Request $request, \App\Models\Workshop $workshop): JsonResponse
+    {
+        $registration = Registration::query()
+            ->where('user_id', $request->user()->id)
+            ->where('workshop_id', $workshop->id)
+            ->first();
+
+        return response()->json([
+            'status' => $registration ? $registration->status : null,
+        ]);
+    }
 }

@@ -19,7 +19,7 @@ export function MarketingWorkshopCard({ workshop }) {
       <div className="relative aspect-video overflow-hidden">
         <img
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          src={FALLBACK_IMAGE}
+          src={workshop.cover_image_base64 || FALLBACK_IMAGE}
           alt=""
         />
         {workshop.is_open && (
@@ -31,7 +31,7 @@ export function MarketingWorkshopCard({ workshop }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-2 flex items-center gap-2 text-on-secondary-container">
           <Icon className="text-sm">history_edu</Icon>
-          <span className="text-caption font-label-md">{workshop.referent?.name ?? '—'}</span>
+          <span className="text-caption font-label-md">{workshop.coordinator_name || workshop.referent?.name || '—'}</span>
         </div>
         <h3 className="mb-3 font-h3 text-xl leading-snug text-primary">{title}</h3>
         <p className="mb-6 flex-1 text-sm text-on-surface-variant line-clamp-3">{description}</p>
@@ -72,7 +72,7 @@ export function CatalogWorkshopCard({ workshop }) {
       <div className="relative aspect-video overflow-hidden">
         <img
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          src={FALLBACK_IMAGE}
+          src={workshop.cover_image_base64 || FALLBACK_IMAGE}
           alt=""
         />
         {workshop.is_open && (
@@ -84,7 +84,7 @@ export function CatalogWorkshopCard({ workshop }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-3 flex items-start justify-between">
           <span className="rounded bg-tertiary-fixed px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight text-on-tertiary-container">
-            {locale === 'de' ? 'Workshop' : 'Workshop'}
+            {workshop.category || (locale === 'de' ? 'Workshop' : 'Workshop')}
           </span>
           <span className="text-caption font-caption text-outline">
             {workshop.available_slots} {locale === 'de' ? 'Plätze frei' : 'locuri libere'}
@@ -94,7 +94,7 @@ export function CatalogWorkshopCard({ workshop }) {
           {title}
         </h3>
         <div className="mb-6 space-y-2">
-          <Info icon="person">{workshop.referent?.name ?? '—'}</Info>
+          <Info icon="person">{workshop.coordinator_name || workshop.referent?.name || '—'}</Info>
           <Info icon="calendar_today">{dateStr}</Info>
           <Info icon="location_on">{workshop.location}</Info>
         </div>

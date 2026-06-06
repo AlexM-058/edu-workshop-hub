@@ -20,6 +20,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'occupied_slots',
     'scheduled_at',
     'is_active',
+    'category',
+    'coordinator_name',
+    'coordinator_bio',
+    'ends_at',
+    'duration',
+    'cost',
+    'cover_image_base64',
+    'professor_image_base64',
 ])]
 class Workshop extends Model
 {
@@ -29,9 +37,11 @@ class Workshop extends Model
     {
         return [
             'scheduled_at'   => 'datetime',
+            'ends_at'        => 'datetime',
             'max_slots'      => 'integer',
             'occupied_slots' => 'integer',
             'is_active'      => 'boolean',
+            'cost'           => 'decimal:2',
         ];
     }
 

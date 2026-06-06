@@ -40,6 +40,7 @@ Route::middleware('clerk.auth')->group(function (): void {
     // Attender endpoints — accept canonical attender and legacy professor roles while old data is migrated.
     Route::middleware('role:attender,professor,admin')->group(function (): void {
         Route::get('/attender/registrations', [AttenderController::class, 'registrations']);
+        Route::get('/attender/workshops/{workshop}/registration-status', [AttenderController::class, 'registrationStatus']);
         Route::delete('/attender/registrations/{registration}', [WorkshopEnrollmentController::class, 'destroy']);
         Route::get('/attender/registrations/{registration}/certificate', [WorkshopEnrollmentController::class, 'certificate']);
         Route::get('/attender/stats', [AttenderController::class, 'stats']);

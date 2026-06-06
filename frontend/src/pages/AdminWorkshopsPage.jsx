@@ -77,9 +77,18 @@ function WorkshopRow({ workshop, locale }) {
 
   return (
     <tr className="hover:bg-surface-container-low">
-      <td className="px-md py-4">
-        <p className="font-label-md text-primary">{title}</p>
-        <p className="mt-1 text-caption text-on-surface-variant">{workshop.location}</p>
+      <td className="flex items-center gap-3 px-md py-4">
+        <div className="flex h-10 w-16 shrink-0 items-center justify-center overflow-hidden rounded bg-slate-100">
+          {workshop.cover_image_base64 ? (
+            <img className="h-full w-full object-cover" src={workshop.cover_image_base64} alt="" />
+          ) : (
+            <Icon className="text-xl text-slate-300">image</Icon>
+          )}
+        </div>
+        <div>
+          <p className="font-label-md text-primary">{title}</p>
+          <p className="mt-1 text-caption text-on-surface-variant">{workshop.location}</p>
+        </div>
       </td>
       <td className="px-md py-4 text-on-surface-variant">
         {workshop.occupied_slots}/{workshop.max_slots}

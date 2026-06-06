@@ -44,10 +44,16 @@ class WorkshopEnrollmentController extends Controller
                 ->where('user_id', $request->user()->id)
                 ->first();
 
-            if ($existing && $existing->status !== 'cancelled') {
-                abort(response()->json([
-                    'message' => 'You are already enrolled or waiting for this workshop.',
-                ], 409));
+            if ($existing) {
+                if ($existing->status === 'cancelled') {
+                    abort(response()->json([
+                        'message' => 'You have cancelled your registration and cannot re-enroll.',
+                    ], 403));
+                } else {
+                    abort(response()->json([
+                        'message' => 'You are already enrolled or waiting for this workshop.',
+                    ], 409));
+                }
             }
 
             $enrolledCount = Registration::query()
@@ -62,8 +68,7 @@ class WorkshopEnrollmentController extends Controller
 
             $status = ($capacity === null || $enrolledCount < $capacity) ? 'enrolled' : 'waitlist';
 
-            // Re-use a cancelled registration record if one exists
-            $registration = $existing ?? new Registration([
+            $registration = new Registration([
                 'workshop_id' => $lockedWorkshop->id,
                 'user_id'     => $request->user()->id,
             ]);

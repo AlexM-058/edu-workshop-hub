@@ -17,12 +17,17 @@ const initialForm = {
   duration: '',
   capacity: '',
   location: '',
+  cost: '',
 }
 
 export default function CreateWorkshopPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { getToken } = useAppAuth()
   const [form, setForm] = useState(initialForm)
+  const [coverImage, setCoverImage] = useState(null)
+  const [coverImagePreview, setCoverImagePreview] = useState(null)
+  const [professorImage, setProfessorImage] = useState(null)
+  const [professorImagePreview, setProfessorImagePreview] = useState(null)
   const [submittingStatus, setSubmittingStatus] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [createdWorkshop, setCreatedWorkshop] = useState(null)
@@ -41,6 +46,8 @@ export default function CreateWorkshopPage() {
 
     const result = await submitWorkshopForm({
       form,
+      coverImage,
+      professorImage,
       status,
       getToken,
       createWorkshop: createTeacherWorkshop,
@@ -83,8 +90,24 @@ export default function CreateWorkshopPage() {
                     <h3 className="mb-md font-label-md text-label-md uppercase text-primary">{t('create.coordinator')}</h3>
                     <div className="grid grid-cols-1 gap-md md:grid-cols-[120px_1fr]">
                       <div>
-                        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-outline-variant bg-slate-100">
-                          <Icon className="h-8 w-8 text-slate-400">upload</Icon>
+                        <div className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-outline-variant bg-slate-100 transition-colors hover:bg-slate-200">
+                          <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/jpg"
+                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                setProfessorImage(file)
+                                setProfessorImagePreview(URL.createObjectURL(file))
+                              }
+                            }}
+                          />
+                          {professorImagePreview ? (
+                            <img src={professorImagePreview} alt="Professor preview" className="h-full w-full object-cover" />
+                          ) : (
+                            <Icon className="h-8 w-8 text-slate-400">upload</Icon>
+                          )}
                         </div>
                         <p className="mt-xs text-center font-caption text-[10px] uppercase text-on-surface-variant">{t('create.profileImage')}</p>
                       </div>
@@ -113,7 +136,7 @@ export default function CreateWorkshopPage() {
 
                   <section className="border-t border-slate-100 pt-lg">
                     <div className="mb-md grid grid-cols-1 gap-md md:grid-cols-2">
-                      <Field label={t('create.cost')} placeholder="0.00" compact prefix="RON" />
+                      <Field label={t('create.cost')} onChange={(value) => updateField('cost', value)} placeholder="0.00" value={form.cost} compact prefix="RON" />
                       <Field label={t('create.participants')} onChange={(value) => updateField('capacity', value)} placeholder={t('create.participantsPlaceholder')} type="number" value={form.capacity} compact />
                     </div>
                     <Field label={t('create.location')} onChange={(value) => updateField('location', value)} placeholder={t('create.locationPlaceholder')} value={form.location} compact icon="location_on" />
@@ -125,8 +148,24 @@ export default function CreateWorkshopPage() {
             <aside className="col-span-12 space-y-md lg:col-span-4">
               <section className="rounded-xl border border-outline-variant bg-surface-container-low p-md">
                 <label className="mb-base block font-label-md text-label-md uppercase text-primary">{t('create.cover')}</label>
-                <div className="flex aspect-video items-center justify-center rounded-lg border-2 border-dashed border-outline bg-white">
-                  <Icon className="h-10 w-10 text-outline">image</Icon>
+                <div className="relative flex aspect-video cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-outline bg-white transition-colors hover:bg-slate-50">
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg"
+                    className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setCoverImage(file)
+                        setCoverImagePreview(URL.createObjectURL(file))
+                      }
+                    }}
+                  />
+                  {coverImagePreview ? (
+                    <img src={coverImagePreview} alt="Cover preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <Icon className="h-10 w-10 text-outline">image</Icon>
+                  )}
                 </div>
                 <p className="mt-sm font-caption text-caption text-on-surface-variant">{t('create.coverHelp')}</p>
               </section>
@@ -143,7 +182,7 @@ export default function CreateWorkshopPage() {
             ) : null}
             {createdWorkshop ? (
               <p className="rounded-lg border border-green-200 bg-green-50 px-md py-sm font-body-md text-sm text-green-700">
-                {t(createdWorkshop.status === 'published' ? 'create.successPublished' : 'create.successDraft')} {createdWorkshop.title}
+                {t(createdWorkshop.is_active ? 'create.successPublished' : 'create.successDraft')} {createdWorkshop.title?.[locale] ?? createdWorkshop.title?.ro ?? ''}
               </p>
             ) : null}
           </div>

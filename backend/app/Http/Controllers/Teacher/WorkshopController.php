@@ -46,12 +46,20 @@ class WorkshopController extends Controller
             'description'    => ['sometimes', 'nullable', 'string'],
             // Shared fields
             'location'       => ['sometimes', 'nullable', 'string', 'max:255'],
-            'scheduled_at'   => ['sometimes', 'nullable', 'date'],
-            'starts_at'      => ['sometimes', 'nullable', 'date'], // legacy alias
+            'scheduled_at'   => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
+            'starts_at'      => ['required_without:scheduled_at', 'date', 'after_or_equal:today'], // legacy alias
             'max_slots'      => ['sometimes', 'nullable', 'integer', 'min:1'],
             'capacity'       => ['sometimes', 'nullable', 'integer', 'min:1'], // legacy alias
             'is_active'      => ['sometimes', 'boolean'],
             'status'         => ['sometimes', 'string', 'in:draft,published'], // legacy alias
+            'category'       => ['sometimes', 'nullable', 'string', 'max:255'],
+            'coordinator_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'coordinator_bio'  => ['sometimes', 'nullable', 'string'],
+            'ends_at'        => ['required', 'date', 'after_or_equal:starts_at'],
+            'duration'       => ['sometimes', 'nullable', 'string', 'max:255'],
+            'cost'           => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'cover_image'    => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'professor_image' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
 
         // ------------------------------------------------------------------
@@ -73,6 +81,22 @@ class WorkshopController extends Controller
         }
 
         // ------------------------------------------------------------------
+        // Handle File Uploads (Base64 conversion)
+        // ------------------------------------------------------------------
+
+        $coverImageBase64 = null;
+        if ($request->hasFile('cover_image')) {
+            $file = $request->file('cover_image');
+            $coverImageBase64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->path()));
+        }
+
+        $professorImageBase64 = null;
+        if ($request->hasFile('professor_image')) {
+            $file = $request->file('professor_image');
+            $professorImageBase64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->path()));
+        }
+
+        // ------------------------------------------------------------------
         // Persist
         // ------------------------------------------------------------------
 
@@ -87,6 +111,14 @@ class WorkshopController extends Controller
             'max_slots'      => $maxSlots ? (int) $maxSlots : 0,
             'occupied_slots' => 0,
             'is_active'      => $isActive,
+            'category'       => $request->input('category'),
+            'coordinator_name' => $request->input('coordinator_name'),
+            'coordinator_bio'  => $request->input('coordinator_bio'),
+            'ends_at'        => $request->input('ends_at'),
+            'duration'       => $request->input('duration'),
+            'cost'           => $request->input('cost'),
+            'cover_image_base64' => $coverImageBase64,
+            'professor_image_base64' => $professorImageBase64,
         ]);
 
         return response()->json([
