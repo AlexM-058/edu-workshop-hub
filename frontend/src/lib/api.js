@@ -105,6 +105,41 @@ export async function fetchTeacherStats({ token } = {}) {
   return apiFetch('/teacher/stats', { token });
 }
 
+export async function fetchTeacherParticipants({ token, workshopId } = {}) {
+  return apiFetch(`/teacher/workshops/${encodeURIComponent(workshopId)}/participants`, { token });
+}
+
+export async function markRegistrationAttendance({ token, registrationId, attended } = {}) {
+  return apiFetch(`/teacher/registrations/${encodeURIComponent(registrationId)}/attendance`, {
+    method: 'PATCH',
+    token,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ attended }),
+  });
+}
+
+export async function downloadAttendanceList({ token, workshopId, format = 'csv' } = {}) {
+  const response = await fetch(
+    `${apiBaseUrl}/teacher/workshops/${encodeURIComponent(workshopId)}/attendance-list?format=${encodeURIComponent(format)}`,
+    {
+      headers: {
+        Accept: format === 'pdf' ? 'application/pdf' : 'text/csv',
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw Object.assign(
+      new Error(body.message ?? `Attendance export failed with ${response.status}`),
+      { status: response.status, body },
+    );
+  }
+
+  return response.blob();
+}
+
 // ---------------------------------------------------------------------------
 // Attender (professor) — authenticated endpoints
 // ---------------------------------------------------------------------------
@@ -127,6 +162,32 @@ export async function fetchAttenderRegistrations({ token, page = 1, perPage = 12
  */
 export async function fetchAttenderStats({ token } = {}) {
   return apiFetch('/attender/stats', { token });
+}
+
+export async function withdrawRegistration({ token, registrationId } = {}) {
+  return apiFetch(`/attender/registrations/${encodeURIComponent(registrationId)}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function downloadCertificate({ token, registrationId } = {}) {
+  const response = await fetch(`${apiBaseUrl}/attender/registrations/${encodeURIComponent(registrationId)}/certificate`, {
+    headers: {
+      Accept: 'application/pdf',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw Object.assign(
+      new Error(body.message ?? `Certificate download failed with ${response.status}`),
+      { status: response.status, body },
+    );
+  }
+
+  return response.blob();
 }
 
 // ---------------------------------------------------------------------------

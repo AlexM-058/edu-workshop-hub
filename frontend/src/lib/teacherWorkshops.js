@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { useAppAuth } from '../auth/AuthContext'
-import { fetchTeacherStats, fetchTeacherWorkshops } from './api'
+import { fetchTeacherParticipants, fetchTeacherStats, fetchTeacherWorkshops } from './api'
 
 // ---------------------------------------------------------------------------
 // Generic fetch state machine (same pattern as workshops.js)
@@ -94,5 +94,43 @@ export function useTeacherStats() {
     stats:     state.data ?? null,
     isLoading: state.status === 'loading' || state.status === 'idle',
     error:     state.error,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// useTeacherParticipants
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches participants for one teacher-owned workshop.
+ *
+ * @param {{ workshopId?: string|number, refreshKey?: number }} params
+ * @returns {{ participants, isLoading, error }}
+ */
+export function useTeacherParticipants({ workshopId, refreshKey = 0 } = {}) {
+  const { getToken, isSignedIn } = useAppAuth()
+  const [state, dispatch] = useReducer(fetchReducer, initialState)
+
+  useEffect(() => {
+    if (!isSignedIn || !workshopId) return
+    let cancelled = false
+    dispatch({ type: 'loading' })
+
+    getToken()
+      .then((token) => fetchTeacherParticipants({ token, workshopId }))
+      .then((payload) => {
+        if (!cancelled) dispatch({ type: 'success', payload })
+      })
+      .catch((error) => {
+        if (!cancelled) dispatch({ type: 'error', error })
+      })
+
+    return () => { cancelled = true }
+  }, [getToken, isSignedIn, refreshKey, workshopId])
+
+  return {
+    participants: state.data?.data ?? null,
+    isLoading:    state.status === 'loading' || state.status === 'idle',
+    error:        state.error,
   }
 }

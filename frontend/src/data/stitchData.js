@@ -103,9 +103,9 @@ export const catalogWorkshops = [
   },
 ]
 export const professorDashboardLinks = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/professor' },
+  { label: 'Dashboard', icon: 'dashboard', to: '/demo/dashboard/attender' },
   { label: 'Active Courses', icon: 'school', to: '/catalog' },
-  { label: 'History', icon: 'history', to: '/demo/dashboard/professor' },
-  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/dashboard/professor' },
-  { label: 'Profile', icon: 'person', to: '/register/attender' },
+  { label: 'History', icon: 'history', to: '/demo/history' },
+  { label: 'Certificates', icon: 'workspace_premium', to: '/demo/certificates' },
+  { label: 'Profile', icon: 'person', to: '/demo/profile' },
 ]

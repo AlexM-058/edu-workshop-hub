@@ -28,10 +28,10 @@ function fetchReducer(state, action) {
 /**
  * Fetches the authenticated professor's registrations.
  *
- * @param {{ page?: number, perPage?: number, status?: string }} params
+ * @param {{ page?: number, perPage?: number, status?: string, refreshKey?: number }} params
  * @returns {{ registrations, meta, isLoading, error }}
  */
-export function useAttenderRegistrations({ page = 1, perPage = 12, status } = {}) {
+export function useAttenderRegistrations({ page = 1, perPage = 12, status, refreshKey = 0 } = {}) {
   const { getToken, isSignedIn } = useAppAuth()
   const [state, dispatch] = useReducer(fetchReducer, initialState)
 
@@ -50,7 +50,7 @@ export function useAttenderRegistrations({ page = 1, perPage = 12, status } = {}
       })
 
     return () => { cancelled = true }
-  }, [getToken, isSignedIn, page, perPage, status])
+  }, [getToken, isSignedIn, page, perPage, refreshKey, status])
 
   return {
     registrations: state.data?.data ?? null,

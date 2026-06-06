@@ -15,7 +15,7 @@ describe('auth permissions', () => {
   })
 
   it('redirects each role to its own dashboard', () => {
-    assert.equal(dashboardPathForRole('admin'), '/demo/admin/users')
+    assert.equal(dashboardPathForRole('admin'), '/demo/admin/dashboard')
     assert.equal(dashboardPathForRole('teacher'), '/demo/dashboard/teacher')
     assert.equal(dashboardPathForRole('referent'), '/demo/dashboard/teacher')
     assert.equal(dashboardPathForRole('attender'), '/demo/dashboard/attender')
