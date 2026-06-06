@@ -40,6 +40,17 @@ test('production nginx serves index.html for client-side routes', () => {
   assert.match(nginxConfig, /location\s+\/\s+\{[\s\S]*try_files\s+\$uri\s+\$uri\/\s+\/index\.html;/)
 })
 
+test('vercel rewrites client-side routes to the SPA entrypoint', () => {
+  const vercelConfig = JSON.parse(readRepoFile('frontend/vercel.json'))
+
+  assert.deepEqual(vercelConfig.rewrites, [
+    {
+      source: '/(.*)',
+      destination: '/index.html',
+    },
+  ])
+})
+
 test('frontend source does not expose placeholder hash links as navigation', () => {
   const filesWithHashLinks = sourceFiles(join(frontendRoot, 'src'))
     .filter((path) => /href=\{?["']#["']\}?/.test(readFileSync(path, 'utf8')))
