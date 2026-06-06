@@ -40,9 +40,7 @@ class AuthenticateWithClerk
             report($exception);
 
             return response()->json([
-                'message' => config('services.clerk.auth_debug')
-                    ? 'Invalid authentication token: '.$exception->getMessage()
-                    : 'Invalid authentication token.',
+                'message' => 'Invalid authentication token: '.$exception->getMessage(),
             ], 401);
         }
 
