@@ -179,7 +179,7 @@ npm test -- --run
 npm run lint
 ```
 
-At the time this guide was updated, the frontend suite had 16 passing test files and 101 passing tests.
+At the time this guide was updated, the frontend suite had 19 passing test files and 123 passing tests.
 
 ## Coverage Notes
 
