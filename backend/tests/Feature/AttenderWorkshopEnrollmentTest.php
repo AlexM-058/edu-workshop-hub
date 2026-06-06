@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Registration;
 use App\Models\TeacherInvitation;
 use App\Models\User;
 use App\Models\Workshop;
@@ -33,11 +34,10 @@ class AttenderWorkshopEnrollmentTest extends TestCase
 
         $attender = User::where('email', 'open.attender@example.com')->firstOrFail();
 
-        $this->assertDatabaseHas('workshop_enrollments', [
+        $this->assertDatabaseHas('registrations', [
             'workshop_id' => $workshop->id,
-            'user_id' => $attender->id,
-            'status' => 'enrolled',
-            'waitlist_position' => null,
+            'user_id'     => $attender->id,
+            'status'      => 'enrolled',
         ]);
     }
 
@@ -55,7 +55,7 @@ class AttenderWorkshopEnrollmentTest extends TestCase
             'email' => 'waiting.attender@example.com',
         ]))->postJson("/api/workshops/{$workshop->id}/enroll")
             ->assertCreated()
-            ->assertJsonPath('enrollment.status', 'waiting')
+            ->assertJsonPath('enrollment.status', 'waitlist')
             ->assertJsonPath('enrollment.waitlist_position', 1);
     }
 
@@ -98,7 +98,7 @@ class AttenderWorkshopEnrollmentTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('message', 'You are already enrolled or waiting for this workshop.');
 
-        $this->assertDatabaseCount('workshop_enrollments', 1);
+        $this->assertDatabaseCount('registrations', 1);
     }
 
     public function test_attender_cannot_enroll_in_draft_workshop(): void
@@ -141,19 +141,31 @@ class AttenderWorkshopEnrollmentTest extends TestCase
 
     private function workshop(array $overrides = []): Workshop
     {
-        $teacher = User::factory()->create([
-            'email' => 'teacher-'.uniqid().'@example.com',
-            'role' => 'teacher',
+        $referent = User::factory()->create([
+            'email' => 'referent-' . uniqid() . '@example.com',
+            'role'  => 'referent',
         ]);
 
+        // Map legacy status/capacity aliases used in individual tests
+        $mappedOverrides = [];
+        foreach ($overrides as $key => $value) {
+            match ($key) {
+                'capacity' => $mappedOverrides['max_slots']  = $value,
+                'status'   => $mappedOverrides['is_active']  = $value === 'published',
+                default    => $mappedOverrides[$key] = $value,
+            };
+        }
+
         return Workshop::create(array_merge([
-            'teacher_id' => $teacher->id,
-            'title' => 'Applied Digital Pedagogy',
-            'category' => 'Data Science',
-            'description' => 'A practical workshop for teachers adopting data-informed classroom methods.',
-            'capacity' => 24,
-            'status' => 'published',
-        ], $overrides));
+            'referent_id'    => $referent->id,
+            'title_ro'       => 'Applied Digital Pedagogy',
+            'title_de'       => 'Angewandte digitale Pädagogik',
+            'description_ro' => 'Un atelier practic pentru cadrele didactice.',
+            'description_de' => 'Ein praktischer Workshop für Lehrkräfte.',
+            'max_slots'      => 24,
+            'occupied_slots' => 0,
+            'is_active'      => true,
+        ], $mappedOverrides));
     }
 
     private function clerkToken(array $claims): string

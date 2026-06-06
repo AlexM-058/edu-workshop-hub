@@ -31,10 +31,38 @@ export function ClerkBackedAuthProvider({ children }) {
   const [syncError, setSyncError] = useState(null)
   const [showTeacherInviteNotice, setShowTeacherInviteNotice] = useState(false)
 
+  const syncUser = useCallback(async () => {
+    if (!isLoaded || !isSignedIn) {
+      setAppUser(null)
+      setIsSyncing(false)
+      setSyncError(null)
+      setShowTeacherInviteNotice(false)
+      return
+    }
+
+    try {
+      setIsSyncing(true)
+      const token = await getToken()
+      const payload = await fetchCurrentUser(token)
+
+      setAppUser(payload.user)
+      if (shouldShowTeacherInviteNotice(payload)) {
+        setShowTeacherInviteNotice(true)
+      }
+      setIsSyncing(false)
+      setSyncError(null)
+    } catch (error) {
+      setAppUser(null)
+      setIsSyncing(false)
+      setSyncError(error)
+    }
+  }, [getToken, isLoaded, isSignedIn])
+
+  // Sync on auth state change
   useEffect(() => {
     let cancelled = false
 
-    async function syncUser() {
+    async function run() {
       if (!isLoaded || !isSignedIn) {
         setAppUser(null)
         setIsSyncing(false)
@@ -65,12 +93,23 @@ export function ClerkBackedAuthProvider({ children }) {
       }
     }
 
-    syncUser()
+    run()
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [getToken, isLoaded, isSignedIn])
+
+  // Re-sync when tab regains focus — catches role changes made by admin
+  // while the user was already logged in (e.g. teacher invitation granted)
+  useEffect(() => {
+    if (!isSignedIn) return
+
+    function handleFocus() {
+      syncUser()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [isSignedIn, syncUser])
 
   const dismissTeacherInviteNotice = useCallback(async () => {
     try {
@@ -89,10 +128,11 @@ export function ClerkBackedAuthProvider({ children }) {
     isLoaded,
     isSignedIn: Boolean(isSignedIn),
     isSyncing,
+    refreshUser: syncUser,
     role: appUser?.role ?? null,
     signOut,
     syncError,
-  }), [appUser, getToken, isLoaded, isSignedIn, isSyncing, signOut, syncError, user])
+  }), [appUser, getToken, isLoaded, isSignedIn, isSyncing, signOut, syncError, syncUser, user])
 
   return (
     <AuthContext.Provider value={value}>

@@ -3,44 +3,94 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\WorkshopResource;
 use App\Models\Workshop;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class WorkshopController extends Controller
 {
+    /**
+     * POST /api/teacher/workshops
+     *
+     * Creates a new workshop owned by the authenticated referent.
+     *
+     * Accepted fields (all map onto the current bilingual schema):
+     *   - title_ro       (string, required)
+     *   - title_de       (string, optional — defaults to title_ro)
+     *   - description_ro (string, optional)
+     *   - description_de (string, optional — defaults to description_ro)
+     *   - location       (string, optional)
+     *   - scheduled_at   (date, optional)
+     *   - max_slots      (integer ≥ 1, optional)
+     *   - is_active      (boolean, optional — default false)
+     *
+     * Legacy aliases accepted from the CreateWorkshop form so the UI
+     * doesn't need to change in this release:
+     *   - title      → title_ro (and title_de if title_de absent)
+     *   - description → description_ro / description_de
+     *   - capacity   → max_slots
+     *   - starts_at  → scheduled_at
+     *   - status     → 'published' maps to is_active = true
+     */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'coordinator_name' => ['nullable', 'string', 'max:255'],
-            'coordinator_bio' => ['nullable', 'string'],
-            'starts_at' => ['nullable', 'date'],
-            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
-            'duration' => ['nullable', 'string', 'max:255'],
-            'capacity' => ['nullable', 'integer', 'min:1'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', Rule::in(['draft', 'published'])],
+        $request->validate([
+            // Canonical bilingual fields
+            'title_ro'       => ['sometimes', 'string', 'max:255'],
+            'title_de'       => ['sometimes', 'string', 'max:255'],
+            'description_ro' => ['sometimes', 'nullable', 'string'],
+            'description_de' => ['sometimes', 'nullable', 'string'],
+            // Legacy single-language aliases (still used by the current form)
+            'title'          => ['sometimes', 'string', 'max:255'],
+            'description'    => ['sometimes', 'nullable', 'string'],
+            // Shared fields
+            'location'       => ['sometimes', 'nullable', 'string', 'max:255'],
+            'scheduled_at'   => ['sometimes', 'nullable', 'date'],
+            'starts_at'      => ['sometimes', 'nullable', 'date'], // legacy alias
+            'max_slots'      => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'capacity'       => ['sometimes', 'nullable', 'integer', 'min:1'], // legacy alias
+            'is_active'      => ['sometimes', 'boolean'],
+            'status'         => ['sometimes', 'string', 'in:draft,published'], // legacy alias
         ]);
 
+        // ------------------------------------------------------------------
+        // Resolve canonical field values from both aliases and canonical names
+        // ------------------------------------------------------------------
+
+        $titleRo    = $request->input('title_ro')    ?? $request->input('title')       ?? '';
+        $titleDe    = $request->input('title_de')    ?? $request->input('title_ro')    ?? $request->input('title') ?? $titleRo;
+        $descRo     = $request->input('description_ro') ?? $request->input('description');
+        $descDe     = $request->input('description_de') ?? $request->input('description_ro') ?? $request->input('description') ?? $descRo;
+        $maxSlots   = $request->input('max_slots')   ?? $request->input('capacity');
+        $scheduledAt = $request->input('scheduled_at') ?? $request->input('starts_at');
+
+        // is_active: prefer explicit boolean, fall back to status alias
+        if ($request->has('is_active')) {
+            $isActive = (bool) $request->input('is_active');
+        } else {
+            $isActive = $request->input('status') === 'published';
+        }
+
+        // ------------------------------------------------------------------
+        // Persist
+        // ------------------------------------------------------------------
+
         $workshop = Workshop::create([
-            ...$validated,
-            'teacher_id' => $request->user()->id,
-            'referent_id' => $request->user()->id,
-            'title_ro' => $validated['title'],
-            'title_de' => $validated['title'],
-            'description_ro' => $validated['description'],
-            'description_de' => $validated['description'],
-            'max_slots' => $validated['capacity'] ?? null,
-            'scheduled_at' => $validated['starts_at'] ?? null,
-            'is_active' => $validated['status'] === 'published',
+            'referent_id'    => $request->user()->id,
+            'title_ro'       => $titleRo,
+            'title_de'       => $titleDe,
+            'description_ro' => $descRo,
+            'description_de' => $descDe,
+            'location'       => $request->input('location'),
+            'scheduled_at'   => $scheduledAt,
+            'max_slots'      => $maxSlots ? (int) $maxSlots : 0,
+            'occupied_slots' => 0,
+            'is_active'      => $isActive,
         ]);
 
         return response()->json([
-            'workshop' => $workshop,
+            'workshop' => new WorkshopResource($workshop->load('referent')),
         ], 201);
     }
 }
