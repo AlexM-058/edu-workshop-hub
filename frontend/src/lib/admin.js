@@ -28,10 +28,10 @@ function fetchReducer(state, action) {
 /**
  * Fetches all platform users (paginated, optional role filter).
  *
- * @param {{ page?: number, perPage?: number, role?: string }} params
+ * @param {{ page?: number, perPage?: number, role?: string, refreshKey?: number }} params
  * @returns {{ users, meta, isLoading, error }}
  */
-export function useAdminUsers({ page = 1, perPage = 20, role } = {}) {
+export function useAdminUsers({ page = 1, perPage = 20, role, refreshKey = 0 } = {}) {
   const { getToken, isSignedIn } = useAppAuth()
   const [state, dispatch] = useReducer(fetchReducer, initialState)
 
@@ -50,7 +50,7 @@ export function useAdminUsers({ page = 1, perPage = 20, role } = {}) {
       })
 
     return () => { cancelled = true }
-  }, [getToken, isSignedIn, page, perPage, role])
+  }, [getToken, isSignedIn, page, perPage, role, refreshKey])
 
   return {
     users:     state.data?.data ?? null,
@@ -69,7 +69,7 @@ export function useAdminUsers({ page = 1, perPage = 20, role } = {}) {
  *
  * @returns {{ stats, isLoading, error }}
  */
-export function useAdminStats() {
+export function useAdminStats({ refreshKey = 0 } = {}) {
   const { getToken, isSignedIn } = useAppAuth()
   const [state, dispatch] = useReducer(fetchReducer, initialState)
 
@@ -88,7 +88,7 @@ export function useAdminStats() {
       })
 
     return () => { cancelled = true }
-  }, [getToken, isSignedIn])
+  }, [getToken, isSignedIn, refreshKey])
 
   return {
     stats:     state.data ?? null,

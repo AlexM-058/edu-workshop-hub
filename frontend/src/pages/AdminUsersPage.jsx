@@ -36,10 +36,11 @@ export default function AdminUsersPage() {
   const [invitedEmail, setInvitedEmail] = useState('')
   const [inviteStatus, setInviteStatus] = useState('')
   const [isInviting, setIsInviting] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
   const inviteControls = getTeacherInvitationFormControlState(isInviting)
 
-  const { users, meta, isLoading, error } = useAdminUsers({ page, perPage: 20, role: roleFilter || undefined })
-  const { stats, isLoading: statsLoading } = useAdminStats()
+  const { users, meta, isLoading, error } = useAdminUsers({ page, perPage: 20, role: roleFilter || undefined, refreshKey })
+  const { stats, isLoading: statsLoading } = useAdminStats({ refreshKey })
 
   const pageCount = meta?.last_page ?? 1
 
@@ -64,6 +65,9 @@ export default function AdminUsersPage() {
     setInviteError(result.inviteError)
     setInvitedEmail(result.invitedEmail)
     setInviteStatus(result.inviteStatus)
+    if (result.didInvite) {
+      setRefreshKey((key) => key + 1)
+    }
     setIsInviting(false)
   }
 
