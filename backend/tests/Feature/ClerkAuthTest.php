@@ -29,6 +29,16 @@ class ClerkAuthTest extends TestCase
             ->assertUnauthorized();
     }
 
+    public function test_auth_me_can_return_debug_reason_for_invalid_tokens(): void
+    {
+        config(['services.clerk.auth_debug' => true]);
+
+        $this->withToken('not-a-token')
+            ->getJson('/api/auth/me')
+            ->assertUnauthorized()
+            ->assertJsonPath('message', 'Invalid authentication token: Malformed Clerk JWT.');
+    }
+
     public function test_auth_me_rejects_expired_tokens(): void
     {
         $this->withToken($this->clerkToken(['exp' => time() - 10]))
