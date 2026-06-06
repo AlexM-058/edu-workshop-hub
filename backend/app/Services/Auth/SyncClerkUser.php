@@ -37,11 +37,11 @@ class SyncClerkUser
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'email'      => $email,
-            'role'       => $isNewUser ? $role : $user->role,
+            'role'       => $this->syncedRole($user, $role, $isNewUser),
         ]);
         $user->save();
 
-        $teacherInvitationAccepted = $isNewUser && $this->acceptTeacherInvitation($user);
+        $teacherInvitationAccepted = $this->acceptTeacherInvitation($user);
 
         return [
             'user' => $user,
@@ -77,6 +77,22 @@ class SyncClerkUser
             ->first();
 
         return $invitation ? $invitation->role : 'attender';
+    }
+
+    private function syncedRole(User $user, string $resolvedRole, bool $isNewUser): string
+    {
+        if ($isNewUser) {
+            return $resolvedRole;
+        }
+
+        if (
+            $resolvedRole === 'teacher'
+            && in_array($user->role, ['attender', 'professor'], true)
+        ) {
+            return 'teacher';
+        }
+
+        return $user->role;
     }
 
     /**

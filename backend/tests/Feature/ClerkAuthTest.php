@@ -115,6 +115,38 @@ class ClerkAuthTest extends TestCase
             ->assertJsonPath('notifications.teacher_invitation_notice_pending', false);
     }
 
+    public function test_existing_attender_is_promoted_when_teacher_invitation_is_created_later(): void
+    {
+        $token = $this->clerkToken([
+            'sub'   => 'user_existing_attender',
+            'email' => 'existing.attender@example.com',
+            'name'  => 'Existing Attender',
+        ]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'attender');
+
+        TeacherInvitation::create([
+            'email' => 'existing.attender@example.com',
+            'role'  => 'teacher',
+        ]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'teacher')
+            ->assertJsonPath('notifications.teacher_invitation_accepted', true)
+            ->assertJsonPath('notifications.teacher_invitation_notice_pending', true);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'existing.attender@example.com',
+            'role' => 'teacher',
+        ]);
+        $this->assertNotNull(TeacherInvitation::firstWhere('email', 'existing.attender@example.com')->accepted_at);
+    }
+
     public function test_teacher_invitation_notice_seen_endpoint_is_idempotent(): void
     {
         $token = $this->clerkToken([
