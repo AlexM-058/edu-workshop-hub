@@ -12,6 +12,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --optimize-autoloader
+
+COPY backend/ ./
+
 COPY docker/backend/entrypoint.sh /usr/local/bin/backend-entrypoint
 RUN sed -i 's/\r$//' /usr/local/bin/backend-entrypoint \
     && chmod +x /usr/local/bin/backend-entrypoint
