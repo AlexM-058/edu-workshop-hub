@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+  buildTeacherAutofillFields,
   buildWorkshopPayload,
   getWorkshopSubmitErrorMessage,
   submitWorkshopForm,
@@ -108,5 +109,33 @@ describe('create workshop form', () => {
 
   it('uses a generic inline error when no validation message exists', () => {
     assert.equal(getWorkshopSubmitErrorMessage(new Error('Network failed'), t), 'Workshop-ul nu a putut fi salvat.');
+  });
+
+  it('builds teacher autocomplete fields from the synced app profile first', () => {
+    assert.deepEqual(buildTeacherAutofillFields({
+      appUser: {
+        name: 'Alexandru Matei Tarita',
+        email: 'alexandru@example.com',
+      },
+      clerkUser: {
+        fullName: 'Alexandru Clerk',
+        primaryEmailAddress: { emailAddress: 'clerk@example.com' },
+      },
+    }), {
+      coordinatorName: 'Alexandru Matei Tarita',
+    });
+  });
+
+  it('falls back to Clerk profile details for teacher autocomplete', () => {
+    assert.deepEqual(buildTeacherAutofillFields({
+      appUser: null,
+      clerkUser: {
+        fullName: '',
+        firstName: 'Mara',
+        lastName: 'Popescu',
+      },
+    }), {
+      coordinatorName: 'Mara Popescu',
+    });
   });
 });

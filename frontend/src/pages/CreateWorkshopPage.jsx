@@ -6,7 +6,7 @@ import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
 import { createTeacherWorkshop, updateTeacherWorkshop, fetchCategories } from '../lib/api'
 import { useWorkshop } from '../lib/workshops'
-import { submitWorkshopForm } from './createWorkshopForm'
+import { buildTeacherAutofillFields, submitWorkshopForm } from './createWorkshopForm'
 
 const initialForm = {
   title: '',
@@ -28,7 +28,7 @@ export default function CreateWorkshopPage() {
   const isEditMode = Boolean(id)
   
   const { t, locale } = useI18n()
-  const { getToken } = useAppAuth()
+  const { appUser, clerkUser, getToken } = useAppAuth()
   
   const { workshop: existingWorkshop, isLoading: isFetching } = useWorkshop(id)
   
@@ -61,6 +61,15 @@ export default function CreateWorkshopPage() {
     setForm((current) => ({
       ...current,
       [field]: value,
+    }))
+  }
+
+  function autofillTeacherDetails() {
+    const fields = buildTeacherAutofillFields({ appUser, clerkUser })
+
+    setForm((current) => ({
+      ...current,
+      ...fields,
     }))
   }
 
@@ -147,7 +156,17 @@ export default function CreateWorkshopPage() {
                   </label>
 
                   <section className="border-t border-slate-100 pt-lg">
-                    <h3 className="mb-md font-label-md text-label-md uppercase text-primary">{t('create.coordinator')}</h3>
+                    <div className="mb-md flex flex-col gap-sm sm:flex-row sm:items-center sm:justify-between">
+                      <h3 className="font-label-md text-label-md uppercase text-primary">{t('create.coordinator')}</h3>
+                      <button
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-outline-variant bg-white px-3 py-2 text-sm font-semibold text-primary transition hover:bg-surface-container-low"
+                        onClick={autofillTeacherDetails}
+                        type="button"
+                      >
+                        <Icon className="text-base">auto_fix_high</Icon>
+                        {t('create.autofillTeacher')}
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 gap-md md:grid-cols-[120px_1fr]">
                       <div>
                         <div className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-outline-variant bg-slate-100 transition-colors hover:bg-slate-200">
