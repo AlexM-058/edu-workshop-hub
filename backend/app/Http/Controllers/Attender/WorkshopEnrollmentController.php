@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Attender;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WaitlistPromotionMail;
+use App\Mail\WorkshopEnrollmentMail;
 use App\Models\Registration;
 use App\Models\Workshop;
 use App\Support\SimplePdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 
 class WorkshopEnrollmentController extends Controller
@@ -46,9 +49,8 @@ class WorkshopEnrollmentController extends Controller
 
             if ($existing) {
                 if ($existing->status === 'cancelled') {
-                    abort(response()->json([
-                        'message' => 'You have cancelled your registration and cannot re-enroll.',
-                    ], 403));
+                    // Allowed to re-enroll. Delete old cancelled registration to reset position.
+                    $existing->delete();
                 } else {
                     abort(response()->json([
                         'message' => 'You are already enrolled or waiting for this workshop.',
@@ -82,6 +84,8 @@ class WorkshopEnrollmentController extends Controller
                 $lockedWorkshop->forceFill([
                     'occupied_slots' => $enrolledCount + 1,
                 ])->save();
+
+                Mail::to($request->user()->email)->send(new WorkshopEnrollmentMail($lockedWorkshop));
             }
 
             return $registration->refresh();
@@ -113,6 +117,15 @@ class WorkshopEnrollmentController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            if ($lockedWorkshop->scheduled_at) {
+                $startsAt = \Carbon\Carbon::parse($lockedWorkshop->scheduled_at);
+                if (now()->addHours(24)->isAfter($startsAt)) {
+                    abort(response()->json([
+                        'message' => 'Nu te poți retrage cu mai puțin de 24 de ore înainte de începerea cursului.',
+                    ], 403));
+                }
+            }
+
             $wasEnrolled = $lockedRegistration->status === 'enrolled';
 
             $lockedRegistration->forceFill([
@@ -134,6 +147,11 @@ class WorkshopEnrollmentController extends Controller
 
                 if ($promoted) {
                     $promoted->forceFill(['status' => 'enrolled'])->save();
+
+                    $promoted->loadMissing('user');
+                    if ($promoted->user && $promoted->user->email) {
+                        Mail::to($promoted->user->email)->send(new WaitlistPromotionMail($lockedWorkshop));
+                    }
                 } else {
                     $lockedWorkshop->forceFill([
                         'occupied_slots' => max(0, (int) $lockedWorkshop->occupied_slots - 1),

@@ -8,6 +8,7 @@ import { useAttenderRegistrations, useAttenderStats } from '../lib/attenderRegis
 import { downloadCertificate, withdrawRegistration } from '../lib/api'
 import { downloadBlob } from '../lib/downloadFile'
 import WithdrawWarningModal from '../components/WithdrawWarningModal'
+import WithdrawBlockedModal from '../components/WithdrawBlockedModal'
 
 // Status config keyed by registration.status value
 const STATUS_CONFIG = {
@@ -23,6 +24,7 @@ export default function ProfessorDashboard() {
   const [actionError, setActionError] = useState(null)
   const [busyRegistrationId, setBusyRegistrationId] = useState(null)
   const [withdrawModalRegistration, setWithdrawModalRegistration] = useState(null)
+  const [blockedModalRegistration, setBlockedModalRegistration] = useState(null)
 
   const { registrations, meta, isLoading, error } = useAttenderRegistrations({ perPage: 5, refreshKey })
   const { stats, isLoading: statsLoading } = useAttenderStats()
@@ -38,6 +40,24 @@ export default function ProfessorDashboard() {
       setActionError(error)
     } finally {
       setBusyRegistrationId(null)
+    }
+  }
+
+  function handleWithdrawClick(reg) {
+    if (!reg.workshop?.scheduled_at) {
+      setWithdrawModalRegistration(reg)
+      return
+    }
+
+    const startsAt = new Date(reg.workshop.scheduled_at)
+    const now = new Date()
+    // Calculate difference in hours
+    const diffHours = (startsAt - now) / (1000 * 60 * 60)
+
+    if (diffHours < 24) {
+      setBlockedModalRegistration(reg)
+    } else {
+      setWithdrawModalRegistration(reg)
     }
   }
 
@@ -229,7 +249,7 @@ export default function ProfessorDashboard() {
                                 <button
                                   className="rounded border border-error/40 px-4 py-2 text-sm font-label-md text-error transition hover:bg-error-container disabled:cursor-wait disabled:opacity-60"
                                   disabled={isBusy}
-                                  onClick={() => setWithdrawModalRegistration(reg)}
+                                  onClick={() => handleWithdrawClick(reg)}
                                   type="button"
                                 >
                                   {locale === 'de' ? 'Zurückziehen' : 'Retrage'}
@@ -323,6 +343,11 @@ export default function ProfessorDashboard() {
         onClose={() => setWithdrawModalRegistration(null)} 
         onConfirm={confirmWithdraw} 
         isBusy={!!busyRegistrationId}
+      />
+
+      <WithdrawBlockedModal
+        isOpen={!!blockedModalRegistration}
+        onClose={() => setBlockedModalRegistration(null)}
       />
     </DashboardShell>
   )

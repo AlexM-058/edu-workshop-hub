@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TeacherRoleMail;
+use App\Mail\WaitlistPromotionMail;
+use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Registration;
-use App\Models\Category;
 use App\Models\TeacherInvitation;
 use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -141,6 +144,10 @@ class AdminController extends Controller
                 ['email' => $user->email],
                 ['role' => 'teacher', 'accepted_at' => now(), 'notice_seen_at' => now()]
             );
+
+            if ($user->email) {
+                Mail::to($user->email)->send(new TeacherRoleMail());
+            }
         }
 
         return response()->json([
@@ -196,6 +203,11 @@ class AdminController extends Controller
 
                     if ($promoted) {
                         $promoted->forceFill(['status' => 'enrolled'])->save();
+
+                        $promoted->loadMissing('user');
+                        if ($promoted->user && $promoted->user->email) {
+                            Mail::to($promoted->user->email)->send(new WaitlistPromotionMail($lockedWorkshop));
+                        }
                     } else {
                         $lockedWorkshop->forceFill([
                             'occupied_slots' => max(0, (int) $lockedWorkshop->occupied_slots - 1),
