@@ -147,6 +147,32 @@ class ClerkAuthTest extends TestCase
         $this->assertNotNull(TeacherInvitation::firstWhere('email', 'existing.attender@example.com')->accepted_at);
     }
 
+    public function test_existing_attender_is_promoted_when_added_to_admin_email_list(): void
+    {
+        $token = $this->clerkToken([
+            'sub'   => 'user_existing_admin',
+            'email' => 'existing.admin@example.com',
+            'name'  => 'Existing Admin',
+        ]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'attender');
+
+        config(['services.clerk.admin_emails' => ['existing.admin@example.com']]);
+
+        $this->withToken($token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.role', 'admin');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'existing.admin@example.com',
+            'role' => 'admin',
+        ]);
+    }
+
     public function test_teacher_invitation_notice_seen_endpoint_is_idempotent(): void
     {
         $token = $this->clerkToken([

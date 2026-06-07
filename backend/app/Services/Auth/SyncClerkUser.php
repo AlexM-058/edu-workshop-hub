@@ -81,6 +81,10 @@ class SyncClerkUser
 
     private function syncedRole(User $user, string $resolvedRole, bool $isNewUser): string
     {
+        if ($resolvedRole === 'admin') {
+            return 'admin';
+        }
+
         if ($isNewUser) {
             return $resolvedRole;
         }
