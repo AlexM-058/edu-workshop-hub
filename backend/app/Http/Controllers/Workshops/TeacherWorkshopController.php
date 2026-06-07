@@ -30,7 +30,7 @@ class TeacherWorkshopController extends Controller
 
         $workshops = Workshop::query()
             ->where('referent_id', $request->user()->id)
-            ->with('referent')
+            ->with(['referent', 'category'])
             ->orderByDesc('created_at')
             ->paginate($perPage);
 
@@ -115,7 +115,7 @@ class TeacherWorkshopController extends Controller
         $format = $request->query('format', 'csv');
         abort_unless(in_array($format, ['csv', 'pdf'], true), 422, 'Unsupported export format.');
 
-        $workshop->load(['registrations.user']);
+        $workshop->load(['referent', 'category', 'registrations.user']);
 
         if ($format === 'pdf') {
             return response($this->attendancePdf($workshop), 200, [

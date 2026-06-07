@@ -15,7 +15,7 @@ class TeacherInvitationNoticeController extends Controller
 
         $updated = TeacherInvitation::query()
             ->where('email', $user->email)
-            ->where('role', 'teacher')
+            ->whereIn('role', ['teacher', 'referent'])
             ->whereNotNull('accepted_at')
             ->whereNull('notice_seen_at')
             ->update(['notice_seen_at' => now()]);

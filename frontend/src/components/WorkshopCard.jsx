@@ -84,7 +84,7 @@ export function CatalogWorkshopCard({ workshop }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-3 flex items-start justify-between">
           <span className="rounded bg-tertiary-fixed px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight text-on-tertiary-container">
-            {workshop.category || (locale === 'de' ? 'Workshop' : 'Workshop')}
+            {workshop.category?.name || (locale === 'de' ? 'Workshop' : 'Workshop')}
           </span>
           <span className="text-caption font-caption text-outline">
             {workshop.available_slots} {locale === 'de' ? 'Plätze frei' : 'locuri libere'}

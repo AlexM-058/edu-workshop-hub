@@ -1,13 +1,9 @@
+import { useState, useEffect } from 'react'
 import AdminShell from '../components/AdminShell'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
-
-const categories = [
-  ['biotech', 'admin.settings.categoryApplied', '12'],
-  ['architecture', 'admin.settings.categoryDesign', '8'],
-  ['history_edu', 'admin.settings.categoryLetters', '5'],
-  ['payments', 'admin.settings.categoryEconomy', '14'],
-]
+import { useAppAuth } from '../auth/AuthContext'
+import { fetchAdminCategories, createCategory, deleteCategory } from '../lib/api'
 
 const translations = [
   ['nav_workshops', 'admin.settings.groupInterface', 'Ateliere și Cursuri', 'Workshops und Kurse'],
@@ -17,7 +13,60 @@ const translations = [
 ]
 
 export default function AdminSettingsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const { getToken } = useAppAuth()
+  
+  const [categories, setCategories] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [newCatName, setNewCatName] = useState('')
+  const [newCatIcon, setNewCatIcon] = useState('school')
+  const [isAdding, setIsAdding] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const loadCategories = async () => {
+    try {
+      const data = await fetchAdminCategories({ token: await getToken() })
+      setCategories(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const handleAddCategory = async (e) => {
+    e.preventDefault()
+    if (!newCatName.trim()) return
+    setIsSubmitting(true)
+    try {
+      await createCategory({ token: await getToken(), name: newCatName, icon: newCatIcon })
+      setNewCatName('')
+      setNewCatIcon('school')
+      setIsAdding(false)
+      loadCategories()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteCategory = async (cat) => {
+    const msg = locale === 'de' 
+      ? `Achtung: Das Löschen der Kategorie "${cat.name}" löscht auch dauerhaft alle ${cat.workshops_count} zugehörigen Workshops. Fortfahren?`
+      : `Atenție: Ștergerea categoriei "${cat.name}" va șterge ireversibil toate cele ${cat.workshops_count} cursuri asociate. Continuați?`
+    if (!window.confirm(msg)) return
+    try {
+      await deleteCategory({ token: await getToken(), categoryId: cat.id })
+      loadCategories()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
 
   return (
     <AdminShell searchKey="admin.searchSettings">
@@ -34,26 +83,65 @@ export default function AdminSettingsPage() {
                   <h2 className="font-h3 text-h3 text-primary">{t('admin.settings.categories')}</h2>
                   <p className="font-caption text-slate-500">{t('admin.settings.categoriesText')}</p>
                 </div>
-                <button className="flex cursor-not-allowed items-center gap-2 rounded border border-secondary px-4 py-2 font-label-md text-secondary opacity-60" disabled title={t('common.demoUnavailable')} type="button">
-                  <Icon>add</Icon>{t('admin.settings.newCategory')}
+                <button 
+                  className="flex items-center gap-2 rounded border border-secondary px-4 py-2 font-label-md text-secondary hover:bg-secondary/10 transition-colors" 
+                  onClick={() => setIsAdding(!isAdding)}
+                  type="button"
+                >
+                  <Icon>{isAdding ? 'close' : 'add'}</Icon>{isAdding ? t('admin.cancel') : t('admin.settings.newCategory')}
                 </button>
               </div>
+
+              {isAdding && (
+                <form onSubmit={handleAddCategory} className="mb-md rounded bg-surface-container-low p-md border border-outline-variant">
+                  <div className="flex gap-4">
+                    <input 
+                      type="text" 
+                      placeholder="Icon (ex: school)" 
+                      value={newCatIcon} 
+                      onChange={(e) => setNewCatIcon(e.target.value)} 
+                      className="w-32 rounded border border-outline-variant px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Category Name" 
+                      value={newCatName} 
+                      onChange={(e) => setNewCatName(e.target.value)} 
+                      className="flex-1 rounded border border-outline-variant px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="rounded bg-primary px-4 py-2 font-label-md text-white shadow-sm hover:brightness-110 disabled:opacity-50"
+                    >
+                      {t('admin.saveChanges')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
               <div className="space-y-sm">
-                {categories.map(([icon, nameKey, count], index) => (
-                  <div key={nameKey} className={`flex items-center justify-between border border-outline-variant p-md transition-all hover:border-primary ${index === 0 ? 'bg-surface-container-low' : 'bg-white'}`}>
-                    <div className="flex items-center gap-md">
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-primary-fixed text-primary"><Icon>{icon}</Icon></div>
-                      <div>
-                        <h3 className="font-label-md text-blue-900">{t(nameKey)}</h3>
-                        <p className="font-caption text-slate-500">{count} {t('admin.settings.activeWorkshops')}</p>
+                {isLoading ? (
+                  <p className="text-center p-4 text-slate-500">Loading...</p>
+                ) : categories.length === 0 ? (
+                  <p className="text-center p-4 text-slate-500">No categories found.</p>
+                ) : (
+                  categories.map((cat, index) => (
+                    <div key={cat.id} className={`flex items-center justify-between border border-outline-variant p-md transition-all hover:border-primary ${index === 0 ? 'bg-surface-container-low' : 'bg-white'}`}>
+                      <div className="flex items-center gap-md">
+                        <div className="flex h-10 w-10 items-center justify-center rounded bg-primary-fixed text-primary"><Icon>{cat.icon || 'folder'}</Icon></div>
+                        <div>
+                          <h3 className="font-label-md text-blue-900">{cat.name}</h3>
+                          <p className="font-caption text-slate-500">{cat.workshops_count} {t('admin.settings.activeWorkshops')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-base">
+                        <button className="p-2 text-slate-400 transition-colors hover:text-error" aria-label={t('admin.delete')} title={t('admin.delete')} onClick={() => handleDeleteCategory(cat)} type="button"><Icon>delete</Icon></button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-base">
-                      <button className="cursor-not-allowed p-2 text-slate-400 opacity-60 transition-colors hover:text-primary" aria-label={t('common.edit')} disabled title={t('common.demoUnavailable')} type="button"><Icon>edit</Icon></button>
-                      <button className="cursor-not-allowed p-2 text-slate-400 opacity-60 transition-colors hover:text-error" aria-label={t('admin.delete')} disabled title={t('common.demoUnavailable')} type="button"><Icon>delete</Icon></button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-gutter">

@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'occupied_slots',
     'scheduled_at',
     'is_active',
-    'category',
+    'category_id',
     'coordinator_name',
     'coordinator_bio',
     'ends_at',
@@ -53,6 +53,11 @@ class Workshop extends Model
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function scopeActive(Builder $query): Builder

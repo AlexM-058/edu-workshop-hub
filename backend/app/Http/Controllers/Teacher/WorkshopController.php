@@ -111,7 +111,7 @@ class WorkshopController extends Controller
             'max_slots'      => $maxSlots ? (int) $maxSlots : 0,
             'occupied_slots' => 0,
             'is_active'      => $isActive,
-            'category'       => $request->input('category'),
+            'category_id'    => $request->input('category_id'),
             'coordinator_name' => $request->input('coordinator_name'),
             'coordinator_bio'  => $request->input('coordinator_bio'),
             'ends_at'        => $request->input('ends_at'),
@@ -122,7 +122,111 @@ class WorkshopController extends Controller
         ]);
 
         return response()->json([
-            'workshop' => new WorkshopResource($workshop->load('referent')),
+            'message' => 'Workshop created successfully',
+            'data'    => new WorkshopResource($workshop),
         ], 201);
+    }
+
+    /**
+     * PUT /api/teacher/workshops/{workshop}
+     *
+     * Updates an existing workshop owned by the referent or any workshop if admin.
+     */
+    public function update(Request $request, Workshop $workshop): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless(
+            $user->role === 'admin' || $workshop->referent_id === $user->id || $workshop->teacher_id === $user->id,
+            403,
+            'Unauthorized to edit this workshop.'
+        );
+
+        $request->validate([
+            'title_ro'       => ['sometimes', 'string', 'max:255'],
+            'title_de'       => ['sometimes', 'string', 'max:255'],
+            'description_ro' => ['sometimes', 'nullable', 'string'],
+            'description_de' => ['sometimes', 'nullable', 'string'],
+            'title'          => ['sometimes', 'string', 'max:255'],
+            'description'    => ['sometimes', 'nullable', 'string'],
+            'location'       => ['sometimes', 'nullable', 'string', 'max:255'],
+            'scheduled_at'   => ['sometimes', 'nullable', 'date'],
+            'starts_at'      => ['sometimes', 'nullable', 'date'],
+            'max_slots'      => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'capacity'       => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'is_active'      => ['sometimes', 'boolean'],
+            'status'         => ['sometimes', 'string', 'in:draft,published'],
+            'category_id'    => ['sometimes', 'nullable', 'exists:categories,id'],
+            'coordinator_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'coordinator_bio'  => ['sometimes', 'nullable', 'string'],
+            'ends_at'        => ['sometimes', 'nullable', 'date'],
+            'duration'       => ['sometimes', 'nullable', 'string', 'max:255'],
+            'cost'           => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'cover_image'    => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'professor_image' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+        ]);
+
+        $updates = [];
+
+        if ($request->has('title_ro') || $request->has('title')) {
+            $updates['title_ro'] = $request->input('title_ro') ?? $request->input('title');
+        }
+        if ($request->has('title_de') || $request->has('title_ro') || $request->has('title')) {
+            $updates['title_de'] = $request->input('title_de') ?? $request->input('title_ro') ?? $request->input('title');
+        }
+        if ($request->has('description_ro') || $request->has('description')) {
+            $updates['description_ro'] = $request->input('description_ro') ?? $request->input('description');
+        }
+        if ($request->has('description_de') || $request->has('description_ro') || $request->has('description')) {
+            $updates['description_de'] = $request->input('description_de') ?? $request->input('description_ro') ?? $request->input('description');
+        }
+        if ($request->has('max_slots') || $request->has('capacity')) {
+            $updates['max_slots'] = $request->input('max_slots') ?? $request->input('capacity');
+        }
+        if ($request->has('scheduled_at') || $request->has('starts_at')) {
+            $updates['scheduled_at'] = $request->input('scheduled_at') ?? $request->input('starts_at');
+        }
+        if ($request->has('ends_at')) {
+            $updates['ends_at'] = $request->input('ends_at');
+        }
+        if ($request->has('location')) {
+            $updates['location'] = $request->input('location');
+        }
+        if ($request->has('duration')) {
+            $updates['duration'] = $request->input('duration');
+        }
+        if ($request->has('cost')) {
+            $updates['cost'] = $request->input('cost');
+        }
+        if ($request->has('category_id')) {
+            $updates['category_id'] = $request->input('category_id');
+        }
+        if ($request->has('coordinator_name')) {
+            $updates['coordinator_name'] = $request->input('coordinator_name');
+        }
+        if ($request->has('coordinator_bio')) {
+            $updates['coordinator_bio'] = $request->input('coordinator_bio');
+        }
+        if ($request->has('is_active')) {
+            $updates['is_active'] = (bool) $request->input('is_active');
+        } elseif ($request->has('status')) {
+            $updates['is_active'] = $request->input('status') === 'published';
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $file = $request->file('cover_image');
+            $updates['cover_image_base64'] = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->path()));
+        }
+        
+        if ($request->hasFile('professor_image')) {
+            $file = $request->file('professor_image');
+            $updates['professor_image_base64'] = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->path()));
+        }
+
+        $workshop->update($updates);
+
+        return response()->json([
+            'message' => 'Workshop updated successfully',
+            'data'    => new WorkshopResource($workshop->refresh()),
+        ], 200);
     }
 }

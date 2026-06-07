@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useAppAuth } from '../auth/AuthContext'
 import DashboardShell from '../components/DashboardShell'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
-import { createTeacherWorkshop } from '../lib/api'
+import { createTeacherWorkshop, updateTeacherWorkshop, fetchCategories } from '../lib/api'
+import { useWorkshop } from '../lib/workshops'
 import { submitWorkshopForm } from './createWorkshopForm'
 
 const initialForm = {
   title: '',
-  category: 'Științe Sociale',
+  category_id: '',
   description: '',
   coordinatorName: '',
   coordinatorBio: '',
@@ -21,9 +23,17 @@ const initialForm = {
 }
 
 export default function CreateWorkshopPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const isEditMode = Boolean(id)
+  
   const { t, locale } = useI18n()
   const { getToken } = useAppAuth()
+  
+  const { workshop: existingWorkshop, isLoading: isFetching } = useWorkshop(id)
+  
   const [form, setForm] = useState(initialForm)
+  const [categories, setCategories] = useState([])
   const [coverImage, setCoverImage] = useState(null)
   const [coverImagePreview, setCoverImagePreview] = useState(null)
   const [professorImage, setProfessorImage] = useState(null)
@@ -32,12 +42,51 @@ export default function CreateWorkshopPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [createdWorkshop, setCreatedWorkshop] = useState(null)
 
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await fetchCategories()
+        setCategories(data)
+        if (data.length > 0 && !form.category_id) {
+          setForm(prev => ({ ...prev, category_id: data[0].id }))
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err)
+      }
+    }
+    loadCategories()
+  }, [])
+
   function updateField(field, value) {
     setForm((current) => ({
       ...current,
       [field]: value,
     }))
   }
+
+  useEffect(() => {
+    if (isEditMode && existingWorkshop) {
+      setForm({
+        title: typeof existingWorkshop.title === 'object' ? existingWorkshop.title?.ro : (existingWorkshop.title || ''),
+        category_id: existingWorkshop.category_id || '',
+        description: typeof existingWorkshop.description === 'object' ? existingWorkshop.description?.ro : (existingWorkshop.description || ''),
+        coordinatorName: existingWorkshop.coordinator_name || '',
+        coordinatorBio: existingWorkshop.coordinator_bio || '',
+        startsAt: existingWorkshop.scheduled_at ? existingWorkshop.scheduled_at.split('T')[0] : '',
+        endsAt: existingWorkshop.ends_at ? existingWorkshop.ends_at.split('T')[0] : '',
+        duration: existingWorkshop.duration || '',
+        capacity: existingWorkshop.max_slots ? String(existingWorkshop.max_slots) : '',
+        location: existingWorkshop.location || '',
+        cost: existingWorkshop.cost ? String(existingWorkshop.cost) : '',
+      })
+      if (existingWorkshop.cover_image_base64) {
+        setCoverImagePreview(existingWorkshop.cover_image_base64)
+      }
+      if (existingWorkshop.professor_image_base64) {
+        setProfessorImagePreview(existingWorkshop.professor_image_base64)
+      }
+    }
+  }, [isEditMode, existingWorkshop])
 
   async function handleSubmit(status) {
     setSubmittingStatus(status)
@@ -50,13 +99,18 @@ export default function CreateWorkshopPage() {
       professorImage,
       status,
       getToken,
-      createWorkshop: createTeacherWorkshop,
+      apiCall: isEditMode ? updateTeacherWorkshop : createTeacherWorkshop,
+      workshopId: id,
       t,
     })
 
     setErrorMessage(result.errorMessage)
     setCreatedWorkshop(result.workshop)
     setSubmittingStatus('')
+    
+    if (isEditMode && !result.errorMessage) {
+      navigate('/demo/dashboard/teacher/workshops')
+    }
   }
 
   const isSubmitting = submittingStatus !== ''
@@ -66,8 +120,12 @@ export default function CreateWorkshopPage() {
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1000px] px-margin py-lg">
           <header className="mb-xl">
-            <h1 className="mb-base font-h1 text-h1 text-primary">{t('create.title')}</h1>
-            <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">{t('create.subtitle')}</p>
+            <h1 className="mb-base font-h1 text-h1 text-primary">
+              {isEditMode ? (locale === 'de' ? 'Workshop bearbeiten' : 'Editează workshop') : t('create.title')}
+            </h1>
+            <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
+              {isEditMode ? (locale === 'de' ? 'Aktualisieren Sie die Details des Workshops' : 'Actualizează detaliile acestui workshop') : t('create.subtitle')}
+            </p>
           </header>
 
           <div className="grid grid-cols-12 gap-gutter">
@@ -77,8 +135,10 @@ export default function CreateWorkshopPage() {
                   <Field label={t('create.titleLabel')} onChange={(value) => updateField('title', value)} placeholder={t('create.titlePlaceholder')} value={form.title} />
                   <label className="space-y-xs block">
                     <span className="block font-label-md text-label-md uppercase text-primary">{t('create.category')}</span>
-                    <select className="w-full rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('category', event.target.value)} value={form.category}>
-                      <option>Științe Sociale</option><option>Data Science</option><option>Umanioare Digitale</option><option>Fizică Teoretică</option>
+                    <select className="w-full rounded-lg border border-outline-variant bg-white p-4 font-body-md outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => updateField('category_id', event.target.value)} value={form.category_id || ''}>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
                     </select>
                   </label>
                   <label className="space-y-xs block">
@@ -192,8 +252,14 @@ export default function CreateWorkshopPage() {
               <Icon>{submittingStatus === 'draft' ? 'hourglass_top' : 'save'}</Icon>
               {submittingStatus === 'draft' ? t('create.saving') : t('common.saveDraft')}
             </button>
-            <button className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting} onClick={() => handleSubmit('published')} type="button">
-              {submittingStatus === 'published' ? t('create.publishing') : t('common.publish')} <Icon>{submittingStatus === 'published' ? 'hourglass_top' : 'arrow_forward'}</Icon>
+            <button
+              className="inline-flex items-center gap-base rounded-lg bg-primary px-xl py-3 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isSubmitting}
+              onClick={() => handleSubmit('published')}
+              type="button"
+            >
+              {submittingStatus === 'published' ? t('common.loading') : isEditMode ? (locale === 'de' ? 'Änderungen speichern' : 'Salvează modificările') : t('common.publish')}
+              <Icon>{submittingStatus === 'published' ? 'hourglass_top' : 'arrow_forward'}</Icon>
             </button>
           </footer>
         </div>

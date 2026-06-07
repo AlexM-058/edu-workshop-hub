@@ -16,7 +16,6 @@ class WorkshopResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $referent = $this->whenLoaded('referent');
         $capacity = $this->max_slots ?? $this->capacity ?? 0;
         $scheduledAt = $this->scheduled_at ?? $this->starts_at;
 
@@ -37,7 +36,12 @@ class WorkshopResource extends JsonResource
             'is_open'        => $this->hasAvailableSlots() && ($this->is_active || $this->status === 'published'),
             'scheduled_at'   => $scheduledAt?->toIso8601String(),
             'is_active'      => $this->is_active || $this->status === 'published',
-            'category'       => $this->category,
+            'category_id'    => $this->category_id,
+            'category'       => $this->category ? [
+                'id' => $this->category->id,
+                'name' => $this->category->name,
+                'icon' => $this->category->icon,
+            ] : null,
             'coordinator_name' => $this->coordinator_name,
             'coordinator_bio'  => $this->coordinator_bio,
             'ends_at'        => $this->ends_at?->toIso8601String(),
@@ -45,9 +49,9 @@ class WorkshopResource extends JsonResource
             'cost'           => $this->cost,
             'cover_image_base64' => $this->cover_image_base64,
             'professor_image_base64' => $this->professor_image_base64,
-            'referent'       => $referent ? [
-                'id'   => $referent->id,
-                'name' => $referent->fullName(),
+            'referent'       => $this->relationLoaded('referent') && $this->referent ? [
+                'id'   => $this->referent->id,
+                'name' => $this->referent->fullName(),
             ] : null,
             'created_at' => $this->created_at->toIso8601String(),
         ];

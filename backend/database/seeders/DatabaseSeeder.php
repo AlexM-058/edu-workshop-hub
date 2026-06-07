@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Registration;
 use App\Models\User;
@@ -73,6 +74,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ------------------------------------------------------------------ //
+        // Categories
+        // ------------------------------------------------------------------ //
+        $catPedagogy = Category::create(['name' => 'Pedagogie', 'icon' => 'school']);
+        $catTech = Category::create(['name' => 'Tehnologie', 'icon' => 'computer']);
+        $catPsychology = Category::create(['name' => 'Psihologie', 'icon' => 'psychology']);
+        $catManagement = Category::create(['name' => 'Management Școlar', 'icon' => 'corporate_fare']);
+
+        // ------------------------------------------------------------------ //
         // Workshops — bilingual, varied dates and fill levels
         // ------------------------------------------------------------------ //
 
@@ -87,6 +96,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Un workshop intensiv despre intersecția dintre știința cognitivă și tehnologia educațională. Participanții vor învăța cum să susțină învățarea profundă în medii hibride și să adapteze conținutul pentru diverse stiluri de predare.',
                 'description_de' => 'Ein intensiver Workshop über die Schnittstelle von Kognitionswissenschaft und Bildungstechnologie. Die Teilnehmer lernen, tiefes Lernen in hybriden Umgebungen zu fördern.',
                 'location'       => 'Cluj-Napoca, Sala 101',
+                'category_id'    => $catPedagogy->id,
                 'max_slots'      => 25,
                 'occupied_slots' => 18,
                 'scheduled_at'   => now()->addDays(14),
@@ -100,6 +110,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Sesiune dedicată creării unui mediu de învățare accesibil și echitabil pentru toți elevii, indiferent de nevoile lor specifice. Include studii de caz și strategii practice.',
                 'description_de' => 'Sitzung zur Schaffung eines zugänglichen und gerechten Lernumfelds für alle Schülerinnen und Schüler, unabhängig von ihren spezifischen Bedürfnissen.',
                 'location'       => 'București, Centrul de Formare',
+                'category_id'    => $catPedagogy->id,
                 'max_slots'      => 20,
                 'occupied_slots' => 20,
                 'scheduled_at'   => now()->addDays(21),
@@ -113,6 +124,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Metode moderne de evaluare continuă și tehnici de feedback care sprijină progresul elevilor. Workshop practic cu exerciții individuale și de grup.',
                 'description_de' => 'Moderne Methoden der kontinuierlichen Bewertung und Feedbacktechniken, die den Fortschritt der Lernenden unterstützen.',
                 'location'       => 'Online (Zoom)',
+                'category_id'    => $catPsychology->id,
                 'max_slots'      => 40,
                 'occupied_slots' => 12,
                 'scheduled_at'   => now()->addDays(30),
@@ -126,6 +138,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Strategii pentru reconstruirea dinamicii de grup și menținerea unui climat pozitiv de învățare după perturbările cauzate de pandemia COVID-19.',
                 'description_de' => 'Strategien zum Wiederaufbau der Gruppendynamik und zur Aufrechterhaltung eines positiven Lernklimas.',
                 'location'       => 'Brașov, Casa Corpului Didactic',
+                'category_id'    => $catManagement->id,
                 'max_slots'      => 30,
                 'occupied_slots' => 8,
                 'scheduled_at'   => now()->subDays(10), // past — attended
@@ -141,6 +154,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Explorați instrumentele AI disponibile pentru educatori: generatoare de conținut, asistenți de evaluare și platforme adaptive. Workshop aplicativ cu demonstrații live.',
                 'description_de' => 'Entdecken Sie KI-Tools für Pädagogen: Content-Generatoren, Bewertungsassistenten und adaptive Plattformen.',
                 'location'       => 'Iași, Universitatea Alexandru Ioan Cuza',
+                'category_id'    => $catTech->id,
                 'max_slots'      => 35,
                 'occupied_slots' => 22,
                 'scheduled_at'   => now()->addDays(7),
@@ -154,6 +168,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Bune practici pentru menținerea unei comunicări eficiente și transparente cu familiile elevilor prin platforme digitale moderne.',
                 'description_de' => 'Best Practices für eine effektive und transparente Kommunikation mit Schülerfamilien über moderne digitale Plattformen.',
                 'location'       => 'Timișoara, Colegiul Național',
+                'category_id'    => $catPedagogy->id,
                 'max_slots'      => 25,
                 'occupied_slots' => 5,
                 'scheduled_at'   => now()->addDays(45),
@@ -167,6 +182,7 @@ class DatabaseSeeder extends Seeder
                 'description_ro' => 'Atelier practic de proiectare a unităților de învățare conform cadrului european al competențelor cheie. Participanții produc un plan de lecție complet.',
                 'description_de' => 'Praktischer Workshop zur Planung von Lerneinheiten gemäß dem europäischen Rahmen der Schlüsselkompetenzen.',
                 'location'       => 'Sibiu, Centrul Pedagogic',
+                'category_id'    => $catPedagogy->id,
                 'max_slots'      => 20,
                 'occupied_slots' => 20,
                 'scheduled_at'   => now()->subDays(30), // past

@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAppAuth } from '../auth/AuthContext'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'
 import TopNav from '../components/TopNav'
 import { useI18n } from '../i18n/I18nContext'
-import { enrollInWorkshop, fetchRegistrationStatus } from '../lib/api'
+import { enrollInWorkshop, fetchRegistrationStatus, deleteWorkshopByAdmin } from '../lib/api'
 import { useWorkshop } from '../lib/workshops'
 import { submitWorkshopEnrollment } from './workshopEnrollment'
+import AdminDeleteWorkshopModal from '../components/AdminDeleteWorkshopModal'
 
 const FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDecgUTSAa8efi825vgclrR5eXRLD1K7Z6VU2zd0_0MZ7xDmEXe_E7MFXSSDEfuAkQEWol_G2pfO0KhMOU9SMyy2qDQgPh7TjIBzTavQYO1QgAT-KMEwimICVDw7m72LQP0yJtPHUxJkJL1lPBkMviigLqWtoBfxkuMTtITDhlit9pURAqctEW79uy_jp13ftcO1V6HsT37n2g9fdmx3IzHXgNFS2hpoZlIp3PES-sI1kaD15H1CeZcLtkBXdGfDl5ioSp7NolKgDQ'
 
 export default function WorkshopDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { t, locale } = useI18n()
   const { getToken, isSignedIn, isSyncing, role } = useAppAuth()
   const { workshop, isLoading, error } = useWorkshop(id)
@@ -21,6 +23,8 @@ export default function WorkshopDetailPage() {
   const [enrollmentSuccess, setEnrollmentSuccess] = useState('')
   const [registrationStatus, setRegistrationStatus] = useState(null)
   const [isStatusLoading, setIsStatusLoading] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (isSignedIn && role === 'attender' && id) {
@@ -104,6 +108,20 @@ export default function WorkshopDetailPage() {
     buttonLabel = t('detail.enrolling')
   }
 
+  async function handleDeleteConfirm() {
+    setIsDeleting(true)
+    setEnrollmentError('')
+    try {
+      const token = await getToken()
+      await deleteWorkshopByAdmin({ token, workshopId: id })
+      navigate('/catalog', { replace: true })
+    } catch (err) {
+      setEnrollmentError(err.message || 'Error deleting workshop')
+      setIsDeleting(false)
+      setIsDeleteModalOpen(false)
+    }
+  }
+
   return (
     <div className="bg-surface text-on-surface">
       <TopNav />
@@ -158,14 +176,24 @@ export default function WorkshopDetailPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                  <button
-                    className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95 disabled:cursor-wait disabled:opacity-70"
-                    disabled={buttonDisabled}
-                    onClick={handleEnrollment}
-                    type="button"
-                  >
-                    {buttonLabel}
-                  </button>
+                  {role === 'admin' ? (
+                    <button
+                      className="rounded-xl bg-error px-10 py-4 font-label-md text-white shadow-lg shadow-error/10 transition-all hover:bg-error/90 disabled:cursor-wait disabled:opacity-70"
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      type="button"
+                    >
+                      {t('admin.deleteWorkshop')}
+                    </button>
+                  ) : (
+                    <button
+                      className="rounded-xl bg-primary px-10 py-4 font-label-md text-on-primary shadow-lg shadow-primary/10 transition-all hover:opacity-95 disabled:cursor-wait disabled:opacity-70"
+                      disabled={buttonDisabled}
+                      onClick={handleEnrollment}
+                      type="button"
+                    >
+                      {buttonLabel}
+                    </button>
+                  )}
                   <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">
                     {t('detail.download')}
                   </button>
@@ -224,7 +252,7 @@ export default function WorkshopDetailPage() {
               </article>
 
               <article className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-low p-8">
-                {workshop.category && <Stat icon="category" label={locale === 'de' ? 'Kategorie' : 'Categorie'} value={workshop.category} />}
+                {workshop.category && <Stat icon="category" label={locale === 'de' ? 'Kategorie' : 'Categorie'} value={workshop.category.name} />}
                 <Stat icon="event" label={locale === 'de' ? 'Datum' : 'Data'} value={dateStr} />
                 {workshop.duration && <Stat icon="schedule" label={locale === 'de' ? 'Dauer' : 'Durata'} value={workshop.duration} />}
                 <Stat icon="location_on" label={locale === 'de' ? 'Ort' : 'Locatie'} value={workshop.location} />
@@ -242,6 +270,13 @@ export default function WorkshopDetailPage() {
         )}
       </main>
       <Footer />
+
+      <AdminDeleteWorkshopModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        isBusy={isDeleting}
+      />
     </div>
   )
 }

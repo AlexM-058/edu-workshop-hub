@@ -95,9 +95,14 @@ function WorkshopRow({ workshop, locale }) {
       </td>
       <td className="px-md py-4 text-on-surface-variant">{date}</td>
       <td className="px-md py-4 text-right">
-        <Link className="font-label-md text-primary hover:underline" to={`/workshops/${workshop.id}`}>
-          {locale === 'de' ? 'Ansehen' : 'Vezi'}
-        </Link>
+        <div className="flex justify-end gap-3">
+          <Link className="font-label-md text-primary hover:underline" to={`/demo/admin/workshops/edit/${workshop.id}`}>
+            {locale === 'de' ? 'Bearbeiten' : 'Editează'}
+          </Link>
+          <Link className="font-label-md text-primary hover:underline" to={`/workshops/${workshop.id}`}>
+            {locale === 'de' ? 'Ansehen' : 'Vezi'}
+          </Link>
+        </div>
       </td>
     </tr>
   )

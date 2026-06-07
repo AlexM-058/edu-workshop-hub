@@ -16,7 +16,7 @@ function optionalCapacity(value) {
 export function buildWorkshopPayload(form, status, coverImage, professorImage) {
   const payload = {
     title: form.title.trim(),
-    category: form.category.trim(),
+    category_id: form.category_id ? String(form.category_id).trim() : '',
     description: form.description.trim(),
     coordinator_name: optionalText(form.coordinatorName),
     coordinator_bio: optionalText(form.coordinatorBio),
@@ -69,15 +69,17 @@ export function getWorkshopSubmitErrorMessage(error, t) {
   return t('create.errorGeneric');
 }
 
-export async function submitWorkshopForm({ form, status, coverImage, professorImage, getToken, createWorkshop, t }) {
+export async function submitWorkshopForm({ form, status, coverImage, professorImage, getToken, apiCall, workshopId, t }) {
   try {
     const token = await getToken();
     const payload = buildWorkshopPayload(form, status, coverImage, professorImage);
-    const response = await createWorkshop(token, payload);
+    const response = workshopId 
+      ? await apiCall(token, workshopId, payload)
+      : await apiCall(token, payload);
 
     return {
       errorMessage: '',
-      workshop: response.workshop,
+      workshop: response.data || response.workshop,
     };
   } catch (error) {
     return {

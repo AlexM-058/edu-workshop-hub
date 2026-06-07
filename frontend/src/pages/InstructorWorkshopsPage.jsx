@@ -140,6 +140,7 @@ export default function InstructorWorkshopsPage() {
                           {statusLabel}
                         </span>
                       </div>
+
                       <div className="mt-4 grid gap-2">
                         <Detail icon="group">
                           {workshop.occupied_slots}/{workshop.max_slots}{' '}
@@ -166,7 +167,7 @@ export default function InstructorWorkshopsPage() {
                         {locale === 'de' ? 'Teilnehmende' : 'Participanți'}
                       </Link>
                       <Link
-                        to={`/demo/dashboard/referent/workshops/new?id=${workshop.id}`}
+                        to={`/demo/dashboard/teacher/workshops/edit/${workshop.id}`}
                         className="rounded border border-primary px-6 py-2 text-label-md font-label-md text-primary transition-colors hover:bg-slate-50"
                       >
                         {t('common.edit')}
