@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('workshops', function (Blueprint $table) {
-            $table->foreignId('category_id')->nullable()->constrained('categories')->cascadeOnDelete();
-            $table->dropColumn('category');
-        });
+        if (! Schema::hasColumn('workshops', 'category_id')) {
+            Schema::table('workshops', function (Blueprint $table) {
+                $table->foreignId('category_id')->nullable()->constrained('categories')->cascadeOnDelete();
+            });
+        }
+
+        if (Schema::hasColumn('workshops', 'category')) {
+            Schema::table('workshops', function (Blueprint $table) {
+                $table->dropColumn('category');
+            });
+        }
     }
 
     /**
@@ -22,10 +29,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('workshops', function (Blueprint $table) {
-            $table->dropForeign(['category_id']);
-            $table->dropColumn('category_id');
-            $table->string('category')->nullable();
-        });
+        if (Schema::hasColumn('workshops', 'category_id')) {
+            Schema::table('workshops', function (Blueprint $table) {
+                $table->dropForeign(['category_id']);
+                $table->dropColumn('category_id');
+            });
+        }
+
+        if (! Schema::hasColumn('workshops', 'category')) {
+            Schema::table('workshops', function (Blueprint $table) {
+                $table->string('category')->nullable();
+            });
+        }
     }
 };
