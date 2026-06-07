@@ -4,6 +4,7 @@ import Icon from './Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import LanguageToggle from './LanguageToggle'
 import { useI18n } from '../i18n/I18nContext'
+import logo from '../assets/edu-logo.jpeg'
 
 const professorLinks = [
   { labelKey: 'nav.catalog', to: '/catalog' },
@@ -31,7 +32,8 @@ export default function TopNav({ searchKey = 'nav.searchCourses', instructor = f
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-8">
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-xl font-bold tracking-tight text-blue-900">
+          <Link to="/" className="flex items-center gap-3 text-xl font-bold tracking-tight text-blue-900">
+            <img src={logo} alt="EduCraft Logo" className="h-10 w-auto object-contain rounded-md" />
             EduCraft
           </Link>
           <nav className="hidden items-center gap-6 md:flex">

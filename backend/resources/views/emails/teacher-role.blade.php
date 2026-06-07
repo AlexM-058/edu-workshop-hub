@@ -15,10 +15,6 @@ Dir stehen nun neue Funktionen zur Verfügung: Du kannst Workshops erstellen, An
 
 Falls du noch nicht eingeloggt bist, melde dich bitte auf der Plattform an und erstelle deinen ersten Workshop.
 
-<x-mail::button :url="config('app.frontend_url') ?? 'http://localhost:5173'">
-Accesează panoul profesorului / Zum Lehrer-Dashboard
-</x-mail::button>
-
 Cu prietenie / Mit freundlichen Grüßen,<br>
-Echipa {{ config('app.name') }}
+Echipa Edu
 </x-mail::message>

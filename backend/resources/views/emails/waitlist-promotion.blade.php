@@ -25,10 +25,6 @@ Du bist nun offiziell angemeldet und dein Platz ist gesichert.
 **Ort:** {{ $workshop->location }}
 @endif
 
-<x-mail::button :url="config('app.frontend_url') ?? 'http://localhost:5173'">
-Accesează contul / Zum Konto
-</x-mail::button>
-
 Cu prietenie / Mit freundlichen Grüßen,<br>
-Echipa {{ config('app.name') }}
+Echipa Edu
 </x-mail::message>

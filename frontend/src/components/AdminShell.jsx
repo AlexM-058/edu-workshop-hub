@@ -4,6 +4,7 @@ import Icon from './Icon'
 import LanguageToggle from './LanguageToggle'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
+import logo from '../assets/edu-logo.jpeg'
 
 const adminLinks = [
   { labelKey: 'admin.nav.dashboard', icon: 'dashboard', to: '/demo/admin/dashboard' },
@@ -23,7 +24,10 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
   return (
     <div className="min-h-screen bg-background text-on-background">
       <header className="fixed left-0 top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white/90 px-8 backdrop-blur-md">
-        <Link to="/" className="font-h2 text-2xl font-bold tracking-tight text-blue-900">EduCraft</Link>
+        <Link to="/" className="flex items-center gap-3 font-h2 text-2xl font-bold tracking-tight text-blue-900">
+          <img src={logo} alt="EduCraft Logo" className="h-10 w-auto object-contain rounded-md" />
+          EduCraft
+        </Link>
         <div className="flex items-center gap-4">
           <div className="relative hidden md:block">
             <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">search</Icon>

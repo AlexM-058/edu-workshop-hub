@@ -25,10 +25,6 @@ Wir freuen uns, dich dabei zu haben und erwarten deine Teilnahme an dieser Sitzu
 **Ort:** {{ $workshop->location }}
 @endif
 
-<x-mail::button :url="config('app.frontend_url') ?? 'http://localhost:5173'">
-Vezi platforma / Zur Plattform
-</x-mail::button>
-
 Cu prietenie / Mit freundlichen Grüßen,<br>
-Echipa {{ config('app.name') }}
+Echipa Edu
 </x-mail::message>
