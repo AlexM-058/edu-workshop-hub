@@ -13,8 +13,8 @@ class TeacherInvitationController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'role' => ['sometimes', Rule::in(['teacher'])],
+            'email'      => ['required', 'email'],
+            'role'       => ['sometimes', Rule::in(['referent'])],
             'expires_at' => ['nullable', 'date', 'after:now'],
         ]);
 
@@ -29,7 +29,7 @@ class TeacherInvitationController extends Controller
 
         if ($invitation->accepted_at === null) {
             $invitation->fill([
-                'role' => $validated['role'] ?? 'teacher',
+                'role'       => $validated['role'] ?? 'referent',
                 'invited_by' => $request->user()->id,
                 'expires_at' => $validated['expires_at'] ?? null,
             ]);

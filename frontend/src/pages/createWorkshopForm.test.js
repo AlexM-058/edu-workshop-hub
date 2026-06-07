@@ -8,7 +8,7 @@ import {
 
 const baseForm = {
   title: ' Applied Digital Pedagogy ',
-  category: 'Data Science',
+  category_id: 1,
   description: ' Classroom methods with practical data exercises. ',
   coordinatorName: ' Tina Teacher ',
   coordinatorBio: ' Teacher educator. ',
@@ -31,7 +31,7 @@ describe('create workshop form', () => {
   it('builds a draft payload from trimmed form values', () => {
     assert.deepEqual(buildWorkshopPayload(baseForm, 'draft'), {
       title: 'Applied Digital Pedagogy',
-      category: 'Data Science',
+      category_id: '1',
       description: 'Classroom methods with practical data exercises.',
       coordinator_name: 'Tina Teacher',
       coordinator_bio: 'Teacher educator.',
@@ -56,7 +56,7 @@ describe('create workshop form', () => {
       location: '',
     }, 'published'), {
       title: 'Applied Digital Pedagogy',
-      category: 'Data Science',
+      category_id: '1',
       description: 'Classroom methods with practical data exercises.',
       status: 'published',
     });

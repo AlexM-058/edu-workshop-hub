@@ -3,7 +3,7 @@ import AdminShell from '../components/AdminShell'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
-import { createTeacherInvitation } from '../lib/api'
+import { createTeacherInvitation, updateUserRoleByAdmin, deleteUserByAdmin } from '../lib/api'
 import { useAdminStats, useAdminUsers } from '../lib/admin'
 import {
   getTeacherInvitationFormControlState,
@@ -28,7 +28,7 @@ const ROLE_BADGES = {
 
 export default function AdminUsersPage() {
   const { t, locale } = useI18n()
-  const { getToken } = useAppAuth()
+  const { getToken, appUser } = useAppAuth()
   const [roleFilter, setRoleFilter] = useState('')
   const [page, setPage] = useState(1)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -37,6 +37,8 @@ export default function AdminUsersPage() {
   const [inviteStatus, setInviteStatus] = useState('')
   const [isInviting, setIsInviting] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [editingRoleUserId, setEditingRoleUserId] = useState(null)
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false)
   const inviteControls = getTeacherInvitationFormControlState(isInviting)
 
   const { users, meta, isLoading, error } = useAdminUsers({ page, perPage: 20, role: roleFilter || undefined, refreshKey })
@@ -77,8 +79,47 @@ export default function AdminUsersPage() {
 
   function roleName(role) {
     if (role === 'attender' || role === 'professor') return locale === 'de' ? 'Teilnehmer' : 'Participant'
-    if (role === 'teacher' || role === 'referent') return locale === 'de' ? 'Teacher' : 'Teacher'
+    if (role === 'teacher' || role === 'referent') return locale === 'de' ? 'Referent' : 'Referent'
     return 'Admin'
+  }
+
+  async function handleRoleChange(user, newRole) {
+    setEditingRoleUserId(null)
+    if (user.role === newRole) return
+    
+    setIsUpdatingRole(true)
+    try {
+      const token = await getToken()
+      await updateUserRoleByAdmin({ token, userId: user.id, role: newRole })
+      setRefreshKey((k) => k + 1)
+    } catch (e) {
+      console.error('Failed to update role', e)
+      // Optionally show a toast error here
+    } finally {
+      setIsUpdatingRole(false)
+    }
+  }
+
+  async function handleDeleteUser(user) {
+    if (user.id === appUser?.id) return
+    
+    const confirmMessage = locale === 'de' 
+      ? `Möchten Sie den Benutzer ${user.name} und alle seine Einschreibungen wirklich löschen?` 
+      : `Ești sigur că vrei să ștergi utilizatorul ${user.name} și toate înscrierile lui?`
+      
+    if (!window.confirm(confirmMessage)) return
+    
+    setIsUpdatingRole(true) // Reuse this flag to disable UI during deletion
+    try {
+      const token = await getToken()
+      await deleteUserByAdmin({ token, userId: user.id })
+      setRefreshKey((k) => k + 1)
+    } catch (e) {
+      console.error('Failed to delete user', e)
+      alert(locale === 'de' ? 'Löschen fehlgeschlagen.' : 'Ștergerea a eșuat.')
+    } finally {
+      setIsUpdatingRole(false)
+    }
   }
 
   function formatDate(iso) {
@@ -247,22 +288,58 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-md py-4">
-                        <span className={`inline-flex rounded px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${ROLE_BADGES[user.role] ?? 'bg-slate-100 text-primary'}`}>
-                          {roleName(user.role)}
-                        </span>
+                        {editingRoleUserId === user.id ? (
+                          <select
+                            className="rounded border border-primary bg-white py-1 px-2 text-[11px] font-bold uppercase tracking-wider text-primary outline-none focus:ring-2 focus:ring-primary/20"
+                            defaultValue={['teacher', 'professor'].includes(user.role) ? (user.role === 'teacher' ? 'referent' : 'attender') : user.role}
+                            onChange={(e) => handleRoleChange(user, e.target.value)}
+                            onBlur={() => setEditingRoleUserId(null)}
+                            autoFocus
+                            disabled={isUpdatingRole}
+                          >
+                            <option value="admin">Admin</option>
+                            <option value="referent">{locale === 'de' ? 'Referent' : 'Referent'}</option>
+                            <option value="attender">{locale === 'de' ? 'Teilnehmer' : 'Participant'}</option>
+                          </select>
+                        ) : (
+                          <span className={`inline-flex rounded px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${ROLE_BADGES[user.role] ?? 'bg-slate-100 text-primary'}`}>
+                            {roleName(user.role)}
+                          </span>
+                        )}
                       </td>
                       <td className="px-md py-4 font-body-md text-on-surface-variant">
                         {formatDate(user.created_at)}
                       </td>
                       <td className="px-md py-4 text-right">
                         <div className="flex justify-end gap-2">
+                          {editingRoleUserId === user.id ? (
+                            <button
+                              className="rounded p-2 text-primary hover:bg-surface-container"
+                              onClick={() => setEditingRoleUserId(null)}
+                              title={locale === 'de' ? 'Abbrechen' : 'Anulează'}
+                              type="button"
+                            >
+                              <Icon>close</Icon>
+                            </button>
+                          ) : (
+                            <button
+                              className="rounded p-2 text-primary hover:bg-surface-container disabled:opacity-50"
+                              onClick={() => setEditingRoleUserId(user.id)}
+                              title={locale === 'de' ? 'Rolle bearbeiten' : 'Editează rolul'}
+                              type="button"
+                              disabled={isUpdatingRole}
+                            >
+                              <Icon>edit</Icon>
+                            </button>
+                          )}
                           <button
-                            className="cursor-not-allowed rounded p-2 text-primary opacity-50"
-                            disabled
-                            title={t('common.demoUnavailable')}
+                            className="rounded p-2 text-error hover:bg-error-container hover:text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed"
+                            onClick={() => handleDeleteUser(user)}
+                            title={locale === 'de' ? 'Benutzer löschen' : 'Șterge utilizatorul'}
                             type="button"
+                            disabled={isUpdatingRole || user.id === appUser?.id}
                           >
-                            <Icon>edit</Icon>
+                            <Icon>delete</Icon>
                           </button>
                         </div>
                       </td>

@@ -7,6 +7,7 @@ import { useI18n } from '../i18n/I18nContext'
 import { useAttenderRegistrations, useAttenderStats } from '../lib/attenderRegistrations'
 import { downloadCertificate, withdrawRegistration } from '../lib/api'
 import { downloadBlob } from '../lib/downloadFile'
+import WithdrawWarningModal from '../components/WithdrawWarningModal'
 
 // Status config keyed by registration.status value
 const STATUS_CONFIG = {
@@ -21,6 +22,7 @@ export default function ProfessorDashboard() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [actionError, setActionError] = useState(null)
   const [busyRegistrationId, setBusyRegistrationId] = useState(null)
+  const [withdrawModalRegistration, setWithdrawModalRegistration] = useState(null)
 
   const { registrations, meta, isLoading, error } = useAttenderRegistrations({ perPage: 5, refreshKey })
   const { stats, isLoading: statsLoading } = useAttenderStats()
@@ -39,15 +41,19 @@ export default function ProfessorDashboard() {
     }
   }
 
-  async function handleWithdraw(registration) {
+  async function confirmWithdraw() {
+    if (!withdrawModalRegistration) return
+
     setActionError(null)
-    setBusyRegistrationId(registration.id)
+    setBusyRegistrationId(withdrawModalRegistration.id)
     try {
       const token = await getToken()
-      await withdrawRegistration({ token, registrationId: registration.id })
+      await withdrawRegistration({ token, registrationId: withdrawModalRegistration.id })
       setRefreshKey((value) => value + 1)
+      setWithdrawModalRegistration(null)
     } catch (error) {
       setActionError(error)
+      setWithdrawModalRegistration(null)
     } finally {
       setBusyRegistrationId(null)
     }
@@ -220,14 +226,14 @@ export default function ProfessorDashboard() {
                           )}
                           <div className="flex flex-wrap items-center gap-3">
                             {reg.status !== 'cancelled' && (
-                              <button
-                                className="rounded border border-error/40 px-4 py-2 text-sm font-label-md text-error transition hover:bg-error-container disabled:cursor-wait disabled:opacity-60"
-                                disabled={isBusy}
-                                onClick={() => handleWithdraw(reg)}
-                                type="button"
-                              >
-                                {locale === 'de' ? 'Zurückziehen' : 'Retrage'}
-                              </button>
+                                <button
+                                  className="rounded border border-error/40 px-4 py-2 text-sm font-label-md text-error transition hover:bg-error-container disabled:cursor-wait disabled:opacity-60"
+                                  disabled={isBusy}
+                                  onClick={() => setWithdrawModalRegistration(reg)}
+                                  type="button"
+                                >
+                                  {locale === 'de' ? 'Zurückziehen' : 'Retrage'}
+                                </button>
                             )}
                             <Link
                               to={`/workshops/${reg.workshop?.id}`}
@@ -311,6 +317,13 @@ export default function ProfessorDashboard() {
           </aside>
         </div>
       </div>
+
+      <WithdrawWarningModal 
+        isOpen={!!withdrawModalRegistration} 
+        onClose={() => setWithdrawModalRegistration(null)} 
+        onConfirm={confirmWithdraw} 
+        isBusy={!!busyRegistrationId}
+      />
     </DashboardShell>
   )
 }

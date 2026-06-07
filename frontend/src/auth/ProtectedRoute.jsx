@@ -28,7 +28,10 @@ export default function ProtectedRoute({ children, roles }) {
     )
   }
 
-  if (isSyncing || !role) {
+  // Only show the syncing page if we don't have a role yet (initial load).
+  // If we already have a role, allow the children to remain mounted during background re-syncs
+  // so we don't destroy their local state (e.g. form inputs) when the window regains focus.
+  if (!role) {
     return <AuthStatusPage title={t('auth.syncingTitle')} text={t('auth.syncingText')} />
   }
 

@@ -124,8 +124,12 @@ export default function InstructorWorkshopsPage() {
                   className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-white transition-shadow hover:shadow-[0_4px_12px_rgba(26,54,93,0.05)] md:flex-row"
                 >
                   {/* Thumbnail placeholder */}
-                  <div className="flex h-48 w-full shrink-0 items-center justify-center bg-slate-100 md:h-auto md:w-64">
-                    <Icon className="text-4xl text-slate-300">image</Icon>
+                  <div className="flex h-48 w-full shrink-0 items-center justify-center overflow-hidden bg-slate-100 md:h-auto md:w-64">
+                    {workshop.cover_image_base64 ? (
+                      <img className="h-full w-full object-cover" src={workshop.cover_image_base64} alt="" />
+                    ) : (
+                      <Icon className="text-4xl text-slate-300">image</Icon>
+                    )}
                   </div>
 
                   <div className="flex min-w-0 flex-1 flex-col justify-between p-md">
@@ -136,6 +140,7 @@ export default function InstructorWorkshopsPage() {
                           {statusLabel}
                         </span>
                       </div>
+
                       <div className="mt-4 grid gap-2">
                         <Detail icon="group">
                           {workshop.occupied_slots}/{workshop.max_slots}{' '}
@@ -162,7 +167,7 @@ export default function InstructorWorkshopsPage() {
                         {locale === 'de' ? 'Teilnehmende' : 'Participanți'}
                       </Link>
                       <Link
-                        to={`/demo/dashboard/referent/workshops/new?id=${workshop.id}`}
+                        to={`/demo/dashboard/teacher/workshops/edit/${workshop.id}`}
                         className="rounded border border-primary px-6 py-2 text-label-md font-label-md text-primary transition-colors hover:bg-slate-50"
                       >
                         {t('common.edit')}

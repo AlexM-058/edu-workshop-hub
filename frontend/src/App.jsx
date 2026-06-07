@@ -48,6 +48,7 @@ function App() {
       <Route path="/demo/dashboard/teacher/workshops" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><InstructorWorkshopsPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops/:id/participants" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><WorkshopParticipantsPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops/new" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />
+      <Route path="/demo/dashboard/teacher/workshops/edit/:id" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><CreateWorkshopPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/workshops/preview" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><WorkshopPreviewPage /></ProtectedRoute>} />
       <Route path="/demo/dashboard/teacher/analytics" element={<ProtectedRoute roles={['teacher', 'referent', 'admin']}><AnalyticsPage /></ProtectedRoute>} />
       <Route path="/demo/certificates" element={<ProtectedRoute roles={['attender', 'professor', 'teacher', 'referent', 'admin']}><CertificatesPage /></ProtectedRoute>} />
@@ -65,6 +66,7 @@ function App() {
       <Route path="/demo/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboardPage /></ProtectedRoute>} />
       <Route path="/demo/admin/users" element={<ProtectedRoute roles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
       <Route path="/demo/admin/workshops" element={<ProtectedRoute roles={['admin']}><AdminWorkshopsPage /></ProtectedRoute>} />
+      <Route path="/demo/admin/workshops/edit/:id" element={<ProtectedRoute roles={['admin']}><CreateWorkshopPage /></ProtectedRoute>} />
       <Route path="/demo/admin/settings" element={<ProtectedRoute roles={['admin']}><AdminSettingsPage /></ProtectedRoute>} />
       <Route path="/demo/admin/audit" element={<ProtectedRoute roles={['admin']}><AdminAuditPage /></ProtectedRoute>} />
 

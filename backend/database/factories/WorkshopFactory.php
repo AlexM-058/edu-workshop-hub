@@ -15,29 +15,16 @@ class WorkshopFactory extends Factory
 
     public function definition(): array
     {
-        $titleRo = $this->faker->sentence(4);
-        $titleDe = $this->faker->sentence(4);
-        $descriptionRo = $this->faker->paragraph();
-        $descriptionDe = $this->faker->paragraph();
-        $maxSlots = $this->faker->numberBetween(10, 100);
-        $scheduledAt = $this->faker->dateTimeBetween('+1 week', '+3 months');
-
         return [
             'referent_id'    => User::factory()->referent(),
-            'title'          => $titleRo,
-            'title_ro'       => $titleRo,
-            'title_de'       => $titleDe,
-            'category'       => 'general',
-            'description'    => $descriptionRo,
-            'description_ro' => $descriptionRo,
-            'description_de' => $descriptionDe,
+            'title_ro'       => $this->faker->sentence(4),
+            'title_de'       => $this->faker->sentence(4),
+            'description_ro' => $this->faker->paragraph(),
+            'description_de' => $this->faker->paragraph(),
             'location'       => $this->faker->city(),
-            'max_slots'      => $maxSlots,
-            'capacity'       => $maxSlots,
+            'max_slots'      => $this->faker->numberBetween(10, 100),
             'occupied_slots' => 0,
-            'starts_at'      => $scheduledAt,
-            'scheduled_at'   => $scheduledAt,
-            'status'         => 'published',
+            'scheduled_at'   => $this->faker->dateTimeBetween('+1 week', '+3 months'),
             'is_active'      => true,
         ];
     }
@@ -53,9 +40,6 @@ class WorkshopFactory extends Factory
     /** Inactive / archived workshop. */
     public function inactive(): static
     {
-        return $this->state([
-            'is_active' => false,
-            'status' => 'draft',
-        ]);
+        return $this->state(['is_active' => false]);
     }
 }

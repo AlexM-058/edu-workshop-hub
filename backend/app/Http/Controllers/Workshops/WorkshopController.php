@@ -26,7 +26,7 @@ class WorkshopController extends Controller
 
         $workshops = Workshop::query()
             ->active()
-            ->with('referent')
+            ->with(['referent', 'category'])
             ->orderBy('scheduled_at')
             ->paginate($perPage);
 
@@ -44,7 +44,7 @@ class WorkshopController extends Controller
             return response()->json(['message' => 'Workshop not found.'], 404);
         }
 
-        $workshop->load('referent');
+        $workshop->load(['referent', 'category']);
 
         return new WorkshopResource($workshop);
     }

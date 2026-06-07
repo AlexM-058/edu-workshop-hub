@@ -30,6 +30,10 @@ async function apiFetch(path, { token, ...init } = {}) {
     );
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }
 
@@ -105,6 +109,43 @@ export async function fetchTeacherStats({ token } = {}) {
   return apiFetch('/teacher/stats', { token });
 }
 
+// ---------------------------------------------------------------------------
+// Categories
+// ---------------------------------------------------------------------------
+
+export async function fetchCategories() {
+  return apiFetch('/categories');
+}
+
+export async function fetchAdminCategories({ token } = {}) {
+  return apiFetch('/admin/categories', { token });
+}
+
+export async function createCategory({ token, name, icon } = {}) {
+  return apiFetch('/admin/categories', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, icon }),
+    token,
+  });
+}
+
+export async function updateCategory({ token, categoryId, name, icon } = {}) {
+  return apiFetch(`/admin/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, icon }),
+    token,
+  });
+}
+
+export async function deleteCategory({ token, categoryId } = {}) {
+  return apiFetch(`/admin/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
 export async function fetchTeacherParticipants({ token, workshopId } = {}) {
   return apiFetch(`/teacher/workshops/${encodeURIComponent(workshopId)}/participants`, { token });
 }
@@ -162,6 +203,39 @@ export async function fetchAttenderRegistrations({ token, page = 1, perPage = 12
  */
 export async function fetchAttenderStats({ token } = {}) {
   return apiFetch('/attender/stats', { token });
+}
+
+export async function uploadProfessorImage({ token, file } = {}) {
+  return uploadFile({ endpoint: '/auth/me/professor-image', token, file });
+}
+
+export async function deleteWorkshopByAdmin({ token, workshopId } = {}) {
+  return apiFetch(`/admin/workshops/${encodeURIComponent(workshopId)}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function updateUserRoleByAdmin({ token, userId, role } = {}) {
+  return apiFetch(`/admin/users/${encodeURIComponent(userId)}/role`, {
+    method: 'PATCH',
+    token,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function deleteUserByAdmin({ token, userId } = {}) {
+  return apiFetch(`/admin/users/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function fetchRegistrationStatus({ token, workshopId } = {}) {
+  return apiFetch(`/attender/workshops/${encodeURIComponent(workshopId)}/registration-status`, { token });
 }
 
 export async function withdrawRegistration({ token, registrationId } = {}) {
@@ -238,20 +312,61 @@ export async function createTeacherInvitation(token, email) {
 }
 
 export async function createTeacherWorkshop(token, payload) {
+  const isFormData = payload instanceof FormData;
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(`${apiBaseUrl}/teacher/workshops`, {
     method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+    headers,
+    body: isFormData ? payload : JSON.stringify(payload),
   });
 
   const responsePayload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     const error = new Error(responsePayload.message ?? `Workshop creation failed with ${response.status}`);
+    error.status = response.status;
+    error.payload = responsePayload;
+    throw error;
+  }
+
+  return responsePayload;
+}
+
+export async function updateTeacherWorkshop(token, workshopId, payload) {
+  const isFormData = payload instanceof FormData;
+
+  if (isFormData) {
+    payload.append('_method', 'PUT');
+  }
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const response = await fetch(`${apiBaseUrl}/teacher/workshops/${encodeURIComponent(workshopId)}`, {
+    method: 'POST',
+    headers,
+    body: isFormData ? payload : JSON.stringify({ ...payload, _method: 'PUT' }),
+  });
+
+  const responsePayload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(responsePayload.message ?? `Workshop update failed with ${response.status}`);
     error.status = response.status;
     error.payload = responsePayload;
     throw error;

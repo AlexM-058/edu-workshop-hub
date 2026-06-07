@@ -85,11 +85,12 @@ class SyncClerkUser
             return $resolvedRole;
         }
 
+        // Promote an existing attender to referent/teacher if they now have an invitation
         if (
-            $resolvedRole === 'teacher'
+            in_array($resolvedRole, ['referent', 'teacher'], true)
             && in_array($user->role, ['attender', 'professor'], true)
         ) {
-            return 'teacher';
+            return $resolvedRole;
         }
 
         return $user->role;
@@ -100,7 +101,7 @@ class SyncClerkUser
      */
     private function acceptTeacherInvitation(User $user): bool
     {
-        if ($user->role !== 'teacher') {
+        if (! in_array($user->role, ['referent', 'teacher'], true)) {
             return false;
         }
 
@@ -112,13 +113,13 @@ class SyncClerkUser
 
     private function hasPendingTeacherInvitationNotice(User $user): bool
     {
-        if ($user->role !== 'teacher') {
+        if (! in_array($user->role, ['referent', 'teacher'], true)) {
             return false;
         }
 
         return TeacherInvitation::query()
             ->where('email', $user->email)
-            ->where('role', 'teacher')
+            ->whereIn('role', ['referent', 'teacher'])
             ->whereNotNull('accepted_at')
             ->whereNull('notice_seen_at')
             ->exists();
