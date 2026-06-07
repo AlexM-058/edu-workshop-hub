@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 
 class AttendanceQrController extends Controller
 {
-    private const TOKEN_SECONDS = 5;
+    private const REFRESH_SECONDS = 5;
+    private const TOKEN_SECONDS = 120;
     private const SESSION_SECONDS = 300;
 
     public function store(Request $request, Workshop $workshop): JsonResponse
@@ -27,10 +28,6 @@ class AttendanceQrController extends Controller
         $sessionExpiresAt = $activeSession?->session_expires_at ?? $now->copy()->addSeconds(self::SESSION_SECONDS);
         $tokenExpiresAt = $now->copy()->addSeconds(self::TOKEN_SECONDS);
 
-        if ($tokenExpiresAt->greaterThan($sessionExpiresAt)) {
-            $tokenExpiresAt = $sessionExpiresAt->copy();
-        }
-
         $rawToken = bin2hex(random_bytes(32));
 
         AttendanceQrToken::create([
@@ -46,7 +43,7 @@ class AttendanceQrController extends Controller
             'check_in_url' => $this->checkInUrl($rawToken),
             'expires_at' => $tokenExpiresAt->toJSON(),
             'session_expires_at' => $sessionExpiresAt->toJSON(),
-            'refresh_after_seconds' => self::TOKEN_SECONDS,
+            'refresh_after_seconds' => self::REFRESH_SECONDS,
         ], 201);
     }
 

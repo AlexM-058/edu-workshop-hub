@@ -72,6 +72,11 @@ class AttendanceQrCheckInTest extends TestCase
             ->assertJsonPath('refresh_after_seconds', 5);
 
         $rawToken = $response->json('token');
+        $tokenExpiresAt = now()->parse($response->json('expires_at'));
+        $sessionExpiresAt = now()->parse($response->json('session_expires_at'));
+
+        $this->assertGreaterThan(90, now()->diffInSeconds($tokenExpiresAt, false));
+        $this->assertGreaterThan(250, now()->diffInSeconds($sessionExpiresAt, false));
         $this->assertIsString($rawToken);
         $this->assertStringContainsString('/attendance/check-in?token=', $response->json('check_in_url'));
         $this->assertDatabaseMissing('attendance_qr_tokens', ['token_hash' => $rawToken]);

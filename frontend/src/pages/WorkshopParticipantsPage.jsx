@@ -136,8 +136,10 @@ function AttendanceQrPanel({ getToken, t, workshopId }) {
 
   const panelState = getAttendanceQrPanelState({ isLoading, qrPayload, error, nowMs })
 
-  const startQrSession = useCallback(async () => {
-    setIsLoading(true)
+  const startQrSession = useCallback(async ({ showLoading = true } = {}) => {
+    if (showLoading) {
+      setIsLoading(true)
+    }
     setError(null)
 
     try {
@@ -147,7 +149,9 @@ function AttendanceQrPanel({ getToken, t, workshopId }) {
     } catch (error) {
       setError(error)
     } finally {
-      setIsLoading(false)
+      if (showLoading) {
+        setIsLoading(false)
+      }
     }
   }, [getToken, workshopId])
 
@@ -163,16 +167,17 @@ function AttendanceQrPanel({ getToken, t, workshopId }) {
     const delay = getMillisecondsUntilRefresh({
       expiresAt: qrPayload.expires_at,
       sessionExpiresAt: qrPayload.session_expires_at,
+      refreshAfterSeconds: qrPayload.refresh_after_seconds,
       nowMs: Date.now(),
     })
     if (delay === null) return undefined
 
     const timeoutId = window.setTimeout(() => {
-      startQrSession()
+      startQrSession({ showLoading: false })
     }, delay)
 
     return () => window.clearTimeout(timeoutId)
-  }, [panelState.kind, qrPayload?.expires_at, startQrSession])
+  }, [panelState.kind, qrPayload?.expires_at, qrPayload?.refresh_after_seconds, qrPayload?.session_expires_at, startQrSession])
 
   const minutes = panelState.secondsRemaining ? Math.floor(panelState.secondsRemaining / 60) : 0
   const seconds = panelState.secondsRemaining ? panelState.secondsRemaining % 60 : 0
@@ -198,7 +203,7 @@ function AttendanceQrPanel({ getToken, t, workshopId }) {
         <button
           className="mt-5 inline-flex items-center gap-2 rounded bg-primary px-5 py-3 font-label-md text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
           disabled={!panelState.canStart}
-          onClick={startQrSession}
+          onClick={() => startQrSession({ showLoading: true })}
           type="button"
         >
           <Icon>{panelState.kind === 'loading' ? 'hourglass_top' : 'qr_code_scanner'}</Icon>

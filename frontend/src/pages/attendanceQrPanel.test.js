@@ -19,6 +19,25 @@ describe('attendance QR panel state', () => {
     });
   });
 
+  it('keeps the active qr visible during a background refresh', () => {
+    assert.deepEqual(getAttendanceQrPanelState({
+      isLoading: true,
+      qrPayload: {
+        check_in_url: 'http://localhost:5173/attendance/check-in?token=abc',
+        expires_at: '2026-06-07T10:02:00.000Z',
+        session_expires_at: '2026-06-07T10:05:00.000Z',
+      },
+      error: null,
+      nowMs: Date.parse('2026-06-07T10:00:01.000Z'),
+    }), {
+      kind: 'active',
+      labelKey: 'attendance.qr.active',
+      canStart: false,
+      secondsRemaining: 299,
+      isRefreshing: true,
+    });
+  });
+
   it('shows active state while the session has time remaining', () => {
     assert.deepEqual(getAttendanceQrPanelState({
       isLoading: false,
@@ -34,6 +53,7 @@ describe('attendance QR panel state', () => {
       labelKey: 'attendance.qr.active',
       canStart: false,
       secondsRemaining: 299,
+      isRefreshing: false,
     });
   });
 
@@ -84,28 +104,41 @@ describe('attendance QR panel state', () => {
     });
   });
 
-  it('calculates refresh delay from the current token expiry', () => {
+  it('calculates refresh delay from the refresh interval', () => {
     assert.equal(getMillisecondsUntilRefresh({
       expiresAt: '2026-06-07T10:00:05.000Z',
       sessionExpiresAt: '2026-06-07T10:05:00.000Z',
+      refreshAfterSeconds: 5,
       nowMs: Date.parse('2026-06-07T10:00:01.000Z'),
-    }), 4000);
+    }), 5000);
     assert.equal(getMillisecondsUntilRefresh({
       expiresAt: '2026-06-07T10:00:05.000Z',
       sessionExpiresAt: '2026-06-07T10:05:00.000Z',
+      refreshAfterSeconds: 5,
       nowMs: Date.parse('2026-06-07T10:00:06.000Z'),
-    }), 0);
+    }), 5000);
+  });
+
+  it('uses refresh_after_seconds instead of the check-in token expiration', () => {
+    assert.equal(getMillisecondsUntilRefresh({
+      expiresAt: '2026-06-07T10:02:00.000Z',
+      sessionExpiresAt: '2026-06-07T10:05:00.000Z',
+      refreshAfterSeconds: 5,
+      nowMs: Date.parse('2026-06-07T10:00:01.000Z'),
+    }), 5000);
   });
 
   it('does not schedule an automatic refresh for the final token in the session', () => {
     assert.equal(getMillisecondsUntilRefresh({
       expiresAt: '2026-06-07T10:05:00.000Z',
       sessionExpiresAt: '2026-06-07T10:05:00.000Z',
+      refreshAfterSeconds: 5,
       nowMs: Date.parse('2026-06-07T10:04:56.000Z'),
     }), null);
     assert.equal(getMillisecondsUntilRefresh({
       expiresAt: '2026-06-07T10:05:05.000Z',
       sessionExpiresAt: '2026-06-07T10:05:00.000Z',
+      refreshAfterSeconds: 5,
       nowMs: Date.parse('2026-06-07T10:04:56.000Z'),
     }), null);
   });
