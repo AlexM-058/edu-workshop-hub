@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Attender;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WaitlistPromotionMail;
+use App\Mail\WorkshopEnrollmentMail;
 use App\Models\Registration;
 use App\Models\Workshop;
 use App\Support\SimplePdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 
 class WorkshopEnrollmentController extends Controller
@@ -82,6 +85,8 @@ class WorkshopEnrollmentController extends Controller
                 $lockedWorkshop->forceFill([
                     'occupied_slots' => $enrolledCount + 1,
                 ])->save();
+
+                Mail::to($request->user()->email)->send(new WorkshopEnrollmentMail($lockedWorkshop));
             }
 
             return $registration->refresh();
@@ -134,6 +139,11 @@ class WorkshopEnrollmentController extends Controller
 
                 if ($promoted) {
                     $promoted->forceFill(['status' => 'enrolled'])->save();
+
+                    $promoted->loadMissing('user');
+                    if ($promoted->user && $promoted->user->email) {
+                        Mail::to($promoted->user->email)->send(new WaitlistPromotionMail($lockedWorkshop));
+                    }
                 } else {
                     $lockedWorkshop->forceFill([
                         'occupied_slots' => max(0, (int) $lockedWorkshop->occupied_slots - 1),

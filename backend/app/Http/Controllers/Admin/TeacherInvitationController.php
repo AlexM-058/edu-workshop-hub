@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TeacherRoleMail;
 use App\Models\TeacherInvitation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class TeacherInvitationController extends Controller
@@ -34,6 +36,8 @@ class TeacherInvitationController extends Controller
                 'expires_at' => $validated['expires_at'] ?? null,
             ]);
             $invitation->save();
+
+            Mail::to($invitation->email)->send(new TeacherRoleMail());
         }
 
         return response()->json([
