@@ -3,6 +3,27 @@ function optionalText(value) {
   return trimmed === '' ? undefined : trimmed;
 }
 
+function compactName(parts) {
+  return parts
+    .map((part) => String(part ?? '').trim())
+    .filter(Boolean)
+    .join(' ');
+}
+
+export function buildTeacherAutofillFields({ appUser, clerkUser } = {}) {
+  const coordinatorName =
+    optionalText(appUser?.name) ??
+    optionalText(clerkUser?.fullName) ??
+    optionalText(compactName([clerkUser?.firstName, clerkUser?.lastName])) ??
+    optionalText(appUser?.email) ??
+    optionalText(clerkUser?.primaryEmailAddress?.emailAddress) ??
+    '';
+
+  return {
+    coordinatorName,
+  };
+}
+
 function optionalCapacity(value) {
   const trimmed = String(value ?? '').trim();
 

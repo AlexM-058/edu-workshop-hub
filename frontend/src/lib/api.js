@@ -159,6 +159,13 @@ export async function markRegistrationAttendance({ token, registrationId, attend
   });
 }
 
+export async function createAttendanceQrToken({ token, workshopId } = {}) {
+  return apiFetch(`/teacher/workshops/${encodeURIComponent(workshopId)}/attendance-qr`, {
+    method: 'POST',
+    token,
+  });
+}
+
 export async function downloadAttendanceList({ token, workshopId, format = 'csv' } = {}) {
   const response = await fetch(
     `${apiBaseUrl}/teacher/workshops/${encodeURIComponent(workshopId)}/attendance-list?format=${encodeURIComponent(format)}`,
@@ -262,6 +269,15 @@ export async function downloadCertificate({ token, registrationId } = {}) {
   }
 
   return response.blob();
+}
+
+export async function checkInAttendance({ token, qrToken } = {}) {
+  return apiFetch('/attender/attendance/check-in', {
+    method: 'POST',
+    token,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: qrToken }),
+  });
 }
 
 // ---------------------------------------------------------------------------
