@@ -14,7 +14,7 @@ class TeacherInvitationController extends Controller
     {
         $validated = $request->validate([
             'email'      => ['required', 'email'],
-            'role'       => ['sometimes', Rule::in(['referent'])],
+            'role'       => ['sometimes', Rule::in(['teacher', 'referent'])],
             'expires_at' => ['nullable', 'date', 'after:now'],
         ]);
 
@@ -29,7 +29,7 @@ class TeacherInvitationController extends Controller
 
         if ($invitation->accepted_at === null) {
             $invitation->fill([
-                'role'       => $validated['role'] ?? 'referent',
+                'role'       => 'teacher',
                 'invited_by' => $request->user()->id,
                 'expires_at' => $validated['expires_at'] ?? null,
             ]);

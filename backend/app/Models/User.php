@@ -13,8 +13,8 @@ use Illuminate\Notifications\Notifiable;
 /**
  * Platform user authenticated exclusively via Clerk.
  *
- * Roles: 'professor' (attender / learner), 'referent' (teacher / organiser),
- * 'admin'.
+ * Canonical roles: 'attender', 'teacher', 'admin'.
+ * Legacy 'professor' and 'referent' values are accepted only during migration.
  *
  * The `password` column exists in the stock Laravel `users` table but is never
  * populated by this application — authentication is handled entirely by Clerk.

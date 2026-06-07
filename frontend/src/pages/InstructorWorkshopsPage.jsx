@@ -50,7 +50,7 @@ export default function InstructorWorkshopsPage() {
               : ''}
           </p>
           <Link
-            to="/demo/dashboard/referent/workshops/new"
+            to="/demo/dashboard/teacher/workshops/new"
             className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2 text-label-md font-label-md text-white transition-colors hover:bg-primary-container"
           >
             <Icon>add</Icon>
@@ -99,7 +99,7 @@ export default function InstructorWorkshopsPage() {
                 : 'Creează primul tău workshop.'}
             </p>
             <Link
-              to="/demo/dashboard/referent/workshops/new"
+              to="/demo/dashboard/teacher/workshops/new"
               className="rounded-lg bg-primary px-8 py-3 font-label-md text-white hover:opacity-90"
             >
               {locale === 'de' ? 'Workshop erstellen' : 'Creează workshop'}

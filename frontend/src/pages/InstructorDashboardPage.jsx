@@ -6,9 +6,9 @@ import { useI18n } from '../i18n/I18nContext'
 import { useTeacherStats, useTeacherWorkshops } from '../lib/teacherWorkshops'
 
 const quickActions = [
-  ['school', 'nav.myWorkshops', 'instructorDashboard.myWorkshopsText', 'instructorDashboard.viewWorkshops', '/demo/dashboard/referent/workshops', 'bg-blue-50 text-blue-700'],
-  ['add_circle', 'instructorDashboard.createWorkshop', 'instructorDashboard.createText', 'instructorDashboard.createNow', '/demo/dashboard/referent/workshops/new', 'bg-green-50 text-green-700'],
-  ['analytics', 'nav.analytics', 'instructorDashboard.analyticsText', 'instructorDashboard.viewReports', '/demo/dashboard/referent/analytics', 'bg-amber-50 text-amber-700'],
+  ['school', 'nav.myWorkshops', 'instructorDashboard.myWorkshopsText', 'instructorDashboard.viewWorkshops', '/demo/dashboard/teacher/workshops', 'bg-blue-50 text-blue-700'],
+  ['add_circle', 'instructorDashboard.createWorkshop', 'instructorDashboard.createText', 'instructorDashboard.createNow', '/demo/dashboard/teacher/workshops/new', 'bg-green-50 text-green-700'],
+  ['analytics', 'nav.analytics', 'instructorDashboard.analyticsText', 'instructorDashboard.viewReports', '/demo/dashboard/teacher/analytics', 'bg-amber-50 text-amber-700'],
 ]
 
 export default function InstructorDashboardPage() {
@@ -119,7 +119,7 @@ export default function InstructorDashboardPage() {
           <section className="col-span-12 lg:col-span-8">
             <div className="mb-md flex items-center justify-between">
               <h2 className="font-h3 text-h3 text-primary">{t('instructorDashboard.activeWorkshops')}</h2>
-              <Link className="font-label-md text-primary hover:underline" to="/demo/dashboard/referent/workshops">
+              <Link className="font-label-md text-primary hover:underline" to="/demo/dashboard/teacher/workshops">
                 {t('common.viewAll')}
               </Link>
             </div>
@@ -145,7 +145,7 @@ export default function InstructorDashboardPage() {
                   {locale === 'de' ? 'Noch keine Workshops erstellt.' : 'Niciun workshop creat încă.'}
                 </p>
                 <Link
-                  to="/demo/dashboard/referent/workshops/new"
+                  to="/demo/dashboard/teacher/workshops/new"
                   className="mt-4 inline-block rounded bg-primary px-6 py-2 font-label-md text-white hover:opacity-90"
                 >
                   {locale === 'de' ? 'Workshop erstellen' : 'Creează primul'}
@@ -206,13 +206,13 @@ export default function InstructorDashboardPage() {
                       <div className="flex gap-2">
                         <Link
                           className="rounded border border-slate-200 px-4 py-2 text-sm font-label-md hover:bg-slate-50"
-                          to={`/demo/dashboard/referent/workshops/new?id=${workshop.id}`}
+                          to={`/demo/dashboard/teacher/workshops/new?id=${workshop.id}`}
                         >
                           {t('common.edit')}
                         </Link>
                         <Link
                           className="rounded bg-primary px-4 py-2 text-sm font-label-md text-white hover:bg-primary-container"
-                          to="/demo/dashboard/referent/analytics"
+                          to="/demo/dashboard/teacher/analytics"
                         >
                           {t('nav.analytics')}
                         </Link>
@@ -229,7 +229,7 @@ export default function InstructorDashboardPage() {
             <section className="rounded-lg bg-primary p-lg text-white shadow-md">
               <h3 className="mb-md font-h3 text-h3">{t('instructorDashboard.quickActions')}</h3>
               {[
-                ['add_box', 'instructorDashboard.createWorkshop', '/demo/dashboard/referent/workshops/new'],
+                ['add_box', 'instructorDashboard.createWorkshop', '/demo/dashboard/teacher/workshops/new'],
                 ['support_agent', 'instructorDashboard.contactSupport', '/'],
               ].map(([icon, label, to]) => (
                 <Link

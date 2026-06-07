@@ -30,7 +30,7 @@ Route::middleware('clerk.auth')->group(function (): void {
     // Teacher endpoints — accept canonical teacher and legacy referent roles while old data is migrated.
     Route::middleware('role:teacher,referent,admin')->group(function (): void {
         Route::get('/teacher/status', fn () => response()->json(['status' => 'ok']));
-        Route::get('/teacher/workshops', [\App\Http\Controllers\Teacher\WorkshopController::class, 'index']);
+        Route::get('/teacher/workshops', [TeacherWorkshopController::class, 'index']);
         Route::post('/teacher/workshops', [TeacherWorkshopCreationController::class, 'store']);
         Route::put('/teacher/workshops/{workshop}', [TeacherWorkshopCreationController::class, 'update']);
         Route::get('/teacher/workshops/{workshop}/participants', [TeacherWorkshopController::class, 'participants']);

@@ -1,10 +1,10 @@
 function optionalText(value) {
-  const trimmed = value.trim();
+  const trimmed = String(value ?? '').trim();
   return trimmed === '' ? undefined : trimmed;
 }
 
 function optionalCapacity(value) {
-  const trimmed = value.trim();
+  const trimmed = String(value ?? '').trim();
 
   if (trimmed === '') {
     return undefined;
@@ -28,6 +28,12 @@ export function buildWorkshopPayload(form, status, coverImage, professorImage) {
     cost: optionalText(form.cost),
     status,
   };
+
+  if (!coverImage && !professorImage) {
+    return Object.fromEntries(
+      Object.entries(payload).filter(([, value]) => value !== undefined),
+    );
+  }
 
   const formData = new FormData();
 
@@ -55,6 +61,12 @@ export function getWorkshopSubmitErrorMessage(error, t) {
     const firstField = Object.keys(validationErrors)[0];
 
     if (firstField) {
+      const firstMessage = validationErrors[firstField]?.[0];
+
+      if (firstMessage) {
+        return firstMessage;
+      }
+
       const translationKey = `create.error.${firstField}`;
       const translated = t(translationKey);
       
@@ -69,13 +81,14 @@ export function getWorkshopSubmitErrorMessage(error, t) {
   return t('create.errorGeneric');
 }
 
-export async function submitWorkshopForm({ form, status, coverImage, professorImage, getToken, apiCall, workshopId, t }) {
+export async function submitWorkshopForm({ form, status, coverImage, professorImage, getToken, apiCall, createWorkshop, workshopId, t }) {
   try {
     const token = await getToken();
     const payload = buildWorkshopPayload(form, status, coverImage, professorImage);
+    const submit = apiCall ?? createWorkshop;
     const response = workshopId 
-      ? await apiCall(token, workshopId, payload)
-      : await apiCall(token, payload);
+      ? await submit(token, workshopId, payload)
+      : await submit(token, payload);
 
     return {
       errorMessage: '',

@@ -83,6 +83,12 @@ export default function AdminUsersPage() {
     return 'Admin'
   }
 
+  function roleFormValue(role) {
+    if (role === 'referent') return 'teacher'
+    if (role === 'professor') return 'attender'
+    return role
+  }
+
   async function handleRoleChange(user, newRole) {
     setEditingRoleUserId(null)
     if (user.role === newRole) return
@@ -291,14 +297,14 @@ export default function AdminUsersPage() {
                         {editingRoleUserId === user.id ? (
                           <select
                             className="rounded border border-primary bg-white py-1 px-2 text-[11px] font-bold uppercase tracking-wider text-primary outline-none focus:ring-2 focus:ring-primary/20"
-                            defaultValue={['teacher', 'professor'].includes(user.role) ? (user.role === 'teacher' ? 'referent' : 'attender') : user.role}
+                            defaultValue={roleFormValue(user.role)}
                             onChange={(e) => handleRoleChange(user, e.target.value)}
                             onBlur={() => setEditingRoleUserId(null)}
                             autoFocus
                             disabled={isUpdatingRole}
                           >
                             <option value="admin">Admin</option>
-                            <option value="referent">{locale === 'de' ? 'Referent' : 'Referent'}</option>
+                            <option value="teacher">{locale === 'de' ? 'Referent' : 'Referent'}</option>
                             <option value="attender">{locale === 'de' ? 'Teilnehmer' : 'Participant'}</option>
                           </select>
                         ) : (

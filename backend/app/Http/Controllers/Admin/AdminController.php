@@ -121,20 +121,25 @@ class AdminController extends Controller
     public function updateRole(Request $request, User $user): JsonResponse
     {
         $request->validate([
-            'role' => ['required', 'string', 'in:admin,referent,attender'],
+            'role' => ['required', 'string', 'in:admin,teacher,attender,referent,professor'],
         ]);
 
-        $newRole = $request->input('role');
+        $newRole = match ($request->input('role')) {
+            'referent' => 'teacher',
+            'professor' => 'attender',
+            default => $request->input('role'),
+        };
+
         $user->update(['role' => $newRole]);
 
         if ($newRole === 'attender') {
             TeacherInvitation::query()
                 ->where('email', $user->email)
                 ->delete();
-        } elseif ($newRole === 'referent') {
+        } elseif ($newRole === 'teacher') {
             TeacherInvitation::updateOrCreate(
                 ['email' => $user->email],
-                ['role' => 'referent', 'accepted_at' => now(), 'notice_seen_at' => now()]
+                ['role' => 'teacher', 'accepted_at' => now(), 'notice_seen_at' => now()]
             );
         }
 

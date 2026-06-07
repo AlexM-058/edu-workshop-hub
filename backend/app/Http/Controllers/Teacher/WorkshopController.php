@@ -55,7 +55,7 @@ class WorkshopController extends Controller
             'category'       => ['sometimes', 'nullable', 'string', 'max:255'],
             'coordinator_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'coordinator_bio'  => ['sometimes', 'nullable', 'string'],
-            'ends_at'        => ['required', 'date', 'after_or_equal:starts_at'],
+            'ends_at'        => ['sometimes', 'nullable', 'date', 'after_or_equal:starts_at'],
             'duration'       => ['sometimes', 'nullable', 'string', 'max:255'],
             'cost'           => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'cover_image'    => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
@@ -121,9 +121,12 @@ class WorkshopController extends Controller
             'professor_image_base64' => $professorImageBase64,
         ]);
 
+        $resource = new WorkshopResource($workshop->load('referent'));
+
         return response()->json([
             'message' => 'Workshop created successfully',
-            'data'    => new WorkshopResource($workshop),
+            'data'    => $resource,
+            'workshop' => $resource,
         ], 201);
     }
 
@@ -224,9 +227,12 @@ class WorkshopController extends Controller
 
         $workshop->update($updates);
 
+        $resource = new WorkshopResource($workshop->refresh()->load('referent'));
+
         return response()->json([
             'message' => 'Workshop updated successfully',
-            'data'    => new WorkshopResource($workshop->refresh()),
+            'data'    => $resource,
+            'workshop' => $resource,
         ], 200);
     }
 }

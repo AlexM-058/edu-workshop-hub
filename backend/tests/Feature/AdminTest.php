@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Registration;
+use App\Models\TeacherInvitation;
 use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -125,6 +126,41 @@ class AdminTest extends TestCase
         $response->assertOk()
             ->assertJsonCount(3, 'data')
             ->assertJsonPath('meta.per_page', 3);
+    }
+
+    public function test_admin_role_updates_are_saved_with_canonical_role_names(): void
+    {
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create([
+            'email' => 'promoted@example.com',
+            'role' => 'attender',
+        ]);
+
+        $this->withToken($this->tokenFor($admin))
+            ->patchJson("/api/admin/users/{$user->id}/role", ['role' => 'referent'])
+            ->assertOk()
+            ->assertJsonPath('user.role', 'teacher');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'promoted@example.com',
+            'role' => 'teacher',
+        ]);
+
+        $this->assertDatabaseHas('teacher_invitations', [
+            'email' => 'promoted@example.com',
+            'role' => 'teacher',
+        ]);
+
+        $this->withToken($this->tokenFor($admin))
+            ->patchJson("/api/admin/users/{$user->id}/role", ['role' => 'professor'])
+            ->assertOk()
+            ->assertJsonPath('user.role', 'attender');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'promoted@example.com',
+            'role' => 'attender',
+        ]);
+        $this->assertSame(0, TeacherInvitation::query()->where('email', 'promoted@example.com')->count());
     }
 
     // -------------------------------------------------------------------------
