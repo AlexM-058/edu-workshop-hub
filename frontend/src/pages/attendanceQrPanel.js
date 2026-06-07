@@ -42,6 +42,13 @@ export function getAttendanceQrPanelState({ isLoading, qrPayload, error, nowMs }
   };
 }
 
-export function getMillisecondsUntilRefresh({ expiresAt, nowMs }) {
-  return Math.max(0, Date.parse(expiresAt) - nowMs);
+export function getMillisecondsUntilRefresh({ expiresAt, sessionExpiresAt, nowMs }) {
+  const expiresMs = Date.parse(expiresAt);
+  const sessionExpiresMs = Date.parse(sessionExpiresAt);
+
+  if (expiresMs >= sessionExpiresMs) {
+    return null;
+  }
+
+  return Math.max(0, expiresMs - nowMs);
 }

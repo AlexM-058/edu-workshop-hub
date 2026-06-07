@@ -160,7 +160,13 @@ function AttendanceQrPanel({ getToken, t, workshopId }) {
   useEffect(() => {
     if (panelState.kind !== 'active' || !qrPayload?.expires_at) return undefined
 
-    const delay = getMillisecondsUntilRefresh({ expiresAt: qrPayload.expires_at, nowMs: Date.now() })
+    const delay = getMillisecondsUntilRefresh({
+      expiresAt: qrPayload.expires_at,
+      sessionExpiresAt: qrPayload.session_expires_at,
+      nowMs: Date.now(),
+    })
+    if (delay === null) return undefined
+
     const timeoutId = window.setTimeout(() => {
       startQrSession()
     }, delay)
