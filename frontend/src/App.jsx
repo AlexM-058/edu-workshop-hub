@@ -10,6 +10,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import WorkshopPreviewPage from './pages/WorkshopPreviewPage';
 import WorkshopParticipantsPage from './pages/WorkshopParticipantsPage';
+import AttendanceCheckInPage from './pages/AttendanceCheckInPage';
 import SignInPage from './pages/SignInPage';
 import SsoCallbackPage from './pages/SsoCallbackPage';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -41,6 +42,7 @@ function App() {
       <Route path="/sso-callback" element={<SsoCallbackPage />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/workshops/:id" element={<WorkshopDetailPage />} />
+      <Route path="/attendance/check-in" element={<ProtectedRoute roles={['attender']}><AttendanceCheckInPage /></ProtectedRoute>} />
 
       {/* TODO: Remove the /demo prefix once production role-based routes replace the prototype paths. */}
       <Route path="/demo/dashboard/attender" element={<ProtectedRoute roles={['attender', 'professor']}><ProfessorDashboard /></ProtectedRoute>} />

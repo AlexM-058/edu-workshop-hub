@@ -1,17 +1,19 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { Link, useParams } from 'react-router-dom'
 import DashboardShell from '../components/DashboardShell'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
-import { downloadAttendanceList, markRegistrationAttendance } from '../lib/api'
+import { createAttendanceQrToken, downloadAttendanceList, markRegistrationAttendance } from '../lib/api'
 import { downloadBlob } from '../lib/downloadFile'
 import { useTeacherParticipants } from '../lib/teacherWorkshops'
+import { getAttendanceQrPanelState, getMillisecondsUntilRefresh } from './attendanceQrPanel'
 
 export default function WorkshopParticipantsPage() {
   const { id } = useParams()
   const { getToken } = useAppAuth()
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   const [refreshKey, setRefreshKey] = useState(0)
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState(null)
@@ -94,6 +96,8 @@ export default function WorkshopParticipantsPage() {
           </div>
         ) : null}
 
+        <AttendanceQrPanel getToken={getToken} t={t} workshopId={id} />
+
         {isLoading ? (
           <LoadingRows />
         ) : participants?.length === 0 ? (
@@ -121,6 +125,102 @@ export default function WorkshopParticipantsPage() {
         )}
       </main>
     </DashboardShell>
+  )
+}
+
+function AttendanceQrPanel({ getToken, t, workshopId }) {
+  const [qrPayload, setQrPayload] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+
+  const panelState = getAttendanceQrPanelState({ isLoading, qrPayload, error, nowMs })
+
+  const startQrSession = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const token = await getToken()
+      const payload = await createAttendanceQrToken({ token, workshopId })
+      setQrPayload(payload)
+    } catch (error) {
+      setError(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [getToken, workshopId])
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNowMs(Date.now()), 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
+  useEffect(() => {
+    if (panelState.kind !== 'active' || !qrPayload?.expires_at) return undefined
+
+    const delay = getMillisecondsUntilRefresh({ expiresAt: qrPayload.expires_at, nowMs: Date.now() })
+    const timeoutId = window.setTimeout(() => {
+      startQrSession()
+    }, delay)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [panelState.kind, qrPayload?.expires_at, startQrSession])
+
+  const minutes = panelState.secondsRemaining ? Math.floor(panelState.secondsRemaining / 60) : 0
+  const seconds = panelState.secondsRemaining ? panelState.secondsRemaining % 60 : 0
+  const timeLabel = `${minutes}:${String(seconds).padStart(2, '0')}`
+
+  return (
+    <section className="mb-lg grid gap-6 rounded-lg border border-slate-200 bg-white p-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-label-md text-secondary">
+          <Icon>qr_code</Icon>
+          {t('attendance.qr.title')}
+        </div>
+        <h2 className="font-h2 text-2xl text-primary">{t(panelState.labelKey)}</h2>
+        <p className="mt-2 max-w-2xl font-body-md text-on-surface-variant">
+          {panelState.kind === 'active'
+            ? t('attendance.qr.activeText', { time: timeLabel })
+            : panelState.kind === 'expired'
+            ? t('attendance.qr.expiredText')
+            : panelState.kind === 'error'
+            ? `${t('attendance.qr.errorText')} ${error?.message ?? ''}`.trim()
+            : t('attendance.qr.idleText')}
+        </p>
+        <button
+          className="mt-5 inline-flex items-center gap-2 rounded bg-primary px-5 py-3 font-label-md text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+          disabled={!panelState.canStart}
+          onClick={startQrSession}
+          type="button"
+        >
+          <Icon>{panelState.kind === 'loading' ? 'hourglass_top' : 'qr_code_scanner'}</Icon>
+          {panelState.kind === 'expired'
+            ? t('attendance.qr.restart')
+            : panelState.kind === 'loading'
+            ? t('attendance.qr.loadingButton')
+            : t('attendance.qr.start')}
+        </button>
+      </div>
+      <div className="flex min-h-64 w-full items-center justify-center rounded border border-slate-200 bg-slate-50 p-4 md:w-64">
+        {panelState.kind === 'active' && qrPayload?.check_in_url ? (
+          <QRCodeSVG
+            bgColor="#ffffff"
+            fgColor="#1f3b57"
+            includeMargin
+            level="M"
+            size={224}
+            value={qrPayload.check_in_url}
+          />
+        ) : (
+          <div className="text-center text-on-surface-variant">
+            <Icon className="mb-3 text-5xl text-slate-300">qr_code_2</Icon>
+            <p className="font-label-md">QR</p>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 

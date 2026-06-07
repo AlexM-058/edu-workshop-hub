@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\TeacherInvitationController;
+use App\Http\Controllers\Attender\AttendanceCheckInController;
 use App\Http\Controllers\Attender\WorkshopEnrollmentController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\TeacherInvitationNoticeController;
 use App\Http\Controllers\Attender\AttenderController;
+use App\Http\Controllers\Teacher\AttendanceQrController;
 use App\Http\Controllers\Teacher\WorkshopController as TeacherWorkshopCreationController;
 use App\Http\Controllers\Workshops\TeacherWorkshopController;
 use App\Http\Controllers\Workshops\WorkshopController as CatalogWorkshopController;
@@ -34,6 +36,7 @@ Route::middleware('clerk.auth')->group(function (): void {
         Route::post('/teacher/workshops', [TeacherWorkshopCreationController::class, 'store']);
         Route::put('/teacher/workshops/{workshop}', [TeacherWorkshopCreationController::class, 'update']);
         Route::get('/teacher/workshops/{workshop}/participants', [TeacherWorkshopController::class, 'participants']);
+        Route::post('/teacher/workshops/{workshop}/attendance-qr', [AttendanceQrController::class, 'store']);
         Route::get('/teacher/workshops/{workshop}/attendance-list', [TeacherWorkshopController::class, 'attendanceList']);
         Route::patch('/teacher/registrations/{registration}/attendance', [TeacherWorkshopController::class, 'markAttendance']);
         Route::get('/teacher/stats', [TeacherWorkshopController::class, 'stats']);
@@ -49,6 +52,7 @@ Route::middleware('clerk.auth')->group(function (): void {
     });
 
     Route::middleware('role:attender')->post('/workshops/{workshop}/enroll', [WorkshopEnrollmentController::class, 'store']);
+    Route::middleware('role:attender')->post('/attender/attendance/check-in', [AttendanceCheckInController::class, 'store']);
 
     // Admin endpoints — requires admin role
     Route::middleware('role:admin')->group(function (): void {
