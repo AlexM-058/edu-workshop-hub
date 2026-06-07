@@ -78,4 +78,25 @@ class WorkshopMigrationDriftTest extends TestCase
         $this->assertTrue(Schema::hasColumn('workshops', 'category_id'));
         $this->assertFalse(Schema::hasColumn('workshops', 'category'));
     }
+
+    public function test_default_categories_migration_seeds_empty_production_table_once(): void
+    {
+        Schema::create('categories', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('icon')->nullable();
+            $table->timestamps();
+        });
+
+        $migration = require database_path('migrations/2026_06_07_140000_seed_default_categories.php');
+
+        $migration->up();
+        $migration->up();
+
+        $this->assertSame(4, DB::table('categories')->count());
+        $this->assertSame(
+            ['Pedagogie', 'Tehnologie', 'Psihologie', 'Management Școlar'],
+            DB::table('categories')->orderBy('id')->pluck('name')->all(),
+        );
+    }
 }
