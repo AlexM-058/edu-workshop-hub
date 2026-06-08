@@ -50,6 +50,105 @@ class TeacherWorkshopsTest extends TestCase
         ], $overrides));
     }
 
+    private function makeAttendanceExportWorkshop(User $referent): Workshop
+    {
+        $workshop = $this->makeWorkshop($referent, [
+            'title_ro' => 'Atelier pedagogic',
+            'title_de' => 'Pädagogik-Workshop',
+            'location' => 'Cluj',
+            'scheduled_at' => '2026-07-15 10:00:00',
+        ]);
+
+        $attender = User::factory()->create([
+            'role' => 'attender',
+            'first_name' => 'Mara',
+            'last_name' => 'Ionescu',
+            'email' => 'mara@example.com',
+        ]);
+
+        $registration = Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $attender->id,
+            'status' => 'enrolled',
+            'attended' => true,
+        ]);
+
+        $registration->certificate()->create([
+            'file_path' => 'certificates/registration-'.$registration->id.'.pdf',
+        ]);
+
+        $absent = User::factory()->create([
+            'role' => 'attender',
+            'first_name' => 'Luca',
+            'last_name' => 'Pop',
+            'email' => 'luca@example.com',
+        ]);
+        Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $absent->id,
+            'status' => 'enrolled',
+            'attended' => false,
+        ]);
+
+        $waitlisted = User::factory()->create([
+            'role' => 'attender',
+            'first_name' => 'Tina',
+            'last_name' => 'Schmidt',
+            'email' => 'tina@example.com',
+        ]);
+        Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $waitlisted->id,
+            'status' => 'waitlist',
+            'attended' => false,
+        ]);
+
+        $cancelled = User::factory()->create([
+            'role' => 'attender',
+            'first_name' => 'Ana',
+            'last_name' => 'Klein',
+            'email' => 'ana@example.com',
+        ]);
+        Registration::create([
+            'workshop_id' => $workshop->id,
+            'user_id' => $cancelled->id,
+            'status' => 'cancelled',
+            'attended' => false,
+        ]);
+
+        return $workshop;
+    }
+
+    /**
+     * @return array<int, array<int, string|null>>
+     */
+    private function parseCsvResponse(string $content): array
+    {
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content) ?? $content;
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, $content);
+        rewind($handle);
+
+        $rows = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            $rows[] = $row;
+        }
+
+        fclose($handle);
+
+        return $rows;
+    }
+
+    private function assertCsvRowsHaveHeaderWidth(array $rows): void
+    {
+        $this->assertNotEmpty($rows);
+        $width = count($rows[0]);
+
+        foreach ($rows as $row) {
+            $this->assertCount($width, $row);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // GET /api/teacher/workshops
     // -------------------------------------------------------------------------
@@ -218,28 +317,135 @@ class TeacherWorkshopsTest extends TestCase
         ]);
     }
 
-    public function test_teacher_can_export_attendance_csv_for_own_workshop(): void
+    public function test_teacher_can_export_attendance_csv_in_romanian(): void
     {
         $referent = $this->makeReferent();
-        $workshop = $this->makeWorkshop($referent);
-        $attender = User::factory()->create([
-            'role' => 'attender',
-            'first_name' => 'Mara',
-            'last_name' => 'Ionescu',
-            'email' => 'mara@example.com',
-        ]);
-        Registration::create([
-            'workshop_id' => $workshop->id,
-            'user_id' => $attender->id,
-            'status' => 'enrolled',
-            'attended' => true,
-        ]);
+        $workshop = $this->makeAttendanceExportWorkshop($referent);
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=csv&locale=ro")
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertSee('Titlu workshop')
+            ->assertSee('Data workshop')
+            ->assertSee('Locație')
+            ->assertSee('Status înscriere')
+            ->assertSee('Prezență')
+            ->assertSee('Certificat disponibil')
+            ->assertSee('mara@example.com')
+            ->assertSee('Confirmat')
+            ->assertSee('Prezent')
+            ->assertSee('Neprezent')
+            ->assertSee('Listă de așteptare')
+            ->assertSee('Anulat')
+            ->assertSee('Da')
+            ->assertSee('Nu');
+
+        $content = $response->getContent();
+        $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $content);
+
+        $rows = $this->parseCsvResponse($content);
+        $this->assertCount(5, $rows);
+        $this->assertSame([
+            'Titlu workshop',
+            'Data workshop',
+            'Locație',
+            'Nume participant',
+            'Email participant',
+            'Status înscriere',
+            'Prezență',
+            'Certificat disponibil',
+        ], $rows[0]);
+        $this->assertCsvRowsHaveHeaderWidth($rows);
+    }
+
+    public function test_teacher_can_export_attendance_csv_in_german(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeAttendanceExportWorkshop($referent);
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=csv&locale=de")
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertSee('Workshop-Titel')
+            ->assertSee('Workshop-Datum')
+            ->assertSee('Ort')
+            ->assertSee('Teilnehmername')
+            ->assertSee('Teilnehmer-E-Mail')
+            ->assertSee('Anmeldestatus')
+            ->assertSee('Anwesenheit')
+            ->assertSee('Zertifikat verfügbar')
+            ->assertSee('mara@example.com')
+            ->assertSee('Bestätigt')
+            ->assertSee('Anwesend')
+            ->assertSee('Nicht anwesend')
+            ->assertSee('Warteliste')
+            ->assertSee('Storniert')
+            ->assertSee('Ja')
+            ->assertSee('Nein');
+
+        $content = $response->getContent();
+        $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $content);
+
+        $rows = $this->parseCsvResponse($content);
+        $this->assertCount(5, $rows);
+        $this->assertSame([
+            'Workshop-Titel',
+            'Workshop-Datum',
+            'Ort',
+            'Teilnehmername',
+            'Teilnehmer-E-Mail',
+            'Anmeldestatus',
+            'Anwesenheit',
+            'Zertifikat verfügbar',
+        ], $rows[0]);
+        $this->assertCsvRowsHaveHeaderWidth($rows);
+    }
+
+    public function test_attendance_csv_locale_falls_back_to_romanian_when_missing_or_invalid(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeAttendanceExportWorkshop($referent);
 
         $this->withToken($this->tokenFor($referent))
             ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=csv")
             ->assertOk()
-            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
-            ->assertSee('mara@example.com')
-            ->assertSee('attended');
+            ->assertDontSee('BROKEN_ATTENDANCE_EXPORT')
+            ->assertSee('Titlu workshop')
+            ->assertSee('Confirmat');
+
+        $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=csv&locale=en")
+            ->assertOk()
+            ->assertDontSee('BROKEN_ATTENDANCE_EXPORT')
+            ->assertSee('Titlu workshop')
+            ->assertSee('Confirmat');
+    }
+
+    public function test_teacher_can_export_attendance_pdf_in_supported_locales(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeAttendanceExportWorkshop($referent);
+
+        $romanian = $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=pdf&locale=ro")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->assertStringStartsWith('%PDF-', $romanian->getContent());
+        $this->assertNotEmpty($romanian->getContent());
+        $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $romanian->getContent());
+        $this->assertStringContainsString('Lista de prezență', $romanian->getContent());
+
+        $german = $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=pdf&locale=de")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->assertStringStartsWith('%PDF-', $german->getContent());
+        $this->assertNotEmpty($german->getContent());
+        $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $german->getContent());
+        $this->assertStringContainsString('Anwesenheitsliste', $german->getContent());
     }
 }
