@@ -6,6 +6,7 @@ import Icon from '../components/Icon'
 import TopNav from '../components/TopNav'
 import { useI18n } from '../i18n/I18nContext'
 import { enrollInWorkshop, fetchRegistrationStatus, deleteWorkshopByAdmin, downloadCertificate } from '../lib/api'
+import { createGoogleCalendarWorkshopUrl } from '../lib/calendar'
 import { useWorkshop } from '../lib/workshops'
 import { submitWorkshopEnrollment } from './workshopEnrollment'
 import AdminDeleteWorkshopModal from '../components/AdminDeleteWorkshopModal'
@@ -116,6 +117,9 @@ export default function WorkshopDetailPage() {
 
   const hasEnded = workshop?.ends_at ? new Date(workshop.ends_at) < new Date() : false;
   const canDownloadCertificate = registrationStatus === 'enrolled' && attended && hasEnded;
+  const calendarUrl = registrationStatus === 'enrolled'
+    ? createGoogleCalendarWorkshopUrl(workshop, locale)
+    : null
 
   async function handleDownloadCertificate() {
     setIsDownloading(true)
@@ -241,6 +245,21 @@ export default function WorkshopDetailPage() {
                       {t('detail.download')}
                     </button>
                   )}
+                  {role === 'attender' && registrationStatus === 'enrolled' && calendarUrl ? (
+                    <a
+                      className="inline-flex items-center gap-2 rounded-xl border-2 border-primary px-8 py-4 font-label-md text-primary transition-all hover:bg-primary/5"
+                      href={calendarUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <Icon className="text-lg">event</Icon>
+                      {t('dashboard.addGoogleCalendar')}
+                    </a>
+                  ) : role === 'attender' && registrationStatus === 'enrolled' ? (
+                    <span className="inline-flex items-center rounded-xl border border-outline-variant px-5 py-3 text-sm text-slate-400">
+                      {t('dashboard.calendarUnavailable')}
+                    </span>
+                  ) : null}
                 </div>
 
                 {enrollmentSuccess ? (
