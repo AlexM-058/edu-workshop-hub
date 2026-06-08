@@ -85,6 +85,7 @@ class AttenderController extends Controller
 
         return response()->json([
             'status' => $registration ? $registration->status : null,
+            'attended' => $registration ? $registration->attended : false,
         ]);
     }
 }

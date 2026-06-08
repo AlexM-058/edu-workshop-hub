@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Symfony\Component\HttpFoundation\Response;
 
 class WorkshopEnrollmentController extends Controller
@@ -172,30 +173,37 @@ class WorkshopEnrollmentController extends Controller
     }
 
     /**
-     * GET /api/attender/registrations/{registration}/certificate
+     * GET /api/workshops/{workshop}/certificate
      *
-     * Downloads a PDF participation certificate.
-     * Only available when attendance has been confirmed by a teacher.
+     * Downloads a PDF participation certificate for the authenticated user.
+     * Only available when:
+     * - The user is enrolled.
+     * - The user has attended the workshop (attendance confirmed by teacher).
+     * - The workshop has ended.
      */
-    public function certificate(Request $request, Registration $registration): Response
+    public function downloadCertificate(Request $request, Workshop $workshop): Response
     {
-        abort_unless($registration->user_id === $request->user()->id, 404);
-        abort_unless($registration->canDownloadCertificate(), 404);
+        $registration = Registration::query()
+            ->where('workshop_id', $workshop->id)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        $registration->loadMissing(['workshop', 'user']);
-        $title = $registration->workshop?->title_ro ?? 'Workshop';
-        $name  = $registration->user?->fullName() ?? 'Participant';
+        abort_unless($registration && $registration->status === 'enrolled', 403, 'Nu sunteți înscris la acest workshop.');
+        abort_unless($registration->attended, 403, 'Prezența nu a fost confirmată.');
+        
+        if ($workshop->ends_at) {
+            abort_unless(now()->isAfter($workshop->ends_at), 403, 'Workshop-ul nu s-a încheiat încă.');
+        }
 
-        $pdf = SimplePdf::fromLines([
-            'Participation Certificate',
-            'Participant: ' . $name,
-            'Workshop: ' . $title,
+        $registration->loadMissing(['user']);
+        $workshop->loadMissing(['referent']);
+
+        $pdf = Pdf::loadView('certificate', [
+            'registration' => $registration,
+            'workshop' => $workshop,
         ]);
 
-        return response($pdf, 200, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="certificate-' . $registration->id . '.pdf"',
-        ]);
+        return $pdf->download('certificat_participare_' . $workshop->id . '.pdf');
     }
 
     // -------------------------------------------------------------------------

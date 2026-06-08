@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import Icon from '../components/Icon'
 import TopNav from '../components/TopNav'
 import { useI18n } from '../i18n/I18nContext'
-import { enrollInWorkshop, fetchRegistrationStatus, deleteWorkshopByAdmin } from '../lib/api'
+import { enrollInWorkshop, fetchRegistrationStatus, deleteWorkshopByAdmin, downloadCertificate } from '../lib/api'
 import { useWorkshop } from '../lib/workshops'
 import { submitWorkshopEnrollment } from './workshopEnrollment'
 import AdminDeleteWorkshopModal from '../components/AdminDeleteWorkshopModal'
@@ -22,7 +22,9 @@ export default function WorkshopDetailPage() {
   const [enrollmentError, setEnrollmentError] = useState('')
   const [enrollmentSuccess, setEnrollmentSuccess] = useState('')
   const [registrationStatus, setRegistrationStatus] = useState(null)
+  const [attended, setAttended] = useState(false)
   const [isStatusLoading, setIsStatusLoading] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -33,6 +35,7 @@ export default function WorkshopDetailPage() {
         .then(token => fetchRegistrationStatus({ token, workshopId: id }))
         .then(res => {
           setRegistrationStatus(res?.status || null)
+          setAttended(res?.attended || false)
         })
         .catch(console.error)
         .finally(() => setIsStatusLoading(false))
@@ -82,7 +85,10 @@ export default function WorkshopDetailPage() {
     if (result.successMessage) {
       // Re-fetch status if successful
       getToken().then(token => fetchRegistrationStatus({ token, workshopId: id }))
-        .then(res => setRegistrationStatus(res?.status || null))
+        .then(res => {
+          setRegistrationStatus(res?.status || null)
+          setAttended(res?.attended || false)
+        })
     }
   }
 
@@ -106,6 +112,32 @@ export default function WorkshopDetailPage() {
 
   if (isEnrolling) {
     buttonLabel = t('detail.enrolling')
+  }
+
+  const hasEnded = workshop?.ends_at ? new Date(workshop.ends_at) < new Date() : false;
+  const canDownloadCertificate = registrationStatus === 'enrolled' && attended && hasEnded;
+
+  async function handleDownloadCertificate() {
+    setIsDownloading(true)
+    setEnrollmentError('')
+    
+    try {
+      const token = await getToken()
+      const blob = await downloadCertificate({ token, workshopId: id })
+      
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `certificat_participare_${id}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      setEnrollmentError(err.message || 'Eroare la descărcarea certificatului')
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   async function handleDeleteConfirm() {
@@ -194,9 +226,21 @@ export default function WorkshopDetailPage() {
                       {buttonLabel}
                     </button>
                   )}
-                  <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">
-                    {t('detail.download')}
-                  </button>
+                  {role === 'attender' && canDownloadCertificate ? (
+                    <button
+                      className="rounded-xl border-2 border-primary px-8 py-4 font-label-md text-primary transition-all hover:bg-primary/5 disabled:cursor-wait disabled:opacity-70 flex items-center gap-2"
+                      onClick={handleDownloadCertificate}
+                      disabled={isDownloading}
+                      type="button"
+                    >
+                      <Icon className="text-lg">workspace_premium</Icon>
+                      {locale === 'de' ? 'Zertifikat herunterladen' : 'Descarcă certificatul de participare'}
+                    </button>
+                  ) : (
+                    <button className="cursor-not-allowed rounded-xl border-2 border-outline-variant px-8 py-4 font-label-md text-primary opacity-60" disabled title={t('common.demoUnavailable')} type="button">
+                      {t('detail.download')}
+                    </button>
+                  )}
                 </div>
 
                 {enrollmentSuccess ? (
