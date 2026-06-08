@@ -166,9 +166,14 @@ export async function createAttendanceQrToken({ token, workshopId } = {}) {
   });
 }
 
-export async function downloadAttendanceList({ token, workshopId, format = 'csv' } = {}) {
+export async function downloadAttendanceList({ token, workshopId, format = 'csv', locale = 'ro' } = {}) {
+  const params = new URLSearchParams({
+    format,
+    locale,
+  });
+
   const response = await fetch(
-    `${apiBaseUrl}/teacher/workshops/${encodeURIComponent(workshopId)}/attendance-list?format=${encodeURIComponent(format)}`,
+    `${apiBaseUrl}/teacher/workshops/${encodeURIComponent(workshopId)}/attendance-list?${params}`,
     {
       headers: {
         Accept: format === 'pdf' ? 'application/pdf' : 'text/csv',

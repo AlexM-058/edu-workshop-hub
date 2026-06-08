@@ -38,7 +38,7 @@ export default function WorkshopParticipantsPage() {
     setBusyId(`export-${format}`)
     try {
       const token = await getToken()
-      const blob = await downloadAttendanceList({ token, workshopId: id, format })
+      const blob = await downloadAttendanceList({ token, workshopId: id, format, locale })
       downloadBlob(blob, `attendance-${id}.${format}`)
     } catch (error) {
       setActionError(error)
@@ -50,7 +50,7 @@ export default function WorkshopParticipantsPage() {
   return (
     <DashboardShell mode="teacher">
       <main className="mx-auto max-w-[1200px] p-8">
-        <header className="mb-lg flex flex-col justify-between gap-4 border-b border-slate-200 pb-md md:flex-row md:items-end">
+        <header className="mb-lg flex flex-col justify-between gap-4 border-b border-slate-200 pb-md md:flex-row md:items-start">
           <div>
             <Link className="mb-4 inline-flex items-center gap-1 text-sm font-label-md text-primary hover:underline" to="/demo/dashboard/teacher/workshops">
               <Icon className="h-4 w-4">arrow_back</Icon>
@@ -65,26 +65,29 @@ export default function WorkshopParticipantsPage() {
                 : 'Confirmă prezența și exportă lista de participanți.'}
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="inline-flex items-center gap-2 rounded border border-primary px-4 py-2 font-label-md text-primary hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"
-              disabled={busyId === 'export-csv'}
-              onClick={() => handleExport('csv')}
-              type="button"
-            >
-              <Icon>table_view</Icon>
-              CSV
-            </button>
-            <button
-              className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2 font-label-md text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
-              disabled={busyId === 'export-pdf'}
-              onClick={() => handleExport('pdf')}
-              type="button"
-            >
-              <Icon>picture_as_pdf</Icon>
-              PDF
-            </button>
-          </div>
+          <section className="w-full rounded border border-slate-200 bg-white p-4 shadow-sm md:w-[420px] md:shrink-0">
+            <h2 className="font-label-lg text-primary">{t('attendance.export.title')}</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-primary px-4 py-2 font-label-md text-primary hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"
+                disabled={busyId === 'export-csv'}
+                onClick={() => handleExport('csv')}
+                type="button"
+              >
+                <Icon>table_view</Icon>
+                {t('attendance.export.csv')}
+              </button>
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-primary px-4 py-2 font-label-md text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+                disabled={busyId === 'export-pdf'}
+                onClick={() => handleExport('pdf')}
+                type="button"
+              >
+                <Icon>picture_as_pdf</Icon>
+                {t('attendance.export.pdf')}
+              </button>
+            </div>
+          </section>
         </header>
 
         {error || actionError ? (
