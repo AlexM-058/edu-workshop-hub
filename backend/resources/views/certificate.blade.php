@@ -80,8 +80,8 @@
 <body>
 
     @php
-        $frontendUrl = rtrim(config('app.frontend_url') ?? 'http://localhost:5173', '/');
-        $logoUrl = $frontendUrl . '/edu-logo.jpeg';
+        // Use local file path to prevent dompdf from making HTTP requests that time out
+        $logoUrl = public_path('edu-logo.jpeg');
         
         $participantName = $registration->user?->fullName() ?? 'Participant';
         $workshopTitleRo = $workshop->title_ro ?? $workshop->title['ro'] ?? 'Workshop';
