@@ -43,7 +43,8 @@ Route::middleware('clerk.auth')->group(function (): void {
     });
 
     // Attender endpoints — accept canonical attender and legacy professor roles while old data is migrated.
-    Route::middleware('role:attender,professor,admin')->group(function (): void {
+    // Teachers and admins can also access attender endpoints since they can enroll in workshops.
+    Route::middleware('role:attender,professor,teacher,referent,admin')->group(function (): void {
         Route::get('/attender/registrations', [AttenderController::class, 'registrations']);
         Route::get('/attender/workshops/{workshop}/registration-status', [AttenderController::class, 'registrationStatus']);
         Route::delete('/attender/registrations/{registration}', [WorkshopEnrollmentController::class, 'destroy']);
@@ -51,8 +52,8 @@ Route::middleware('clerk.auth')->group(function (): void {
         Route::get('/attender/stats', [AttenderController::class, 'stats']);
     });
 
-    Route::middleware('role:attender')->post('/workshops/{workshop}/enroll', [WorkshopEnrollmentController::class, 'store']);
-    Route::middleware('role:attender')->post('/attender/attendance/check-in', [AttendanceCheckInController::class, 'store']);
+    Route::middleware('role:attender,professor,teacher,referent,admin')->post('/workshops/{workshop}/enroll', [WorkshopEnrollmentController::class, 'store']);
+    Route::middleware('role:attender,professor,teacher,referent,admin')->post('/attender/attendance/check-in', [AttendanceCheckInController::class, 'store']);
 
     // Admin endpoints — requires admin role
     Route::middleware('role:admin')->group(function (): void {
