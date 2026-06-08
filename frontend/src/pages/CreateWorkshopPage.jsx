@@ -277,13 +277,28 @@ export default function CreateWorkshopPage() {
               onClick={() => handleSubmit('published')}
               type="button"
             >
-              {submittingStatus === 'published' ? t('common.loading') : isEditMode ? (locale === 'de' ? 'Änderungen speichern' : 'Salvează modificările') : t('common.publish')}
+              {submittingStatus === 'published' ? <LoadingDotsLabel label={t('create.publishing')} /> : isEditMode ? (locale === 'de' ? 'Änderungen speichern' : 'Salvează modificările') : t('common.publish')}
               <Icon>{submittingStatus === 'published' ? 'hourglass_top' : 'arrow_forward'}</Icon>
             </button>
           </footer>
         </div>
       </main>
     </DashboardShell>
+  )
+}
+
+function LoadingDotsLabel({ label }) {
+  const cleanLabel = label.replace(/\.+$/, '')
+
+  return (
+    <span className="inline-flex min-w-[9rem] items-center justify-center">
+      <span>{cleanLabel}</span>
+      <span className="ml-1 inline-flex w-5 justify-start" aria-hidden="true">
+        <span className="animate-pulse">.</span>
+        <span className="animate-pulse [animation-delay:150ms]">.</span>
+        <span className="animate-pulse [animation-delay:300ms]">.</span>
+      </span>
+    </span>
   )
 }
 

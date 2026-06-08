@@ -27,17 +27,17 @@ function fetchReducer(state, action) {
 /**
  * Fetches the paginated public workshop catalog.
  *
- * @param {{ page?: number, perPage?: number }} params
+ * @param {{ page?: number, perPage?: number, search?: string }} params
  * @returns {{ workshops: Workshop[]|null, meta: PaginationMeta|null, isLoading: boolean, error: Error|null }}
  */
-export function useWorkshops({ page = 1, perPage = 12 } = {}) {
+export function useWorkshops({ page = 1, perPage = 12, search = '' } = {}) {
   const [state, dispatch] = useReducer(fetchReducer, initialState)
 
   useEffect(() => {
     let cancelled = false
     dispatch({ type: 'loading' })
 
-    fetchWorkshops({ page, perPage })
+    fetchWorkshops({ page, perPage, search })
       .then((payload) => {
         if (!cancelled) dispatch({ type: 'success', payload })
       })
@@ -48,7 +48,7 @@ export function useWorkshops({ page = 1, perPage = 12 } = {}) {
     return () => {
       cancelled = true
     }
-  }, [page, perPage])
+  }, [page, perPage, search])
 
   return {
     workshops: state.data?.data ?? null,

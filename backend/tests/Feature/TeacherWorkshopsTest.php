@@ -119,6 +119,41 @@ class TeacherWorkshopsTest extends TestCase
         return $workshop;
     }
 
+    private function makeDiacriticAttendanceExportWorkshop(User $referent): Workshop
+    {
+        $workshop = $this->makeWorkshop($referent, [
+            'title_ro' => 'Învățare colaborativă',
+            'title_de' => 'Kollaboratives Lernen',
+            'location' => 'Timișoara / München',
+            'scheduled_at' => '2026-07-15 10:00:00',
+        ]);
+
+        foreach ([
+            ['Ștefan', 'Țară', 'stefan.tara@example.com', true],
+            ['Müller', 'Groß', 'mueller.gross@example.com', false],
+        ] as [$firstName, $lastName, $email, $attended]) {
+            $registration = Registration::create([
+                'workshop_id' => $workshop->id,
+                'user_id' => User::factory()->create([
+                    'role' => 'attender',
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $email,
+                ])->id,
+                'status' => 'enrolled',
+                'attended' => $attended,
+            ]);
+
+            if ($attended) {
+                $registration->certificate()->create([
+                    'file_path' => 'certificates/registration-'.$registration->id.'.pdf',
+                ]);
+            }
+        }
+
+        return $workshop;
+    }
+
     /**
      * @return array<int, array<int, string|null>>
      */
@@ -200,6 +235,22 @@ class TeacherWorkshopsTest extends TestCase
             ->getJson('/api/teacher/workshops');
 
         $response->assertOk()->assertJsonCount(2, 'data');
+    }
+
+    public function test_referent_search_sees_only_matching_own_workshops(): void
+    {
+        $referent = $this->makeReferent();
+        $other    = $this->makeReferent();
+        $match = $this->makeWorkshop($referent, ['title_ro' => 'Atelier de robotică']);
+        $this->makeWorkshop($referent, ['title_ro' => 'Managementul clasei']);
+        $this->makeWorkshop($other, ['title_ro' => 'Atelier de robotică avansată']);
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->getJson('/api/teacher/workshops?search=robotică');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $match->id);
     }
 
     public function test_admin_can_access_teacher_workshops_endpoint(): void
@@ -436,7 +487,8 @@ class TeacherWorkshopsTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $romanian->getContent());
         $this->assertNotEmpty($romanian->getContent());
         $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $romanian->getContent());
-        $this->assertStringContainsString('Lista de prezență', $romanian->getContent());
+        $this->assertStringContainsString('/FontFile2', $romanian->getContent());
+        $this->assertStringNotContainsString('/BaseFont /Helvetica', $romanian->getContent());
 
         $german = $this->withToken($this->tokenFor($referent))
             ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=pdf&locale=de")
@@ -446,6 +498,23 @@ class TeacherWorkshopsTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $german->getContent());
         $this->assertNotEmpty($german->getContent());
         $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $german->getContent());
-        $this->assertStringContainsString('Anwesenheitsliste', $german->getContent());
+        $this->assertStringContainsString('/FontFile2', $german->getContent());
+        $this->assertStringNotContainsString('/BaseFont /Helvetica', $german->getContent());
+    }
+
+    public function test_teacher_can_export_attendance_pdf_with_unicode_font_for_diacritics(): void
+    {
+        $referent = $this->makeReferent();
+        $workshop = $this->makeDiacriticAttendanceExportWorkshop($referent);
+
+        $response = $this->withToken($this->tokenFor($referent))
+            ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=pdf&locale=ro")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $content = $response->getContent();
+        $this->assertStringStartsWith('%PDF-', $content);
+        $this->assertStringContainsString('/FontFile2', $content);
+        $this->assertStringNotContainsString('/BaseFont /Helvetica', $content);
     }
 }

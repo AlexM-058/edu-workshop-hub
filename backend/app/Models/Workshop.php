@@ -65,6 +65,35 @@ class Workshop extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeSearch(Builder $query, ?string $search): Builder
+    {
+        $term = trim($search ?? '');
+
+        if ($term === '') {
+            return $query;
+        }
+
+        $pattern = '%' . $term . '%';
+        $columns = [
+            'title_ro',
+            'title_de',
+            'description_ro',
+            'description_de',
+            'location',
+            'coordinator_name',
+        ];
+
+        return $query->where(function (Builder $query) use ($columns, $pattern): void {
+            foreach ($columns as $column) {
+                $query->orWhere($column, 'ILIKE', $pattern);
+            }
+
+            $query->orWhereHas('category', function (Builder $query) use ($pattern): void {
+                $query->where('name', 'ILIKE', $pattern);
+            });
+        });
+    }
+
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->where(function (Builder $query): void {

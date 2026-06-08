@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'
 import TopNav from '../components/TopNav'
@@ -9,15 +9,31 @@ import { useWorkshops } from '../lib/workshops'
 export default function CatalogPage() {
   const { t, locale } = useI18n()
   const [page, setPage] = useState(1)
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const perPage = 9
 
-  const { workshops, meta, isLoading, error } = useWorkshops({ page, perPage })
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, 275)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
+
+  const { workshops, meta, isLoading, error } = useWorkshops({ page, perPage, search: debouncedSearch })
 
   const pageCount = meta?.last_page ?? 1
+  const hasActiveSearch = debouncedSearch.trim() !== ''
+
+  function handleSearchChange(value) {
+    setSearchInput(value)
+    setPage(1)
+  }
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <TopNav />
+      <TopNav searchValue={searchInput} onSearchChange={handleSearchChange} />
       <main className="mx-auto max-w-6xl px-8 py-12 pt-28">
         <section className="mb-12">
           <h1 className="mb-2 font-h1 text-h1 text-primary">{t('catalog.title')}</h1>
@@ -62,9 +78,11 @@ export default function CatalogPage() {
               {locale === 'de' ? 'Keine Workshops gefunden' : 'Niciun workshop găsit'}
             </p>
             <p className="mt-2 text-on-surface-variant">
-              {locale === 'de'
-                ? 'Aktuell sind keine aktiven Workshops verfügbar.'
-                : 'Nu există workshop-uri active momentan.'}
+              {hasActiveSearch
+                ? t('workshops.emptySearch')
+                : locale === 'de'
+                  ? 'Aktuell sind keine aktiven Workshops verfügbar.'
+                  : 'Nu există workshop-uri active momentan.'}
             </p>
           </div>
         )}

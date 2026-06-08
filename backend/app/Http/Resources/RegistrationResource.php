@@ -30,8 +30,13 @@ class RegistrationResource extends JsonResource
                     'ro' => $workshop->title_ro,
                     'de' => $workshop->title_de,
                 ],
+                'description'  => [
+                    'ro' => $workshop->description_ro,
+                    'de' => $workshop->description_de,
+                ],
                 'location'     => $workshop->location,
                 'scheduled_at' => $workshop->scheduled_at->toIso8601String(),
+                'ends_at'      => $workshop->ends_at?->toIso8601String(),
                 'max_slots'    => $workshop->max_slots,
                 'referent'     => $workshop->referent ? [
                     'id'   => $workshop->referent->id,

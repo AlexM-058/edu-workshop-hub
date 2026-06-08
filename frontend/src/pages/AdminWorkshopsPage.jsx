@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminShell from '../components/AdminShell'
 import Icon from '../components/Icon'
@@ -5,11 +6,28 @@ import { useI18n } from '../i18n/I18nContext'
 import { useWorkshops } from '../lib/workshops'
 
 export default function AdminWorkshopsPage() {
-  const { locale } = useI18n()
-  const { workshops, meta, isLoading, error } = useWorkshops({ page: 1, perPage: 20 })
+  const { t, locale } = useI18n()
+  const [page, setPage] = useState(1)
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const { workshops, meta, isLoading, error } = useWorkshops({ page, perPage: 20, search: debouncedSearch })
+  const hasActiveSearch = debouncedSearch.trim() !== ''
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, 275)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
+
+  function handleSearchChange(value) {
+    setSearchInput(value)
+    setPage(1)
+  }
 
   return (
-    <AdminShell searchKey="nav.searchWorkshops">
+    <AdminShell searchKey="nav.searchWorkshops" searchValue={searchInput} onSearchChange={handleSearchChange}>
       <main className="mx-auto max-w-[1200px] p-8">
         <header className="mb-lg flex flex-col justify-between gap-4 border-b border-slate-200 pb-md md:flex-row md:items-end">
           <div>
@@ -43,7 +61,13 @@ export default function AdminWorkshopsPage() {
         ) : workshops?.length === 0 ? (
           <section className="rounded-lg border border-dashed border-slate-300 bg-white py-20 text-center text-on-surface-variant">
             <Icon className="mb-3 text-5xl text-slate-300">school</Icon>
-            <p>{locale === 'de' ? 'Keine veröffentlichten Workshops.' : 'Nu există workshop-uri publicate.'}</p>
+            <p>
+              {hasActiveSearch
+                ? t('workshops.emptySearch')
+                : locale === 'de'
+                  ? 'Keine veröffentlichten Workshops.'
+                  : 'Nu există workshop-uri publicate.'}
+            </p>
           </section>
         ) : (
           <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">

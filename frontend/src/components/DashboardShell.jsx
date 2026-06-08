@@ -22,7 +22,13 @@ const instructorLinks = [
   { labelKey: 'nav.profile', icon: 'account_circle', to: '/demo/profile' },
 ]
 
-export default function DashboardShell({ children, mode = 'attender' }) {
+export default function DashboardShell({
+  children,
+  mode = 'attender',
+  searchValue = '',
+  onSearchChange,
+  searchDisabled = false,
+}) {
   const links = mode === 'teacher' ? instructorLinks : professorLinks
   const { t } = useI18n()
   const location = useLocation()
@@ -30,7 +36,13 @@ export default function DashboardShell({ children, mode = 'attender' }) {
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <TopNav instructor={mode === 'teacher'} searchKey={mode === 'teacher' ? 'nav.searchWorkshops' : 'nav.searchResources'} />
+      <TopNav
+        instructor={mode === 'teacher'}
+        onSearchChange={onSearchChange}
+        searchDisabled={searchDisabled}
+        searchKey={mode === 'teacher' ? 'nav.searchWorkshops' : 'nav.searchResources'}
+        searchValue={searchValue}
+      />
       <aside className="fixed left-0 top-16 z-40 hidden h-[calc(100vh-64px)] w-64 flex-col border-r border-slate-200 bg-slate-50 p-4 lg:flex">
         <div className="mb-8 px-4 pt-4">
           <h2 className="font-h3 text-xl font-bold text-blue-900">{mode === 'teacher' ? 'EduCraft' : t('nav.dashboard')}</h2>

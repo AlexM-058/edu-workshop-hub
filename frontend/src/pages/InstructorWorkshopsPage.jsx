@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import DashboardShell from '../components/DashboardShell'
 import Icon from '../components/Icon'
@@ -29,12 +29,28 @@ function statusBadge(workshop, locale) {
 export default function InstructorWorkshopsPage() {
   const { t, locale } = useI18n()
   const [page, setPage] = useState(1)
-  const { workshops, meta, isLoading, error } = useTeacherWorkshops({ page, perPage: 10 })
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const { workshops, meta, isLoading, error } = useTeacherWorkshops({ page, perPage: 10, search: debouncedSearch })
 
   const pageCount = meta?.last_page ?? 1
+  const hasActiveSearch = debouncedSearch.trim() !== ''
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, 275)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
+
+  function handleSearchChange(value) {
+    setSearchInput(value)
+    setPage(1)
+  }
 
   return (
-    <DashboardShell mode="teacher">
+    <DashboardShell mode="teacher" searchValue={searchInput} onSearchChange={handleSearchChange}>
       <main className="mx-auto max-w-[1200px] p-8">
         <header className="mb-lg">
           <h1 className="mb-2 font-h1 text-h1 text-primary">{t('workshops.title')}</h1>
@@ -94,16 +110,20 @@ export default function InstructorWorkshopsPage() {
               {locale === 'de' ? 'Noch keine Workshops' : 'Niciun workshop creat'}
             </p>
             <p className="mt-2 mb-8 text-on-surface-variant">
-              {locale === 'de'
-                ? 'Erstelle deinen ersten Workshop.'
-                : 'Creează primul tău workshop.'}
+              {hasActiveSearch
+                ? t('workshops.emptySearch')
+                : locale === 'de'
+                  ? 'Erstelle deinen ersten Workshop.'
+                  : 'Creează primul tău workshop.'}
             </p>
-            <Link
-              to="/demo/dashboard/teacher/workshops/new"
-              className="rounded-lg bg-primary px-8 py-3 font-label-md text-white hover:opacity-90"
-            >
-              {locale === 'de' ? 'Workshop erstellen' : 'Creează workshop'}
-            </Link>
+            {!hasActiveSearch && (
+              <Link
+                to="/demo/dashboard/teacher/workshops/new"
+                className="rounded-lg bg-primary px-8 py-3 font-label-md text-white hover:opacity-90"
+              >
+                {locale === 'de' ? 'Workshop erstellen' : 'Creează workshop'}
+              </Link>
+            )}
           </div>
         )}
 

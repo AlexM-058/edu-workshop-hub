@@ -17,7 +17,13 @@ const adminLinks = [
   { labelKey: 'nav.profile', icon: 'account_circle', to: '/demo/profile' },
 ]
 
-export default function AdminShell({ children, searchKey = 'admin.searchSettings' }) {
+export default function AdminShell({
+  children,
+  searchKey = 'admin.searchSettings',
+  searchValue = '',
+  onSearchChange,
+  searchDisabled = false,
+}) {
   const { t } = useI18n()
   const { clerkConfigured, isSignedIn, signOut } = useAppAuth()
 
@@ -31,7 +37,14 @@ export default function AdminShell({ children, searchKey = 'admin.searchSettings
         <div className="flex items-center gap-4">
           <div className="relative hidden md:block">
             <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">search</Icon>
-            <input className="w-64 rounded border border-outline-variant bg-surface-container-low py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary" placeholder={t(searchKey)} type="text" />
+            <input
+              className="w-64 rounded border border-outline-variant bg-surface-container-low py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary"
+              disabled={searchDisabled || !onSearchChange}
+              onChange={(event) => onSearchChange?.(event.target.value)}
+              placeholder={t(searchKey)}
+              type="text"
+              value={searchValue}
+            />
           </div>
           <button className="cursor-not-allowed rounded p-2 text-slate-600 opacity-60 transition-colors hover:bg-slate-50" aria-label={t('admin.notifications')} disabled title={t('common.demoUnavailable')} type="button"><Icon>notifications</Icon></button>
           <button className="cursor-not-allowed rounded p-2 text-slate-600 opacity-60 transition-colors hover:bg-slate-50" aria-label={t('common.needHelp')} disabled title={t('common.demoUnavailable')} type="button"><Icon>help_outline</Icon></button>
