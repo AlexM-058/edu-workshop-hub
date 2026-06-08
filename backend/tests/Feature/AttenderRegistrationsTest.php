@@ -107,6 +107,29 @@ class AttenderRegistrationsTest extends TestCase
             ]);
     }
 
+    public function test_registration_workshop_snapshot_includes_calendar_fields(): void
+    {
+        $professor = $this->makeProfessor();
+        $referent  = $this->makeReferent();
+        $workshop  = Workshop::factory()->create([
+            'referent_id'    => $referent->id,
+            'is_active'      => true,
+            'description_ro' => 'Descriere pentru calendar.',
+            'description_de' => 'Beschreibung für den Kalender.',
+            'scheduled_at'   => '2026-07-15 10:00:00',
+            'ends_at'        => '2026-07-15 12:30:00',
+        ]);
+
+        $this->register($professor, $workshop, 'enrolled');
+
+        $this->withToken($this->tokenFor($professor))
+            ->getJson('/api/attender/registrations')
+            ->assertOk()
+            ->assertJsonPath('data.0.workshop.description.ro', 'Descriere pentru calendar.')
+            ->assertJsonPath('data.0.workshop.description.de', 'Beschreibung für den Kalender.')
+            ->assertJsonPath('data.0.workshop.ends_at', '2026-07-15T12:30:00+00:00');
+    }
+
     public function test_professor_sees_all_statuses_by_default(): void
     {
         $professor = $this->makeProfessor();

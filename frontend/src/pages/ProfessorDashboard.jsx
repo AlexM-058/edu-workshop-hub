@@ -6,6 +6,7 @@ import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { useAttenderRegistrations, useAttenderStats } from '../lib/attenderRegistrations'
 import { downloadCertificate, withdrawRegistration } from '../lib/api'
+import { createGoogleCalendarWorkshopUrl } from '../lib/calendar'
 import { downloadBlob } from '../lib/downloadFile'
 import WithdrawWarningModal from '../components/WithdrawWarningModal'
 import WithdrawBlockedModal from '../components/WithdrawBlockedModal'
@@ -183,6 +184,9 @@ export default function ProfessorDashboard() {
                   const statusCfg = STATUS_CONFIG[reg.status] ?? STATUS_CONFIG.enrolled
                   const statusLabel = locale === 'de' ? statusCfg.de : statusCfg.ro
                   const isBusy = busyRegistrationId === reg.id
+                  const calendarUrl = reg.status === 'enrolled'
+                    ? createGoogleCalendarWorkshopUrl(reg.workshop, locale)
+                    : null
 
                   return (
                     <article
@@ -245,6 +249,21 @@ export default function ProfessorDashboard() {
                             </span>
                           )}
                           <div className="flex flex-wrap items-center gap-3">
+                            {calendarUrl ? (
+                              <a
+                                className="inline-flex items-center gap-1 rounded border border-primary/30 px-4 py-2 text-sm font-label-md text-primary transition hover:bg-primary/5"
+                                href={calendarUrl}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                <Icon className="text-base">event</Icon>
+                                {t('dashboard.addGoogleCalendar')}
+                              </a>
+                            ) : reg.status === 'enrolled' ? (
+                              <span className="text-sm text-slate-400">
+                                {t('dashboard.calendarUnavailable')}
+                              </span>
+                            ) : null}
                             {reg.status !== 'cancelled' && (
                                 <button
                                   className="rounded border border-error/40 px-4 py-2 text-sm font-label-md text-error transition hover:bg-error-container disabled:cursor-wait disabled:opacity-60"
