@@ -23,6 +23,7 @@ class TeacherWorkshopController extends Controller
      * Query params:
      *   - per_page (int, default 12, max 50)
      *   - page     (int, default 1)
+     *   - search   (string, optional)
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -30,6 +31,7 @@ class TeacherWorkshopController extends Controller
 
         $workshops = Workshop::query()
             ->where('referent_id', $request->user()->id)
+            ->search($request->query('search'))
             ->with(['referent', 'category'])
             ->orderByDesc('created_at')
             ->paginate($perPage);

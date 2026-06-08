@@ -28,10 +28,10 @@ function fetchReducer(state, action) {
 /**
  * Fetches the authenticated teacher's own workshops (paginated).
  *
- * @param {{ page?: number, perPage?: number }} params
+ * @param {{ page?: number, perPage?: number, search?: string }} params
  * @returns {{ workshops, meta, isLoading, error }}
  */
-export function useTeacherWorkshops({ page = 1, perPage = 12 } = {}) {
+export function useTeacherWorkshops({ page = 1, perPage = 12, search = '' } = {}) {
   const { getToken, isSignedIn } = useAppAuth()
   const [state, dispatch] = useReducer(fetchReducer, initialState)
 
@@ -41,7 +41,7 @@ export function useTeacherWorkshops({ page = 1, perPage = 12 } = {}) {
     dispatch({ type: 'loading' })
 
     getToken()
-      .then((token) => fetchTeacherWorkshops({ token, page, perPage }))
+      .then((token) => fetchTeacherWorkshops({ token, page, perPage, search }))
       .then((payload) => {
         if (!cancelled) dispatch({ type: 'success', payload })
       })
@@ -50,7 +50,7 @@ export function useTeacherWorkshops({ page = 1, perPage = 12 } = {}) {
       })
 
     return () => { cancelled = true }
-  }, [getToken, isSignedIn, page, perPage])
+  }, [getToken, isSignedIn, page, perPage, search])
 
   return {
     workshops: state.data?.data ?? null,

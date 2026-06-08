@@ -64,6 +64,60 @@ class WorkshopCatalogTest extends TestCase
             ->assertJsonPath('meta.total', 5);
     }
 
+    public function test_index_search_finds_workshop_by_romanian_title(): void
+    {
+        $referent = $this->makeReferent();
+        $match = $this->makeWorkshop($referent, ['title_ro' => 'Pedagogie digitală aplicată']);
+        $this->makeWorkshop($referent, ['title_ro' => 'Managementul clasei']);
+
+        $response = $this->getJson('/api/workshops?search=pedagogie');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $match->id);
+    }
+
+    public function test_index_search_finds_workshop_by_german_title(): void
+    {
+        $referent = $this->makeReferent();
+        $match = $this->makeWorkshop($referent, ['title_de' => 'Digitale Didaktik']);
+        $this->makeWorkshop($referent, ['title_de' => 'Klassenmanagement']);
+
+        $response = $this->getJson('/api/workshops?search=didaktik');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $match->id);
+    }
+
+    public function test_index_search_finds_workshop_by_location(): void
+    {
+        $referent = $this->makeReferent();
+        $match = $this->makeWorkshop($referent, ['location' => 'Sala mare, Cluj']);
+        $this->makeWorkshop($referent, ['location' => 'Brașov']);
+
+        $response = $this->getJson('/api/workshops?search=cluj');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $match->id);
+    }
+
+    public function test_index_search_keeps_inactive_workshops_hidden(): void
+    {
+        $referent = $this->makeReferent();
+        $this->makeWorkshop($referent, [
+            'is_active' => false,
+            'title_ro' => 'Atelier ascuns',
+        ]);
+
+        $response = $this->getJson('/api/workshops?search=ascuns');
+
+        $response->assertOk()
+            ->assertJsonCount(0, 'data')
+            ->assertJsonPath('meta.total', 0);
+    }
+
     public function test_index_caps_per_page_at_50(): void
     {
         $referent = $this->makeReferent();

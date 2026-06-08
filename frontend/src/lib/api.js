@@ -7,7 +7,7 @@ function normalizeApiBaseUrl(value) {
     .replace(/\/$/, '');
 }
 
-const apiBaseUrl = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+const apiBaseUrl = normalizeApiBaseUrl(import.meta.env?.VITE_API_URL);
 
 // ---------------------------------------------------------------------------
 // Internal helper
@@ -69,11 +69,20 @@ export async function markTeacherInviteNoticeSeen(token) {
 /**
  * Fetch a paginated list of active workshops.
  *
- * @param {{ page?: number, perPage?: number }} params
+ * @param {{ page?: number, perPage?: number, search?: string }} params
  * @returns {Promise<{ data: Workshop[], meta: PaginationMeta }>}
  */
-export async function fetchWorkshops({ page = 1, perPage = 12 } = {}) {
-  return apiFetch(`/workshops?page=${page}&per_page=${perPage}`);
+export async function fetchWorkshops({ page = 1, perPage = 12, search = '' } = {}) {
+  const params = new URLSearchParams({
+    page,
+    per_page: perPage,
+  });
+
+  if (search.trim() !== '') {
+    params.set('search', search.trim());
+  }
+
+  return apiFetch(`/workshops?${params}`);
 }
 
 /**
@@ -93,10 +102,19 @@ export async function fetchWorkshop(id) {
 /**
  * Fetch the authenticated referent's workshops (paginated).
  *
- * @param {{ token: string, page?: number, perPage?: number }} opts
+ * @param {{ token: string, page?: number, perPage?: number, search?: string }} opts
  */
-export async function fetchTeacherWorkshops({ token, page = 1, perPage = 12 } = {}) {
-  return apiFetch(`/teacher/workshops?page=${page}&per_page=${perPage}`, { token });
+export async function fetchTeacherWorkshops({ token, page = 1, perPage = 12, search = '' } = {}) {
+  const params = new URLSearchParams({
+    page,
+    per_page: perPage,
+  });
+
+  if (search.trim() !== '') {
+    params.set('search', search.trim());
+  }
+
+  return apiFetch(`/teacher/workshops?${params}`, { token });
 }
 
 /**
