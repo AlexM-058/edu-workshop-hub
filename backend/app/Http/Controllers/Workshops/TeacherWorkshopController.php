@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\WorkshopResource;
 use App\Models\Registration;
 use App\Models\Workshop;
-use App\Support\SimplePdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -185,7 +185,6 @@ class TeacherWorkshopController extends Controller
     {
         $labels = $this->exportLabels($locale);
         $title = $this->workshopTitle($workshop, $locale);
-        $rows = $this->exportRows($workshop, $locale, $labels);
         $confirmed = $workshop->registrations->where('status', 'enrolled');
         $present = $confirmed->where('attended', true)->count();
         $absent = $confirmed->where('attended', false)->count();
@@ -193,48 +192,23 @@ class TeacherWorkshopController extends Controller
             ->filter(fn (Registration $registration): bool => in_array($registration->status, ['waitlist', 'waitlisted'], true))
             ->count();
 
-        $lines = [
-            $labels['pdf']['title'],
-            str_repeat('=', 72),
-            '',
-            $labels['pdf']['metadata'],
-            str_repeat('-', 72),
-            $labels['pdf']['workshop'].': '.$title,
-            $labels['pdf']['date'].': '.(optional($workshop->scheduled_at)->format('Y-m-d H:i') ?? '-'),
-            $labels['pdf']['location'].': '.($workshop->location ?? '-'),
-            $labels['pdf']['teacher'].': '.($workshop->referent?->fullName() ?? '-'),
-            $labels['pdf']['generatedAt'].': '.now()->format('Y-m-d H:i'),
-            '',
-            $labels['pdf']['summary'],
-            str_repeat('-', 72),
-            $labels['pdf']['confirmedTotal'].': '.$confirmed->count(),
-            $labels['pdf']['present'].': '.$present,
-            $labels['pdf']['absent'].': '.$absent,
-            $labels['pdf']['waitlist'].': '.$waitlisted,
-            '',
-            $labels['pdf']['participants'],
-            str_repeat('-', 72),
-            $this->formatParticipantPdfRow([
-                $labels['csvHeaders'][3],
-                $labels['csvHeaders'][4],
-                $labels['csvHeaders'][5],
-                $labels['csvHeaders'][6],
-                $labels['csvHeaders'][7],
-            ]),
-            str_repeat('-', 72),
-        ];
-
-        foreach ($rows as $row) {
-            $lines[] = $this->formatParticipantPdfRow([
-                $row['participant_name'],
-                $row['participant_email'],
-                $row['registration_status'],
-                $row['attendance'],
-                $row['certificate_available'],
-            ]);
-        }
-
-        return SimplePdf::fromLines($lines);
+        return Pdf::loadView('exports.attendance-list', [
+            'labels' => $labels['pdf'],
+            'tableHeaders' => $labels['pdfTableHeaders'],
+            'locale' => $locale,
+            'title' => $title,
+            'workshopDate' => optional($workshop->scheduled_at)->format('Y-m-d H:i') ?? '-',
+            'location' => $workshop->location ?? '-',
+            'teacher' => $workshop->referent?->fullName() ?? '-',
+            'generatedAt' => now()->format('Y-m-d H:i'),
+            'summary' => [
+                $labels['pdf']['confirmedTotal'] => $confirmed->count(),
+                $labels['pdf']['present'] => $present,
+                $labels['pdf']['absent'] => $absent,
+                $labels['pdf']['waitlist'] => $waitlisted,
+            ],
+            'rows' => $this->attendancePdfRows($workshop, $labels),
+        ])->setPaper('a4', 'landscape')->output();
     }
 
     /**
@@ -257,40 +231,38 @@ class TeacherWorkshopController extends Controller
     }
 
     /**
-     * @param  array<int, string|null>  $columns
+     * @return array<int, array<string, string|null>>
      */
-    private function formatParticipantPdfRow(array $columns): string
+    private function attendancePdfRows(Workshop $workshop, array $labels): array
     {
-        $widths = [17, 25, 15, 15, 10];
-
-        return collect($columns)
-            ->map(fn (?string $value, int $index): string => str_pad(
-                $this->truncateForPdf($value ?? '-', $widths[$index]),
-                $widths[$index]
-            ))
-            ->implode('  ');
+        return $workshop->registrations
+            ->sortBy([
+                fn (Registration $a, Registration $b): int => $this->statusSortWeight($a->status) <=> $this->statusSortWeight($b->status),
+                fn (Registration $a, Registration $b): int => $a->created_at <=> $b->created_at,
+            ])
+            ->values()
+            ->map(fn (Registration $registration, int $index): array => [
+                'position' => (string) ($index + 1),
+                'status' => $labels['statuses'][$registration->status] ?? $registration->status,
+                'attendance' => $registration->attended ? $labels['attendance']['present'] : $labels['attendance']['absent'],
+                'participant_name' => $registration->user?->fullName() ?? '-',
+                'participant_email' => $registration->user?->email ?? '-',
+                'registered_at' => optional($registration->created_at)->format('Y-m-d H:i') ?? '-',
+                'attendance_confirmed_at' => $registration->attended === null
+                    ? '-'
+                    : (optional($registration->updated_at)->format('Y-m-d H:i') ?? '-'),
+                'certificate_available' => $registration->certificate ? $labels['yes'] : $labels['no'],
+            ])
+            ->all();
     }
 
-    private function truncateForPdf(string $value, int $width): string
+    private function statusSortWeight(string $status): int
     {
-        if ($this->textLength($value) <= $width) {
-            return $value;
-        }
-
-        if ($width <= 1) {
-            return '…';
-        }
-
-        if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($value, 0, $width, '…', 'UTF-8');
-        }
-
-        return substr($value, 0, $width - 1).'…';
-    }
-
-    private function textLength(string $value): int
-    {
-        return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+        return match ($status) {
+            'enrolled' => 0,
+            'waitlist', 'waitlisted' => 1,
+            default => 2,
+        };
     }
 
     private function exportLocale(Request $request): string
@@ -344,6 +316,16 @@ class TeacherWorkshopController extends Controller
                     'waitlist' => 'Listă de așteptare',
                     'participants' => 'Participanți',
                 ],
+                'pdfTableHeaders' => [
+                    'Nr.',
+                    'Status',
+                    'Prezență',
+                    'Nume',
+                    'Email',
+                    'Data înscrierii',
+                    'Data confirmării',
+                    'Certificat',
+                ],
             ],
             'de' => [
                 'csvHeaders' => [
@@ -382,6 +364,16 @@ class TeacherWorkshopController extends Controller
                     'absent' => 'Nicht anwesend',
                     'waitlist' => 'Warteliste',
                     'participants' => 'Teilnehmer',
+                ],
+                'pdfTableHeaders' => [
+                    'Nr.',
+                    'Status',
+                    'Anwesenheit',
+                    'Name',
+                    'E-Mail',
+                    'Anmeldedatum',
+                    'Bestätigungsdatum',
+                    'Zertifikat',
                 ],
             ],
         ];

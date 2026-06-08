@@ -487,7 +487,8 @@ class TeacherWorkshopsTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $romanian->getContent());
         $this->assertNotEmpty($romanian->getContent());
         $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $romanian->getContent());
-        $this->assertStringContainsString('Lista de prezență', $romanian->getContent());
+        $this->assertStringContainsString('/FontFile2', $romanian->getContent());
+        $this->assertStringNotContainsString('/BaseFont /Helvetica', $romanian->getContent());
 
         $german = $this->withToken($this->tokenFor($referent))
             ->get("/api/teacher/workshops/{$workshop->id}/attendance-list?format=pdf&locale=de")
@@ -497,7 +498,8 @@ class TeacherWorkshopsTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $german->getContent());
         $this->assertNotEmpty($german->getContent());
         $this->assertStringNotContainsString('BROKEN_ATTENDANCE_EXPORT', $german->getContent());
-        $this->assertStringContainsString('Anwesenheitsliste', $german->getContent());
+        $this->assertStringContainsString('/FontFile2', $german->getContent());
+        $this->assertStringNotContainsString('/BaseFont /Helvetica', $german->getContent());
     }
 
     public function test_teacher_can_export_attendance_pdf_with_unicode_font_for_diacritics(): void
