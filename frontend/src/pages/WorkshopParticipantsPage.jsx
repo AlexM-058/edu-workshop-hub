@@ -243,7 +243,19 @@ function ParticipantRow({ participant, locale, isBusy, onAttendance }) {
     ? (locale === 'de' ? 'Warteliste' : 'Listă așteptare')
     : participant.status === 'cancelled'
     ? (locale === 'de' ? 'Abgebrochen' : 'Anulat')
+    : participant.attended === true
+    ? (locale === 'de' ? 'Anwesend' : 'Prezent')
+    : participant.attended === false
+    ? (locale === 'de' ? 'Fehlt' : 'Absent')
     : (locale === 'de' ? 'Eingeschrieben' : 'Înscris')
+
+  const badgeColors = participant.status !== 'enrolled'
+    ? 'bg-surface-container text-slate-600'
+    : participant.attended === true
+    ? 'bg-green-100 text-green-700'
+    : participant.attended === false
+    ? 'bg-red-100 text-red-700'
+    : 'bg-surface-container text-slate-600'
 
   return (
     <article className="grid grid-cols-1 gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0 md:grid-cols-[1fr_auto_auto] md:items-center">
@@ -251,13 +263,13 @@ function ParticipantRow({ participant, locale, isBusy, onAttendance }) {
         <h2 className="font-h3 text-lg text-primary">{participant.user?.name ?? '-'}</h2>
         <p className="text-sm text-on-surface-variant">{participant.user?.email}</p>
       </div>
-      <span className="w-fit rounded-full bg-surface-container px-3 py-1 text-xs font-label-md text-slate-600">
+      <span className={`w-fit rounded-full px-3 py-1 text-xs font-label-md ${badgeColors}`}>
         {statusLabel}
       </span>
       <div className="flex flex-wrap gap-2">
         <button
           className="inline-flex items-center gap-2 rounded bg-secondary px-4 py-2 text-sm font-label-md text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-50"
-          disabled={isBusy || participant.status !== 'enrolled' || participant.attended}
+          disabled={isBusy || participant.status !== 'enrolled' || participant.attended === true}
           onClick={() => onAttendance(participant, true)}
           type="button"
         >
@@ -266,7 +278,7 @@ function ParticipantRow({ participant, locale, isBusy, onAttendance }) {
         </button>
         <button
           className="inline-flex items-center gap-2 rounded border border-slate-300 px-4 py-2 text-sm font-label-md text-primary hover:bg-slate-50 disabled:cursor-wait disabled:opacity-50"
-          disabled={isBusy || participant.status !== 'enrolled' || !participant.attended}
+          disabled={isBusy || participant.status !== 'enrolled' || participant.attended === false}
           onClick={() => onAttendance(participant, false)}
           type="button"
         >

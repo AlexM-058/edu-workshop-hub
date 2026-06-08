@@ -39,7 +39,7 @@ function AttenderCertificates({ locale, t }) {
     setBusyId(registration.id)
     try {
       const token = await getToken()
-      const blob = await downloadCertificate({ token, registrationId: registration.id })
+      const blob = await downloadCertificate({ token, workshopId: registration.workshop.id })
       downloadBlob(blob, `certificate-${registration.id}.pdf`)
     } catch (error) {
       setActionError(error)

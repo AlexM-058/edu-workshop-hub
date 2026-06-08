@@ -256,9 +256,9 @@ export async function withdrawRegistration({ token, registrationId } = {}) {
     token,
   });
 }
-
-export async function downloadCertificate({ token, registrationId } = {}) {
-  const response = await fetch(`${apiBaseUrl}/attender/registrations/${encodeURIComponent(registrationId)}/certificate`, {
+export async function downloadCertificate({ token, workshopId } = {}) {
+  const response = await fetch(`${apiBaseUrl}/workshops/${encodeURIComponent(workshopId)}/certificate`, {
+    method: 'GET',
     headers: {
       Accept: 'application/pdf',
       Authorization: `Bearer ${token}`,
@@ -266,11 +266,8 @@ export async function downloadCertificate({ token, registrationId } = {}) {
   });
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw Object.assign(
-      new Error(body.message ?? `Certificate download failed with ${response.status}`),
-      { status: response.status, body },
-    );
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Eroare la descărcarea certificatului');
   }
 
   return response.blob();
