@@ -192,7 +192,10 @@ class WorkshopEnrollmentController extends Controller
         abort_unless($registration->attended, 403, 'Prezența nu a fost confirmată.');
         
         if ($workshop->ends_at) {
-            abort_unless(now()->isAfter($workshop->ends_at), 403, 'Workshop-ul nu s-a încheiat încă.');
+            // Permitem descărcarea cu o marjă de eroare de 5 minute pentru a preveni
+            // situațiile în care ceasul utilizatorului (frontend) e ușor în viitor
+            // față de ceasul serverului, permițându-i să dea click pe buton prea devreme.
+            abort_unless(now()->addMinutes(5)->isAfter($workshop->ends_at), 403, 'Workshop-ul nu s-a încheiat încă.');
         }
 
         $registration->loadMissing(['user']);
