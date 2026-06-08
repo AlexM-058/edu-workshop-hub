@@ -39,9 +39,9 @@ class RegistrationResource extends JsonResource
                 ] : null,
             ] : null,
 
-            // Certificate availability — true only after attendance is confirmed
-            'has_certificate'          => (bool) $this->attended && $this->certificate !== null,
-            'can_download_certificate' => $this->attended && $this->certificate !== null,
+            // Certificate availability — true only after attendance is confirmed and workshop has ended
+            'has_certificate'          => $this->attended === true && (! $workshop || ! $workshop->ends_at || now()->addMinutes(5)->isAfter($workshop->ends_at)),
+            'can_download_certificate' => $this->attended === true && (! $workshop || ! $workshop->ends_at || now()->addMinutes(5)->isAfter($workshop->ends_at)),
         ];
     }
 }

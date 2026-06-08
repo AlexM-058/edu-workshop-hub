@@ -32,7 +32,7 @@ function AttenderCertificates({ locale, t }) {
   const [actionError, setActionError] = useState(null)
   const { registrations, isLoading, error } = useAttenderRegistrations({ perPage: 30 })
   const { stats, isLoading: statsLoading } = useAttenderStats()
-  const certificates = registrations?.filter((reg) => reg.can_download_certificate || reg.attended) ?? []
+  const certificates = registrations?.filter((reg) => reg.can_download_certificate) ?? []
 
   async function handleDownload(registration) {
     setActionError(null)
