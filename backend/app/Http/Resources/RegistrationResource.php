@@ -17,7 +17,6 @@ class RegistrationResource extends JsonResource
         $workshop = $this->whenLoaded('workshop');
         $locale   = $request->query('locale', 'ro');
 
-        return [
             'id'         => $this->id,
             'status'     => $this->status,    // enrolled | waitlist | cancelled
             'attended'   => $this->attended,
