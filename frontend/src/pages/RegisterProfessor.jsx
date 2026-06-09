@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import LanguageToggle from '../components/LanguageToggle'
 import { images } from '../data/stitchData'
@@ -28,8 +29,12 @@ export default function RegisterProfessor() {
         <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-xl md:grid-cols-12">
           <aside className="space-y-lg md:col-span-5 lg:col-span-4">
             <div className="space-y-md">
+              <DevelopmentBadge />
               <h1 className="font-h1 text-h1 leading-tight text-primary">{t('register.title')}</h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant">{t('register.subtitle')}</p>
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                {t('register.prototypeNotice')}
+              </p>
             </div>
             <nav className="relative space-y-gutter">
               <div className="absolute bottom-0 left-4 top-0 -z-10 w-px bg-outline-variant" />

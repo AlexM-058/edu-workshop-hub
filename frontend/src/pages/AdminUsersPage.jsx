@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import AdminShell from '../components/AdminShell'
+import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
@@ -150,6 +151,7 @@ export default function AdminUsersPage() {
             type="button"
           >
             <Icon>file_download</Icon>{t('admin.exportCsv')}
+            <DevelopmentBadge className="normal-case tracking-normal" />
           </button>
         </header>
 

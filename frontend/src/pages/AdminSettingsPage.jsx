@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import AdminShell from '../components/AdminShell'
+import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
 import { useAppAuth } from '../auth/AuthContext'
@@ -157,6 +158,7 @@ export default function AdminSettingsPage() {
                     <h2 className="font-h3 text-h3 text-primary">{t('admin.settings.localization')}</h2>
                     <p className="font-caption text-slate-500">{t('admin.settings.localizationText')}</p>
                   </div>
+                  <DevelopmentBadge />
                   <div className="flex gap-xs rounded bg-slate-100 p-xs">
                     <span className="rounded bg-white px-3 py-1 text-xs font-bold text-primary shadow-sm">RO</span>
                     <span className="rounded px-3 py-1 text-xs font-medium text-slate-500">DE</span>
@@ -164,7 +166,13 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="relative">
                   <Icon className="absolute left-3 top-2 text-sm text-slate-400">filter_list</Icon>
-                  <input className="w-full rounded border border-outline-variant py-1.5 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary" placeholder={t('admin.settings.filterTranslations')} type="text" />
+                  <input
+                    className="w-full cursor-not-allowed rounded border border-outline-variant py-1.5 pl-9 pr-4 text-sm opacity-60 outline-none"
+                    disabled
+                    placeholder={t('admin.settings.filterTranslations')}
+                    title={t('common.demoUnavailable')}
+                    type="text"
+                  />
                 </div>
               </div>
               <div className="max-h-[600px] flex-1 overflow-y-auto">

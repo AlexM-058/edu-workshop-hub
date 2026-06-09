@@ -1,4 +1,5 @@
 import AdminShell from '../components/AdminShell'
+import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
 import { useAdminStats } from '../lib/admin'
@@ -11,7 +12,10 @@ export default function AdminAuditPage() {
     <AdminShell searchKey="admin.searchAudit">
       <div className="mx-auto max-w-[1200px] p-8">
         <header className="mb-12">
-          <h1 className="mb-2 font-h1 text-h1 text-primary">{t('admin.audit.title')}</h1>
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <h1 className="font-h1 text-h1 text-primary">{t('admin.audit.title')}</h1>
+            <DevelopmentBadge />
+          </div>
           <p className="max-w-2xl font-body-lg text-on-surface-variant">{t('admin.audit.subtitle')}</p>
         </header>
 
@@ -53,9 +57,7 @@ export default function AdminAuditPage() {
             <div className="border border-slate-200 bg-white p-8">
               <div className="mb-8 flex items-center justify-between">
                 <h2 className="font-h3 text-h3 text-primary">{t('admin.audit.recentActivity')}</h2>
-                <span className="rounded bg-surface-container px-3 py-1 text-xs text-on-surface-variant">
-                  {locale === 'de' ? 'AuditLog in Entwicklung' : 'AuditLog în dezvoltare'}
-                </span>
+                <DevelopmentBadge />
               </div>
 
               {/* Quick stats summary using real data */}
