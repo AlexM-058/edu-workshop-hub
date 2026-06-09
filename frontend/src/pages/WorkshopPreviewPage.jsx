@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import DashboardShell from '../components/DashboardShell'
-import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useI18n } from '../i18n/I18nContext'
 
@@ -14,10 +13,7 @@ export default function WorkshopPreviewPage() {
       <main className="min-h-screen">
         <div className="flex items-center justify-between bg-primary-container px-margin py-4 text-on-primary-container">
           <div className="flex items-center gap-3"><Icon>verified</Icon><span className="font-label-md uppercase">{t('preview.mode')}</span></div>
-          <div className="flex items-center gap-3">
-            <DevelopmentBadge />
-            <p className="font-caption italic opacity-80">{t('preview.modeText')}</p>
-          </div>
+          <p className="font-caption italic opacity-80">{t('preview.modeText')}</p>
         </div>
 
         <div className="mx-auto max-w-[1200px] px-margin py-xl">

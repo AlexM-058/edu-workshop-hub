@@ -1,6 +1,5 @@
 import AdminShell from '../components/AdminShell'
 import DashboardShell from '../components/DashboardShell'
-import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
@@ -13,7 +12,7 @@ const resources = [
 
 export default function ResourcesPage() {
   const { role } = useAppAuth()
-  const { locale, t } = useI18n()
+  const { locale } = useI18n()
   const isAdmin = role === 'admin'
   const isTeacher = role === 'teacher' || role === 'referent'
 
@@ -35,7 +34,6 @@ export default function ResourcesPage() {
               <Icon>{icon}</Icon>
             </span>
             <h2 className="font-h3 text-h3 text-primary">{locale === 'de' ? titleDe : titleRo}</h2>
-            <DevelopmentBadge className="mt-sm" />
             <p className="mt-2 text-sm leading-6 text-on-surface-variant">{locale === 'de' ? textDe : textRo}</p>
             <button
               className="mt-md inline-flex cursor-not-allowed items-center gap-2 rounded border border-primary px-4 py-2 text-sm font-label-md text-primary opacity-60"
@@ -43,7 +41,7 @@ export default function ResourcesPage() {
               type="button"
             >
               <Icon>download</Icon>
-              {t('common.underDevelopment')}
+              {locale === 'de' ? 'Bald verfügbar' : 'Disponibil curând'}
             </button>
           </article>
         ))}

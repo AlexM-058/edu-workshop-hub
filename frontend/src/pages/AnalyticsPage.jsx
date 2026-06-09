@@ -1,5 +1,4 @@
 import DashboardShell from '../components/DashboardShell'
-import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import MetricCard from '../components/MetricCard'
 import { useI18n } from '../i18n/I18nContext'
@@ -17,10 +16,7 @@ export default function AnalyticsPage() {
         </div>
         <div className="mb-xl flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <div className="mb-2 flex flex-wrap items-center gap-3">
-              <h2 className="font-h2 text-h2 text-primary">{t('analytics.title')}</h2>
-              <DevelopmentBadge />
-            </div>
+            <h2 className="mb-2 font-h2 text-h2 text-primary">{t('analytics.title')}</h2>
             <p className="font-body-lg text-body-lg text-slate-500">{t('analytics.subtitle')}</p>
           </div>
           <div className="flex gap-4">

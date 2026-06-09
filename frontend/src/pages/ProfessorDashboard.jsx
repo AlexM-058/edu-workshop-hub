@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import DashboardShell from '../components/DashboardShell'
-import DevelopmentBadge from '../components/DevelopmentBadge'
 import Icon from '../components/Icon'
 import { useAppAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
@@ -340,12 +339,11 @@ export default function ProfessorDashboard() {
             </div>
 
             <div className="rounded-lg border border-outline-variant bg-white p-md">
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <h3 className="font-h3 text-lg text-primary">{t('dashboard.recommended')}</h3>
-                <DevelopmentBadge />
-              </div>
+              <h3 className="mb-4 font-h3 text-lg text-primary">{t('dashboard.recommended')}</h3>
               <p className="text-sm text-on-surface-variant">
-                {t('dashboard.recommendedUnderDevelopment')}
+                {locale === 'de'
+                  ? 'Empfehlungen sind verfügbar, sobald die API verbunden ist.'
+                  : 'Recomandările vor fi disponibile după conectarea API-ului.'}
               </p>
               <Link
                 to="/catalog"
