@@ -17,10 +17,10 @@ export default function CertificatesPage() {
   const isTeacher = role === 'teacher' || role === 'referent' || role === 'admin'
   const content = isTeacher ? <TeacherCertificates locale={locale} t={t} /> : <AttenderCertificates locale={locale} t={t} />
 
-  if (isAdmin) return <AdminShell searchKey="nav.certificates">{content}</AdminShell>
+  if (isAdmin) return <AdminShell searchKey="nav.certificates" showSearch={false}>{content}</AdminShell>
 
   return (
-    <DashboardShell mode={isTeacher ? 'teacher' : 'attender'}>
+    <DashboardShell mode={isTeacher ? 'teacher' : 'attender'} showSearch={false}>
       {content}
     </DashboardShell>
   )

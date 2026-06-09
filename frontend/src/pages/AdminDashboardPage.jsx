@@ -9,7 +9,7 @@ export default function AdminDashboardPage() {
   const { stats, isLoading, error } = useAdminStats()
 
   return (
-    <AdminShell searchKey="admin.searchUsers">
+    <AdminShell searchKey="admin.searchUsers" showSearch={false}>
       <main className="mx-auto max-w-[1200px] p-8">
         <header className="mb-lg border-b border-slate-200 pb-md">
           <h1 className="font-h1 text-h1 text-primary">{locale === 'de' ? 'Admin-Dashboard' : 'Dashboard admin'}</h1>

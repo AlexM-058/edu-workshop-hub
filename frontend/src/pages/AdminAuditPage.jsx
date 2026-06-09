@@ -8,7 +8,7 @@ export default function AdminAuditPage() {
   const { stats, isLoading, error } = useAdminStats()
 
   return (
-    <AdminShell searchKey="admin.searchAudit">
+    <AdminShell searchKey="admin.searchAudit" showSearch={false}>
       <div className="mx-auto max-w-[1200px] p-8">
         <header className="mb-12">
           <h1 className="mb-2 font-h1 text-h1 text-primary">{t('admin.audit.title')}</h1>

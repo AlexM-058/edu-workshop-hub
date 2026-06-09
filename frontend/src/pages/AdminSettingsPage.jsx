@@ -69,7 +69,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <AdminShell searchKey="admin.searchSettings">
+    <AdminShell searchKey="admin.searchSettings" showSearch={false}>
       <div className="mx-auto max-w-[1200px] p-8">
         <header className="mb-lg">
           <h1 className="mb-base font-h1 text-h1 text-primary">{t('admin.settings.title')}</h1>

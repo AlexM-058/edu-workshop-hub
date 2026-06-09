@@ -49,6 +49,6 @@ export default function ResourcesPage() {
     </main>
   )
 
-  if (isAdmin) return <AdminShell searchKey="nav.searchResources">{content}</AdminShell>
-  return <DashboardShell mode={isTeacher ? 'teacher' : 'attender'}>{content}</DashboardShell>
+  if (isAdmin) return <AdminShell searchKey="nav.searchResources" showSearch={false}>{content}</AdminShell>
+  return <DashboardShell mode={isTeacher ? 'teacher' : 'attender'} showSearch={false}>{content}</DashboardShell>
 }

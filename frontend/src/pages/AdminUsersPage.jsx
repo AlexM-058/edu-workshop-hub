@@ -135,7 +135,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <AdminShell searchKey="admin.searchUsers">
+    <AdminShell searchKey="admin.searchUsers" showSearch={false}>
       <div className="mx-auto max-w-[1200px] space-y-lg p-8">
 
         <header className="flex items-end justify-between border-b border-outline-variant pb-md">

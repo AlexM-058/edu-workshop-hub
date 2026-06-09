@@ -28,6 +28,7 @@ export default function DashboardShell({
   searchValue = '',
   onSearchChange,
   searchDisabled = false,
+  showSearch = true,
 }) {
   const links = mode === 'teacher' ? instructorLinks : professorLinks
   const { t } = useI18n()
@@ -42,6 +43,7 @@ export default function DashboardShell({
         searchDisabled={searchDisabled}
         searchKey={mode === 'teacher' ? 'nav.searchWorkshops' : 'nav.searchResources'}
         searchValue={searchValue}
+        showSearch={showSearch}
       />
       <aside className="fixed left-0 top-16 z-40 hidden h-[calc(100vh-64px)] w-64 flex-col border-r border-slate-200 bg-slate-50 p-4 lg:flex">
         <div className="mb-8 px-4 pt-4">

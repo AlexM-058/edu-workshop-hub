@@ -160,7 +160,7 @@ export default function WorkshopDetailPage() {
 
   return (
     <div className="bg-surface text-on-surface">
-      <TopNav />
+      <TopNav showSearch={false} />
       <main className="mx-auto max-w-7xl px-8 py-xl pt-28">
         {isLoading && (
           <div className="animate-pulse space-y-8">
