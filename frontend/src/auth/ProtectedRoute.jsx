@@ -1,14 +1,40 @@
 import { Navigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAppAuth } from './AuthContext'
 import { canAccessRole, dashboardPathForRole } from './permissions'
 import { useI18n } from '../i18n/I18nContext'
+
+const CLERK_LOAD_TIMEOUT_MS = 3000
 
 export default function ProtectedRoute({ children, roles }) {
   const location = useLocation()
   const { isLoaded, isSignedIn, isSyncing, role, signOut, syncError } = useAppAuth()
   const { t } = useI18n()
+  const [loadTimedOut, setLoadTimedOut] = useState(false)
+
+  useEffect(() => {
+    if (isLoaded) {
+      setLoadTimedOut(false)
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setLoadTimedOut(true)
+    }, CLERK_LOAD_TIMEOUT_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [isLoaded])
 
   if (!isLoaded) {
+    if (loadTimedOut) {
+      const params = new URLSearchParams({
+        redirect_url: `${location.pathname}${location.search}`,
+        auth_fallback: 'clerk_load_timeout',
+      })
+
+      return <Navigate replace to={`/sign-in?${params.toString()}`} />
+    }
+
     return <AuthStatusPage title={t('auth.loadingTitle')} text={t('auth.loadingText')} />
   }
 

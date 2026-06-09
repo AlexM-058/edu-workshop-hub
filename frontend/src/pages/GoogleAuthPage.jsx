@@ -9,6 +9,7 @@ export default function GoogleAuthPage() {
   const { t } = useI18n()
   const [searchParams] = useSearchParams()
   const redirectUrl = searchParams.get('redirect_url') || '/demo/dashboard/attender'
+  const authFallback = searchParams.get('auth_fallback')
 
   if (isSignedIn) {
     return <Navigate replace to={redirectUrl} />
@@ -22,6 +23,12 @@ export default function GoogleAuthPage() {
         <p className="mb-8 max-w-prose font-body-md leading-7 text-on-surface-variant">
           {t('auth.signInText')}
         </p>
+
+        {authFallback === 'clerk_load_timeout' ? (
+          <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {t('auth.clerkLoadTimeout')}
+          </p>
+        ) : null}
 
         {clerkConfigured ? (
           <GoogleOAuthControls redirectUrl={redirectUrl} />
